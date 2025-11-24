@@ -23,7 +23,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../components/Toast";
 import { loginUser } from "../../stores/auth/service";
-import pizzattoImage from "../../imgs/PizzattoLog_logo.png";
+import pizzatto50AnosImage from "../../imgs/pizzatto 50 anos.jpg";
 
 const Login = () => {
   const theme = useTheme();
@@ -33,7 +33,8 @@ const Login = () => {
   const containerProps: ContainerProps = {
     maxWidth: false,
     sx: {
-      background: `url(${pizzattoImage}) no-repeat center center, linear-gradient(70deg, rgba(255,255,255,0.6) 10%, rgba(255,77,0,0.6) 100%)`,
+      // background: `url(${pizzattoImage}) no-repeat center center, linear-gradient(70deg, rgba(255,255,255,0.6) 10%, rgba(255,77,0,0.6) 100%)`,
+      background: `url(${pizzatto50AnosImage}) `,
       backgroundSize: "contain",
       height: "100vh",
       display: "flex",
@@ -87,7 +88,7 @@ const Login = () => {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: "rgba(255, 255, 255, 0.75)",
+            bgcolor: "rgba(255,77,0, 0.46)",
             padding: 4,
             borderRadius: "16px",
             width: isMobile ? "100%" : 400,
@@ -100,11 +101,11 @@ const Login = () => {
             gutterBottom
             sx={{
               fontWeight: 600,
-              color: theme.palette.primary.main,
+              color: theme.palette.secondary.main,
               mb: 3,
             }}
           >
-            Acesse sua conta
+            Gestor de Contratos
           </Typography>
 
           <form style={{ width: "100%" }}>
@@ -192,7 +193,7 @@ const Login = () => {
                 variant="body2"
                 onClick={() => navigate("/forgot-password")}
                 sx={{
-                  color: theme.palette.primary.main,
+                  color: theme.palette.secondary.main,
                   textDecoration: "none",
                   fontWeight: 500,
                   cursor: "pointer",
