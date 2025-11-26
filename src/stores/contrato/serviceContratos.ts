@@ -22,6 +22,14 @@ export const ContratosService = {
     return find.data;
   },
 
+  createClausulasByArtificialInteligence: async (data: any) => {
+    const create = await contratosApi.post(
+      `/contrato/create-clausulas-by-ia`,
+      data
+    );
+    return create.data;
+  },
+
   createPdfContrato: async (data: any) => {
     const create = await contratosApi.post(`/contrato/pdf-contrato`, data, {
       responseType: "blob", // ISSO É ESSENCIAL

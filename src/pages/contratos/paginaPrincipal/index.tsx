@@ -385,10 +385,10 @@ const PaginaPrincipalContratos = () => {
                     {
                       title: (
                         <Box sx={{ py: 2 }}>
-                          <Typography sx={{ fontWeight: 700 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>
                             Validade de Contrato
                           </Typography>
-                          <Typography sx={{ fontWeight: 700 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 700 }}>
                             Tempo Restante Contrato (Dias)
                           </Typography>
                         </Box>

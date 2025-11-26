@@ -13,6 +13,8 @@ import {
   CardContent,
   Chip,
   Stack,
+  TextField,
+  CircularProgress,
 } from "@mui/material";
 import SidebarNew from "../../../components/Sidebar";
 import { useContext, useEffect, useState } from "react";
@@ -82,6 +84,8 @@ const ControleContratos = () => {
 
   const [contrato, setContrato] = useState<any>({});
   const [editarContrato, setEditarContrato] = useState<any>(false);
+  const [clausulaIa, setClausulaIa] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleContrato = async () => {
     try {
@@ -106,12 +110,14 @@ const ControleContratos = () => {
   };
 
   const handleGerarContrato = async () => {
+    setLoading(true);
     try {
       console.log("Iniciando geração de PDF...");
 
       const response = await ContratosService.createPdfContrato({
         _id: params._id,
         usuario: user?.nome,
+        status: "AGUARDANDO ASSINATURA",
       });
 
       console.log("Response recebido:", response);
@@ -135,6 +141,8 @@ const ControleContratos = () => {
     } catch (error) {
       console.error("Erro detalhado ao baixar PDF:", error);
       showToast("Erro ao gerar Contrato!", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -159,9 +167,23 @@ const ControleContratos = () => {
     setFlushHook(!flushHook);
   };
 
+  // const htmlToText = (html: string) => {
+  //   const div = document.createElement("div");
+  //   div.innerHTML = html;
+  //   return div.textContent || div.innerText || "";
+  // };
+
   useEffect(() => {
     handleContrato();
-  }, [flushHook]);
+  }, [flushHook, params._id]);
+
+  useEffect(() => {
+    if (contrato?.clausulasIa) {
+      setClausulaIa(contrato.clausulasIa);
+    } else {
+      setClausulaIa(""); // ou mantém o valor anterior, depende da regra de negócio
+    }
+  }, [contrato]);
 
   const entidade = contrato?.cliente || contrato?.fornecedor;
   const filial = contrato?.filial;
@@ -232,7 +254,11 @@ const ControleContratos = () => {
                   </IconButton>
                 </Tooltip>
                 <Box sx={{ display: "flex", gap: 2 }}>
-                  <ModalPromptGeradorClausulas contrato={contrato} />
+                  <ModalPromptGeradorClausulas
+                    contrato={contrato}
+                    showToast={showToast}
+                    setFlushHook={setFlushHook}
+                  />
                   <Tooltip title={"Gerar Contrato"}>
                     <IconButton
                       color={"error"}
@@ -246,7 +272,11 @@ const ControleContratos = () => {
                         height: 56,
                       }}
                     >
-                      {<PictureAsPdf />}
+                      {loading ? (
+                        <CircularProgress size={25} />
+                      ) : (
+                        <PictureAsPdf />
+                      )}
                     </IconButton>
                   </Tooltip>
                   <Tooltip title={"Assumir Contrato"}>
@@ -293,11 +323,19 @@ const ControleContratos = () => {
                         },
                         {
                           label: "Data Inicio Fidelidade",
-                          value: contrato.dataInicioFidelidade && moment(contrato.dataInicioFidelidade).format('DD/MM/YYYY'),
+                          value:
+                            contrato.dataInicioFidelidade &&
+                            moment(contrato.dataInicioFidelidade).format(
+                              "DD/MM/YYYY"
+                            ),
                         },
                         {
                           label: "Data Final Fidelidade",
-                          value: contrato.dataFinalFidelidade && moment(contrato.dataFinalFidelidade).format('DD/MM/YYYY'),
+                          value:
+                            contrato.dataFinalFidelidade &&
+                            moment(contrato.dataFinalFidelidade).format(
+                              "DD/MM/YYYY"
+                            ),
                         },
                         {
                           label: "Valor Restante",
@@ -333,7 +371,11 @@ const ControleContratos = () => {
                         },
                         {
                           label: "Data de Assinatura",
-                          value: contrato.dataAssinatura && moment(contrato.dataAssinatura).format('DD/MM/YYYY'),
+                          value:
+                            contrato.dataAssinatura &&
+                            moment(contrato.dataAssinatura).format(
+                              "DD/MM/YYYY"
+                            ),
                         },
                       ].map((item, index) => (
                         <Grid size={{ xs: 12, md: 6 }} key={index}>
@@ -490,6 +532,35 @@ const ControleContratos = () => {
                   </CardContent>
                 </Card>
               </Grid>
+              {/* 🟧 IA */}
+              {contrato.clausulasIa && (
+                <Grid size={{ xs: 12, md: 12 }}>
+                  <Card sx={cardStyle(theme)}>
+                    <Box sx={headerStyle(theme)}>
+                      <Stack direction="row" alignItems="center" spacing={1}>
+                        <Business color="primary" />
+                        <Typography variant="h6" fontWeight={600}>
+                          Clausula Gerada por Inteligência Artificial
+                        </Typography>
+                      </Stack>
+                    </Box>
+                    <CardContent sx={{ p: 3 }}>
+                      <Box>
+                        <TextField
+                          fullWidth
+                          multiline
+                          rows={6}
+                          value={clausulaIa}
+                          onChange={(e) => {
+                            setClausulaIa(e.target.value);
+                          }}
+                          InputProps={{ style: { borderRadius: "10px" } }}
+                        />
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              )}
             </Grid>
           </>
         )}
