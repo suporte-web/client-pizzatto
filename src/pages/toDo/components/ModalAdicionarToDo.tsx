@@ -6,15 +6,20 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   Grid,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
   TextField,
   Tooltip,
   useTheme,
 } from "@mui/material";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ToDoService } from "../../../stores/toDo/service";
 import { UserContext } from "../../../UserContext";
+import { UserService } from "../../../stores/users/service";
 
 const ModalAdicionarToDo = ({ setFlushHook, showToast }: any) => {
   const { user } = useContext(UserContext);
@@ -25,9 +30,29 @@ const ModalAdicionarToDo = ({ setFlushHook, showToast }: any) => {
   const [descricao, setDescricao] = useState("");
   const [prazoLimite, setPrazoLimite] = useState("");
   const [responsavel, setResponsavel] = useState("");
+  const [users, setUsers] = useState([]);
 
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setNome("");
+    setDescricao("");
+    setPrazoLimite("");
+    setResponsavel("");
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const get = await UserService.getUsersAtivos();
+      setUsers(get);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, [users]);
 
   const handleCreate = async () => {
     try {
@@ -39,6 +64,7 @@ const ModalAdicionarToDo = ({ setFlushHook, showToast }: any) => {
       });
       showToast("Sucesso ao criar A Fazer!", "success");
       setFlushHook((prev: any) => !prev);
+      handleClose();
     } catch (error) {
       showToast("Erro ao criar A Fazer!", "error");
       console.log(error);
@@ -56,8 +82,8 @@ const ModalAdicionarToDo = ({ setFlushHook, showToast }: any) => {
               backgroundColor: alpha(theme.palette.info.main, 0.3),
               transform: "scale(1.08)",
             },
-            width: 56,
-            height: 56,
+            width: 46,
+            height: 46,
             boxShadow: 2,
           }}
         >
@@ -93,12 +119,14 @@ const ModalAdicionarToDo = ({ setFlushHook, showToast }: any) => {
                 label="Nome"
                 size="small"
                 value={nome}
-                onChange={(e) => {setNome(e.target.value)}}
+                onChange={(e) => {
+                  setNome(e.target.value);
+                }}
                 fullWidth
                 InputProps={{
                   sx: { borderRadius: "10px" },
                 }}
-                />
+              />
             </Grid>
 
             <Grid size={{ xs: 12 }}>
@@ -106,43 +134,54 @@ const ModalAdicionarToDo = ({ setFlushHook, showToast }: any) => {
                 label="Descrição"
                 size="small"
                 value={descricao}
-                onChange={(e) => {setDescricao(e.target.value)}}
+                onChange={(e) => {
+                  setDescricao(e.target.value);
+                }}
                 fullWidth
                 multiline
                 rows={3}
                 InputProps={{
                   sx: { borderRadius: "10px" },
                 }}
-                />
+              />
             </Grid>
 
-            <Grid size={{ xs: 12, sm: 6 }}>
+            <Grid size={{ xs: 12, sm: user?.acessos?.administrador ? 6 : 12 }}>
               <TextField
                 type="date"
                 label="Prazo Limite"
                 size="small"
                 value={prazoLimite}
-                onChange={(e) => {setPrazoLimite(e.target.value)}}
+                onChange={(e) => {
+                  setPrazoLimite(e.target.value);
+                }}
                 fullWidth
                 InputLabelProps={{ shrink: true }}
                 InputProps={{
                   sx: { borderRadius: "10px" },
                 }}
-                />
-            </Grid>
-
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                label="Colaborador"
-                size="small"
-                value={responsavel}
-                onChange={(e) => {setResponsavel(e.target.value)}}
-                fullWidth
-                InputProps={{
-                  sx: { borderRadius: "10px" },
-                }}
               />
             </Grid>
+
+            {user?.acessos?.administrador && (
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth size="small">
+                  <InputLabel>Colaborador</InputLabel>
+                  <Select
+                    value={responsavel}
+                    label="Colaborador"
+                    onChange={(e) => {
+                      setResponsavel(e.target.value);
+                    }}
+                    sx={{ borderRadius: "10px" }}
+                  >
+                    {users.map((item: any) => (
+                      <MenuItem value={item.nome}>{item.nome}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
           </Grid>
         </DialogContent>
 

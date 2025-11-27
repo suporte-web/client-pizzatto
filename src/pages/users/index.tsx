@@ -101,7 +101,7 @@ const Users = () => {
             <Chip 
               label={item.ativo ? "Ativo" : "Inativo"} 
               size="small"
-              color={item.ativo ? "success" : "default"}
+              color={item.ativo ? "success" : "error"}
               variant={item.ativo ? "filled" : "outlined"}
             />
           </Box>
@@ -305,7 +305,7 @@ const Users = () => {
                         <Chip 
                           label={item.ativo ? "Ativo" : "Inativo"} 
                           size="small"
-                          color={item.ativo ? "success" : "default"}
+                          color={item.ativo ? "success" : "error"}
                           variant={item.ativo ? "filled" : "outlined"}
                         />
                       </TableCell>

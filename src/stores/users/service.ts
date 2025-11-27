@@ -23,12 +23,17 @@ export const UserService = {
   },
 
   findOne: async (id: string) => {
-    const get = await Api.get(`/user/${id}`);
+    const get = await Api.get(`/user/find-one/${id}`);
     return get.data;
   },
 
   updateSenha: async (data: any) => {
     const patch = await Api.patch(`/user/update-senha`, data);
     return patch.data;
+  },
+
+  getUsersAtivos: async () => {
+    const get = await Api.get(`/user/get-users-ativos`);
+    return get.data;
   },
 };

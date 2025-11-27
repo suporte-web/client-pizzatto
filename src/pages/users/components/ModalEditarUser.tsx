@@ -15,6 +15,7 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
+  Grid,
 } from "@mui/material";
 import { useState } from "react";
 import { useToast } from "../../../components/Toast";
@@ -26,6 +27,8 @@ const ModalEditarUser = ({ setFlushHook, item }: any) => {
   const [open, setOpen] = useState(false);
   const [nome, setNome] = useState(item.nome);
   const [email, setEmail] = useState(item.email);
+
+  const [ativo, setAtivo] = useState(item.ativo);
   const [administrador, setAdministrador] = useState(
     item?.acessos?.administrador
   );
@@ -42,6 +45,7 @@ const ModalEditarUser = ({ setFlushHook, item }: any) => {
       await UserService.update(item._id, {
         nome,
         email,
+        ativo,
         "acessos.administrador": administrador,
         "acessos.financeiro": financeiro,
         "acessos.rh": rh,
@@ -183,72 +187,100 @@ const ModalEditarUser = ({ setFlushHook, item }: any) => {
               </Typography>
             </Box>
             <FormGroup>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={administrador}
-                    onChange={(e) => {
-                      setAdministrador(e.target.checked);
-                    }}
+              <Grid container spacing={1}>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={administrador}
+                        onChange={(e) => {
+                          setAdministrador(e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Administrador"
                   />
-                }
-                label="Administrador"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={financeiro}
-                    onChange={(e) => {
-                      setFinanceiro(e.target.checked);
-                    }}
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={financeiro}
+                        onChange={(e) => {
+                          setFinanceiro(e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Financeiro"
                   />
-                }
-                label="Financeiro"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={rh}
-                    onChange={(e) => {
-                      setRh(e.target.checked);
-                    }}
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={rh}
+                        onChange={(e) => {
+                          setRh(e.target.checked);
+                        }}
+                      />
+                    }
+                    label="RH"
                   />
-                }
-                label="RH"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={comercial}
-                    onChange={(e) => {
-                      setComercial(e.target.checked);
-                    }}
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={comercial}
+                        onChange={(e) => {
+                          setComercial(e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Comercial"
                   />
-                }
-                label="Comercial"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={contratos}
-                    onChange={(e) => {
-                      setContratos(e.target.checked);
-                    }}
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={contratos}
+                        onChange={(e) => {
+                          setContratos(e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Contratos"
                   />
-                }
-                label="Contratos"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={retropatio}
-                    onChange={(e) => {
-                      setRetropatio(e.target.checked);
-                    }}
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={retropatio}
+                        onChange={(e) => {
+                          setRetropatio(e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Retropatio"
                   />
-                }
-                label="Retropatio"
-              />
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        color="success"
+                        checked={ativo}
+                        onChange={(e) => {
+                          setAtivo(e.target.checked);
+                        }}
+                      />
+                    }
+                    label="Ativo"
+                  />
+                </Grid>
+              </Grid>
             </FormGroup>
           </Box>
         </DialogContent>
