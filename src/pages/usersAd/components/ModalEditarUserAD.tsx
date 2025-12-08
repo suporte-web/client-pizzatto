@@ -12,10 +12,11 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-const ModalEditarUserAD = (
-  // { item }: any
-) => {
+const ModalEditarUserAD = ({ item }: any) => {
   const [open, setOpen] = useState(false);
+
+  console.log(item);
+  
 
   const handleOpen = () => {
     setOpen(true);
