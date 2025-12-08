@@ -37,6 +37,7 @@ const ModalEditarInventario = ({ item, showToast, setFlushHook }: any) => {
   const [dataEntrega, setDataEntrega] = useState("");
   const [status, setStatus] = useState("");
   const [descricao, setDescricao] = useState("");
+  const [maquina, setMaquina] = useState("");
 
   // Inicializa os estados quando o item é passado ou quando abre o modal
   useEffect(() => {
@@ -51,6 +52,7 @@ const ModalEditarInventario = ({ item, showToast, setFlushHook }: any) => {
       setDataEntrega(item.dataEntrega ? item.dataEntrega.split("T")[0] : "");
       setStatus(item.status || "");
       setDescricao(item.descricao || "");
+      setMaquina(item.maquina || "");
     }
   }, [item, open]);
 
@@ -68,6 +70,7 @@ const ModalEditarInventario = ({ item, showToast, setFlushHook }: any) => {
       setDataEntrega("");
       setStatus("");
       setDescricao("");
+      setMaquina("");
     }, 300);
   };
 
@@ -91,6 +94,7 @@ const ModalEditarInventario = ({ item, showToast, setFlushHook }: any) => {
         status: status || undefined,
         dataEntrega: dataEntrega ? new Date(dataEntrega).toISOString() : undefined,
         descricao: descricao ? descricao : undefined,
+        maquina: maquina ? maquina : undefined,
       };
 
       console.log("Dados sendo atualizados:", dadosAtualizados);
@@ -270,6 +274,17 @@ const ModalEditarInventario = ({ item, showToast, setFlushHook }: any) => {
                 flexDirection: isMobile ? "column" : "row",
               }}
             >
+              <TextField
+                size="small"
+                label="Máquina"
+                type="text"
+                fullWidth
+                value={maquina}
+                onChange={(e) => setMaquina(e.target.value)}
+                InputProps={{ style: { borderRadius: "10px" } }}
+                InputLabelProps={{ shrink: true }}
+              />
+
               <TextField
                 size="small"
                 label="Data de Entrega"

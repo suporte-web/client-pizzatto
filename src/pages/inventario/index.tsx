@@ -25,6 +25,9 @@ import {
   CardContent,
   Grid,
   alpha,
+  Tooltip,
+  IconButton,
+  CircularProgress,
 } from "@mui/material";
 import SidebarNew from "../../components/Sidebar";
 import { useEffect, useState } from "react";
@@ -36,6 +39,7 @@ import ModalEditarInventario from "./components/ModalEditarInventario";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { PictureAsPdf } from "@mui/icons-material";
 
 const Inventario = () => {
   const containerProps: ContainerProps = {
@@ -65,6 +69,7 @@ const Inventario = () => {
     furtado: 0,
     foraDeOperacao: 0,
   });
+  const [loadingTermoId, setLoadingTermoId] = useState<string | null>(null);
 
   // Lista de status possíveis
   const statusList = [
@@ -223,32 +228,81 @@ const Inventario = () => {
 
   const totalPaginas = Math.ceil(totalPages / rowsPerPage);
 
+  const handleCreatePdfTermo = async (id: any) => {
+    try {
+      setLoadingTermoId(id);
+
+      const response = await InventarioService.createPdfTermo({ _id: id });
+
+      if (!response || !response.pdfBase64) {
+        throw new Error("Resposta vazia do servidor");
+      }
+
+      const byteCharacters = atob(response.pdfBase64);
+      const byteNumbers = Array.from(byteCharacters, (c) => c.charCodeAt(0));
+      const byteArray = new Uint8Array(byteNumbers);
+
+      const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
+
+      if (pdfBlob.size === 0) {
+        throw new Error("Arquivo PDF vazio");
+      }
+
+      handleDownload({ pdfBlob, colaborador: response.colaborador });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingTermoId(null);
+    }
+  };
+
+  const handleDownload = (blob: any) => {
+    const blobUrl = URL.createObjectURL(blob.pdfBlob);
+    const link = document.createElement("a");
+
+    link.href = blobUrl;
+    link.download = `Termo-de-Notebook - ${blob.colaborador}.pdf`;
+    link.style.display = "none";
+
+    document.body.appendChild(link);
+    link.click();
+
+    // Limpeza
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    }, 100);
+
+    showToast("Contrato gerado com sucesso!", "success");
+    setFlushHook(!flushHook);
+  };
+
   return (
     <>
       <SidebarNew title="Inventário">
-        <Container 
-          {...containerProps} 
-          sx={{ 
+        <Container
+          {...containerProps}
+          sx={{
             py: 3,
             maxWidth: "100% !important",
-            px: { xs: 2, md: 3 }
+            px: { xs: 2, md: 3 },
           }}
         >
           {/* Header com título e ações */}
           <Box sx={{ mb: 4 }}>
-            <Box 
-              display="flex" 
-              justifyContent="space-between" 
-              alignItems="center" 
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
               sx={{ mb: 3 }}
             >
-              <Typography 
-                variant="h4" 
-                component="h1" 
+              <Typography
+                variant="h4"
+                component="h1"
                 fontWeight="bold"
                 color="primary"
                 sx={{
-                  fontSize: { xs: '1.75rem', md: '2.125rem' }
+                  fontSize: { xs: "1.75rem", md: "2.125rem" },
                 }}
               >
                 Gestão de Inventário
@@ -261,19 +315,19 @@ const Inventario = () => {
                 <Box
                   onClick={handleRefresh}
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     width: 48,
                     height: 48,
-                    borderRadius: '12px',
+                    borderRadius: "12px",
                     backgroundColor: theme.palette.primary.main,
-                    color: 'white',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease-in-out',
-                    '&:hover': {
+                    color: "white",
+                    cursor: "pointer",
+                    transition: "all 0.2s ease-in-out",
+                    "&:hover": {
                       backgroundColor: theme.palette.primary.dark,
-                      transform: 'scale(1.05)',
+                      transform: "scale(1.05)",
                     },
                   }}
                 >
@@ -285,15 +339,15 @@ const Inventario = () => {
             {/* Cards de Resumo */}
             <Grid container spacing={2} sx={{ mb: 3 }}>
               <Grid size={{ xs: 6, md: 2.4 }}>
-                <Card 
-                  sx={{ 
+                <Card
+                  sx={{
                     background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                    color: 'white',
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                    color: "white",
+                    borderRadius: "16px",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
                   }}
                 >
-                  <CardContent sx={{ textAlign: 'center', p: 2 }}>
+                  <CardContent sx={{ textAlign: "center", p: 2 }}>
                     <Typography variant="h4" fontWeight="bold">
                       {totalStatus.todos}
                     </Typography>
@@ -304,15 +358,15 @@ const Inventario = () => {
                 </Card>
               </Grid>
               <Grid size={{ xs: 6, md: 2.4 }}>
-                <Card 
-                  sx={{ 
+                <Card
+                  sx={{
                     background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
-                    color: 'white',
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                    color: "white",
+                    borderRadius: "16px",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
                   }}
                 >
-                  <CardContent sx={{ textAlign: 'center', p: 2 }}>
+                  <CardContent sx={{ textAlign: "center", p: 2 }}>
                     <Typography variant="h4" fontWeight="bold">
                       {totalStatus.emUso}
                     </Typography>
@@ -323,15 +377,15 @@ const Inventario = () => {
                 </Card>
               </Grid>
               <Grid size={{ xs: 6, md: 2.4 }}>
-                <Card 
-                  sx={{ 
+                <Card
+                  sx={{
                     background: `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.info.dark} 100%)`,
-                    color: 'white',
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                    color: "white",
+                    borderRadius: "16px",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
                   }}
                 >
-                  <CardContent sx={{ textAlign: 'center', p: 2 }}>
+                  <CardContent sx={{ textAlign: "center", p: 2 }}>
                     <Typography variant="h4" fontWeight="bold">
                       {totalStatus.emEstoque}
                     </Typography>
@@ -342,15 +396,15 @@ const Inventario = () => {
                 </Card>
               </Grid>
               <Grid size={{ xs: 6, md: 2.4 }}>
-                <Card 
-                  sx={{ 
+                <Card
+                  sx={{
                     background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
-                    color: 'white',
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                    color: "white",
+                    borderRadius: "16px",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
                   }}
                 >
-                  <CardContent sx={{ textAlign: 'center', p: 2 }}>
+                  <CardContent sx={{ textAlign: "center", p: 2 }}>
                     <Typography variant="h4" fontWeight="bold">
                       {totalStatus.emManutencao}
                     </Typography>
@@ -361,15 +415,15 @@ const Inventario = () => {
                 </Card>
               </Grid>
               <Grid size={{ xs: 6, md: 2.4 }}>
-                <Card 
-                  sx={{ 
+                <Card
+                  sx={{
                     background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.dark} 100%)`,
-                    color: 'white',
-                    borderRadius: '16px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+                    color: "white",
+                    borderRadius: "16px",
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
                   }}
                 >
-                  <CardContent sx={{ textAlign: 'center', p: 2 }}>
+                  <CardContent sx={{ textAlign: "center", p: 2 }}>
                     <Typography variant="h4" fontWeight="bold">
                       {totalStatus.descontinuado + totalStatus.furtado}
                     </Typography>
@@ -383,13 +437,13 @@ const Inventario = () => {
           </Box>
 
           {/* Tabs de Status */}
-          <Paper 
+          <Paper
             elevation={0}
-            sx={{ 
-              mb: 3, 
-              borderRadius: '16px',
+            sx={{
+              mb: 3,
+              borderRadius: "16px",
               border: `1px solid ${theme.palette.divider}`,
-              overflow: 'hidden'
+              overflow: "hidden",
             }}
           >
             <Tabs
@@ -398,27 +452,27 @@ const Inventario = () => {
               variant="scrollable"
               scrollButtons="auto"
               sx={{
-                '& .MuiTab-root': {
+                "& .MuiTab-root": {
                   minHeight: 60,
-                  fontSize: '0.875rem',
+                  fontSize: "0.875rem",
                   fontWeight: 500,
-                  textTransform: 'none',
-                  position: 'relative',
-                  '&::after': {
+                  textTransform: "none",
+                  position: "relative",
+                  "&::after": {
                     content: '""',
-                    position: 'absolute',
+                    position: "absolute",
                     bottom: 0,
-                    left: '50%',
+                    left: "50%",
                     width: 0,
                     height: 3,
-                    backgroundColor: 'currentColor',
-                    transition: 'all 0.3s ease',
-                    transform: 'translateX(-50%)',
+                    backgroundColor: "currentColor",
+                    transition: "all 0.3s ease",
+                    transform: "translateX(-50%)",
                   },
-                  '&.Mui-selected': {
+                  "&.Mui-selected": {
                     color: (tabProps: any) => getTabColor(tabProps.value),
-                    '&::after': {
-                      width: '80%',
+                    "&::after": {
+                      width: "80%",
                     },
                   },
                 },
@@ -432,12 +486,12 @@ const Inventario = () => {
                   <Tab
                     key={status}
                     label={
-                      <Box sx={{ textAlign: 'center' }}>
+                      <Box sx={{ textAlign: "center" }}>
                         <Typography variant="body2" fontWeight="inherit">
                           {status}
                         </Typography>
-                        <Typography 
-                          variant="h6" 
+                        <Typography
+                          variant="h6"
                           fontWeight="bold"
                           sx={{ mt: 0.5 }}
                         >
@@ -458,17 +512,24 @@ const Inventario = () => {
           </Paper>
 
           {/* Filtros e Busca */}
-          <Paper 
+          <Paper
             elevation={0}
-            sx={{ 
-              p: 3, 
-              mb: 3, 
-              borderRadius: '16px',
+            sx={{
+              p: 3,
+              mb: 3,
+              borderRadius: "16px",
               border: `1px solid ${theme.palette.divider}`,
               background: alpha(theme.palette.background.paper, 0.6),
             }}
           >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: 'wrap' }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                flexWrap: "wrap",
+              }}
+            >
               <TextField
                 size="small"
                 label="Buscar Inventário"
@@ -477,20 +538,22 @@ const Inventario = () => {
                 onChange={(e) => {
                   setPesquisa(e.target.value);
                 }}
-                InputProps={{ 
+                InputProps={{
                   style: { borderRadius: "12px" },
-                  startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                  startAdornment: (
+                    <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />
+                  ),
                 }}
-                sx={{ 
-                  minWidth: { xs: '100%', md: 300 },
-                  flex: 1 
+                sx={{
+                  minWidth: { xs: "100%", md: 300 },
+                  flex: 1,
                 }}
               />
-              <FormControl 
-                size="small" 
-                sx={{ 
-                  minWidth: { xs: '100%', md: 200 },
-                  flex: 1 
+              <FormControl
+                size="small"
+                sx={{
+                  minWidth: { xs: "100%", md: 200 },
+                  flex: 1,
                 }}
               >
                 <InputLabel>Equipamento</InputLabel>
@@ -520,11 +583,11 @@ const Inventario = () => {
                   ))}
                 </Select>
               </FormControl>
-              <FormControl 
-                size="small" 
-                sx={{ 
-                  minWidth: { xs: '100%', md: 200 },
-                  flex: 1 
+              <FormControl
+                size="small"
+                sx={{
+                  minWidth: { xs: "100%", md: 200 },
+                  flex: 1,
                 }}
               >
                 <InputLabel>Setor</InputLabel>
@@ -608,60 +671,93 @@ const Inventario = () => {
               showLastButton
               size={isMobile ? "small" : "medium"}
               sx={{
-                '& .MuiPaginationItem-root': {
-                  borderRadius: '8px',
+                "& .MuiPaginationItem-root": {
+                  borderRadius: "8px",
                   fontWeight: 600,
-                }
+                },
               }}
             />
           </Box>
 
           {/* Tabela */}
-          <Paper 
+          <Paper
             elevation={0}
-            sx={{ 
-              borderRadius: '16px',
+            sx={{
+              borderRadius: "16px",
               border: `1px solid ${theme.palette.divider}`,
-              overflow: 'hidden',
-              mb: 3
+              overflow: "hidden",
+              mb: 3,
             }}
           >
-            <Box sx={{ position: 'relative' }}>
+            <Box sx={{ position: "relative" }}>
               {loading && (
-                <LinearProgress 
-                  sx={{ 
-                    position: 'absolute', 
-                    top: 0, 
-                    left: 0, 
+                <LinearProgress
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
                     right: 0,
-                    height: 2 
-                  }} 
+                    height: 2,
+                  }}
                 />
               )}
               <Table size="small">
                 <TableHead>
-                  <TableRow sx={{ backgroundColor: alpha(theme.palette.primary.main, 0.04) }}>
-                    <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Equipamento</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Patrimônio</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', py: 2 }}>TAG</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Setor</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Nome Computador</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Nome Colaborador</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Localização</TableCell>
-                    <TableCell align="center" sx={{ fontWeight: 'bold', py: 2 }}>Data de Entrega</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', py: 2 }}>Ações</TableCell>
+                  <TableRow
+                    sx={{
+                      backgroundColor: alpha(theme.palette.primary.main, 0.04),
+                    }}
+                  >
+                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                      Equipamento
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                      Patrimônio
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                      TAG
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                      Setor
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                      Nome Computador
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                      Nome Colaborador
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                      Localização
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{ fontWeight: "bold", py: 2 }}
+                    >
+                      Data de Entrega
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                      Status
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                      Ações
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {inventarios.map((item, index) => (
-                    <TableRow 
+                    <TableRow
                       key={item.id}
-                      sx={{ 
-                        '&:hover': {
-                          backgroundColor: alpha(theme.palette.primary.main, 0.02),
+                      sx={{
+                        "&:hover": {
+                          backgroundColor: alpha(
+                            theme.palette.primary.main,
+                            0.02
+                          ),
                         },
-                        backgroundColor: index % 2 === 0 ? 'transparent' : alpha(theme.palette.action.hover, 0.02)
+                        backgroundColor:
+                          index % 2 === 0
+                            ? "transparent"
+                            : alpha(theme.palette.action.hover, 0.02),
                       }}
                     >
                       <TableCell sx={{ py: 1.5 }}>{item.equipamento}</TableCell>
@@ -681,11 +777,15 @@ const Inventario = () => {
                           variant="outlined"
                         />
                       </TableCell>
-                      <TableCell sx={{ py: 1.5, fontFamily: 'monospace' }}>
+                      <TableCell sx={{ py: 1.5, fontFamily: "monospace" }}>
                         {item.nomeComputador || "-"}
                       </TableCell>
-                      <TableCell sx={{ py: 1.5 }}>{item.nomeColaborador || "-"}</TableCell>
-                      <TableCell sx={{ py: 1.5 }}>{item.localizacao || "-"}</TableCell>
+                      <TableCell sx={{ py: 1.5 }}>
+                        {item.nomeColaborador || "-"}
+                      </TableCell>
+                      <TableCell sx={{ py: 1.5 }}>
+                        {item.localizacao || "-"}
+                      </TableCell>
                       <TableCell align="center" sx={{ py: 1.5 }}>
                         {item.dataEntrega
                           ? moment(item.dataEntrega).format("DD/MM/YYYY")
@@ -707,24 +807,56 @@ const Inventario = () => {
                         />
                       </TableCell>
                       <TableCell sx={{ py: 1.5 }}>
-                        <ModalEditarInventario
-                          item={item}
-                          showToast={showToast}
-                          setFlushHook={setFlushHook}
-                        />
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            g: 1,
+                          }}
+                        >
+                          <ModalEditarInventario
+                            item={item}
+                            showToast={showToast}
+                            setFlushHook={setFlushHook}
+                          />
+                          <Tooltip title="Editar Inventário">
+                            <IconButton
+                              onClick={() => handleCreatePdfTermo(item._id)}
+                              color="error"
+                              size="small"
+                              sx={{
+                                "&:hover": {
+                                  backgroundColor: "error.light",
+                                  color: "error.contrastText",
+                                },
+                              }}
+                            >
+                              {loadingTermoId === item._id ? (
+                                <CircularProgress color="error" size={17} />
+                              ) : (
+                                <PictureAsPdf fontSize="small" />
+                              )}
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
                       </TableCell>
                     </TableRow>
                   ))}
                   {inventarios.length === 0 && !loading && (
                     <TableRow>
                       <TableCell colSpan={10} align="center" sx={{ py: 4 }}>
-                        <Box sx={{ textAlign: 'center', color: 'text.secondary' }}>
-                          <FilterListIcon sx={{ fontSize: 48, mb: 1, opacity: 0.5 }} />
+                        <Box
+                          sx={{ textAlign: "center", color: "text.secondary" }}
+                        >
+                          <FilterListIcon
+                            sx={{ fontSize: 48, mb: 1, opacity: 0.5 }}
+                          />
                           <Typography variant="h6" gutterBottom>
                             Nenhum item encontrado
                           </Typography>
                           <Typography variant="body2">
-                            Tente ajustar os filtros ou adicionar novos itens ao inventário.
+                            Tente ajustar os filtros ou adicionar novos itens ao
+                            inventário.
                           </Typography>
                         </Box>
                       </TableCell>
@@ -736,11 +868,7 @@ const Inventario = () => {
           </Paper>
 
           {/* Controles de Paginação Inferior */}
-          <Box
-            display="flex"
-            justifyContent="center"
-            sx={{ mt: 3 }}
-          >
+          <Box display="flex" justifyContent="center" sx={{ mt: 3 }}>
             <Pagination
               count={totalPaginas}
               page={page}
@@ -752,10 +880,10 @@ const Inventario = () => {
               showLastButton
               size={isMobile ? "small" : "medium"}
               sx={{
-                '& .MuiPaginationItem-root': {
-                  borderRadius: '8px',
+                "& .MuiPaginationItem-root": {
+                  borderRadius: "8px",
                   fontWeight: 600,
-                }
+                },
               }}
             />
           </Box>

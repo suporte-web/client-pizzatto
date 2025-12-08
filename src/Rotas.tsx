@@ -13,6 +13,7 @@ import ControleContratos from "./pages/contratos/controleContratos";
 import CadastrosContratos from "./pages/contratos/cadastros";
 import ContasOffice from "./pages/contasOffice";
 import ToDo from "./pages/toDo";
+import UsersAd from "./pages/usersAd";
 
 const Rotas = () => (
   <Routes>
@@ -98,6 +99,15 @@ const Rotas = () => (
       element={
         <UserProvider>
           <ToDo />
+        </UserProvider>
+      }
+    />
+
+    <Route
+      path="/users-ad"
+      element={
+        <UserProvider>
+          <UsersAd />
         </UserProvider>
       }
     />

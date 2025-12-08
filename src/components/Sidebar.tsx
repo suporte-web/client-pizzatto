@@ -411,6 +411,13 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                 >
                   Usuários
                 </StyledMenuItem>
+                <StyledMenuItem
+                  icon={<PersonOutlineOutlined />}
+                  component={<Link to={"/users-ad"} />}
+                  active={location.pathname === "/users-ad"}
+                >
+                  Usuários AD
+                </StyledMenuItem>
                 <StyledSubMenu
                   label={"Infraestrutura"}
                   icon={<Inventory2Outlined />}
@@ -508,19 +515,19 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                 justifyContent: isOpen ? "center" : "flex-start",
                 gap: 1.5,
                 px: 2,
-                py: 1.5,
+                // py: 1.5,
                 minHeight: "48px",
                 border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
                 backgroundColor: alpha(theme.palette.error.main, 0.05),
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                // transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                 "&:hover": {
                   backgroundColor: alpha(theme.palette.error.main, 0.1),
                   borderColor: alpha(theme.palette.error.main, 0.4),
                   transform: "translateY(-2px)",
-                  boxShadow: `0 4px 16px ${alpha(
-                    theme.palette.error.main,
-                    0.2
-                  )}`,
+                  // boxShadow: `0 4px 16px ${alpha(
+                  //   theme.palette.error.main,
+                  //   0.2
+                  // )}`,
                 },
               }}
             >

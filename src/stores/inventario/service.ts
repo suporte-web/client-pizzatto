@@ -20,4 +20,12 @@ export const InventarioService = {
     const update = await Api.patch(`/inventario/update`, data);
     return update.data;
   },
+
+  createPdfTermo: async (data: any) => {
+    const create = await Api.post(
+      `/inventario/create-pdf-termo/${data._id}`,
+      data
+    );
+    return create.data;
+  },
 };
