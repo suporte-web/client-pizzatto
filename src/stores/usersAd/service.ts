@@ -13,7 +13,28 @@ export const UserAdService = {
   },
 
   getUsersAdByFilter: async (data: any) => {
-    const filter = await usersAdApi.post(`/ad-users/get-users-ad-by-filter`, data);
+    const filter = await usersAdApi.post(
+      `/ad-users/get-users-ad-by-filter`,
+      data
+    );
     return filter.data;
+  },
+
+  getGroupsUsersAd: async () => {
+    const get = await usersAdApi.get(`/ad-users/groups`);
+    return get.data;
+  },
+
+  update: async (data: any) => {
+    const upd = await usersAdApi.post(`/ad-users/update`, data);
+    return upd.data;
+  },
+
+  resetPasswordAndForceChange: async (data: any) => {
+    const reset = await usersAdApi.post(
+      `/ad-users/reset-password`,
+      data
+    );
+    return reset.data;
   },
 };

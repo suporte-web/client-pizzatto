@@ -33,6 +33,7 @@ const UsersAd = () => {
   const [totalPages, setTotalPages] = useState(10);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [loading, setLoading] = useState(false);
+  const [flushHook, setFlushHook] = useState(false);
 
   const [pesquisa, setPesquisa] = useState("");
   const [usersAd, setUsersAd] = useState([]);
@@ -58,7 +59,7 @@ const UsersAd = () => {
 
   useEffect(() => {
     fetchData();
-  }, [pesquisa, page, rowsPerPage]);
+  }, [flushHook, pesquisa, page, rowsPerPage]);
 
   const totalPaginas = Math.ceil(totalPages / rowsPerPage);
 
@@ -161,7 +162,11 @@ const UsersAd = () => {
                     />
                   </TableCell>
                   <TableCell>
-                    <ModalEditarUserAD item={item} />
+                    <ModalEditarUserAD
+                      item={item}
+                      showToast={showToast}
+                      setFlushHook={setFlushHook}
+                    />
                   </TableCell>
                 </TableRow>
               ))}
