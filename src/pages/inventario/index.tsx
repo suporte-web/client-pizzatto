@@ -84,6 +84,7 @@ const Inventario = () => {
   const [flushHook, setFlushHook] = useState(false);
 
   const [pesquisa, setPesquisa] = useState("");
+  const [total, setTotal] = useState("");
   const [loading, setLoading] = useState(false);
   const [inventarios, setInventarios] = useState<any[]>([]);
 
@@ -111,6 +112,7 @@ const Inventario = () => {
 
       const normalized = (get.data ?? []).map(normalizeGlpiRow);
       setInventarios(normalized);
+      setTotal(get.total)
 
       setTotalPages(get.totalcount ?? get.total ?? 0);
     } catch (error) {
@@ -159,13 +161,9 @@ const Inventario = () => {
                   fontSize: { xs: "1.75rem", md: "2.125rem" },
                 }}
               >
-                Gestão de Inventário
+                Gestão de Inventário - {total || '0'}
               </Typography>
               <Box display="flex" gap={2}>
-                {/* <ModalCriarInventario
-                  showToast={showToast}
-                  setFlushHook={setFlushHook}
-                /> */}
                 <Box
                   onClick={handleRefresh}
                   sx={{
