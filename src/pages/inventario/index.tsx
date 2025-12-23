@@ -17,29 +17,58 @@ import {
   useTheme,
   type ContainerProps,
   Chip,
-  Tabs,
-  Tab,
   Paper,
   Typography,
-  Card,
-  CardContent,
-  Grid,
   alpha,
-  Tooltip,
-  IconButton,
-  CircularProgress,
 } from "@mui/material";
 import SidebarNew from "../../components/Sidebar";
 import { useEffect, useState } from "react";
 import { useToast } from "../../components/Toast";
-import ModalCriarInventario from "./components/ModalCriarInventario";
-import { InventarioService } from "../../stores/inventario/service";
-import moment from "moment";
-import ModalEditarInventario from "./components/ModalEditarInventario";
+// import ModalCriarInventario from "./components/ModalCriarInventario";
 import SearchIcon from "@mui/icons-material/Search";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { PictureAsPdf } from "@mui/icons-material";
+import { GlpiService } from "../../stores/glpi/service";
+import ModalGerarTermoCompromisso from "./components/ModalGerarTermoDeCompromisso";
+
+const GLPI_FIELDS = {
+  equipamento: 40,
+  nomeComputador: 1,
+  tag: 5,
+  nomeColaborador: 7,
+  setor: 10,
+  localizacao: 15,
+  so: 45,
+  fabricante: 23,
+  processador: 17,
+  memoria: 111,
+  status: 31,
+  id: 2,
+} as const;
+
+const pick = (row: any, key: number) => {
+  const v = row?.[key];
+  // o GLPI às vezes devolve { name, id } em dropdowns dependendo do modo
+  if (v && typeof v === "object")
+    return v.name ?? v.completename ?? v.value ?? v;
+  return v ?? "";
+};
+
+const normalizeGlpiRow = (row: any) => ({
+  id: pick(row, GLPI_FIELDS.id),
+  equipamento: pick(row, GLPI_FIELDS.equipamento),
+  fabricante: pick(row, GLPI_FIELDS.fabricante),
+  tag: pick(row, GLPI_FIELDS.tag),
+  setor: pick(row, GLPI_FIELDS.setor),
+  nomeComputador: pick(row, GLPI_FIELDS.nomeComputador),
+  nomeColaborador: pick(row, GLPI_FIELDS.nomeColaborador),
+  localizacao: pick(row, GLPI_FIELDS.localizacao),
+  processador: pick(row, GLPI_FIELDS.processador),
+  memoria: pick(row, GLPI_FIELDS.memoria),
+  status: pick(row, GLPI_FIELDS.status),
+  so: pick(row, GLPI_FIELDS.so),
+  _raw: row, // opcional: mantém o original pra debug
+});
 
 const Inventario = () => {
   const containerProps: ContainerProps = {
@@ -55,99 +84,35 @@ const Inventario = () => {
   const [flushHook, setFlushHook] = useState(false);
 
   const [pesquisa, setPesquisa] = useState("");
-  const [equipamento, setEquipamento] = useState("");
-  const [setor, setSetor] = useState("");
   const [loading, setLoading] = useState(false);
   const [inventarios, setInventarios] = useState<any[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState<string>("Todos");
-  const [totalStatus, setTotalStatus] = useState({
-    todos: 0,
-    emUso: 0,
-    emEstoque: 0,
-    emManutencao: 0,
-    descontinuado: 0,
-    furtado: 0,
-    foraDeOperacao: 0,
-  });
-  const [loadingTermoId, setLoadingTermoId] = useState<string | null>(null);
-
-  // Lista de status possíveis
-  const statusList = [
-    "Todos",
-    "EM USO",
-    "EM ESTOQUE",
-    "EM MANUTENÇÃO",
-    "DESCONTINUADO",
-    "FURTADO",
-    "FORA DE OPERAÇÃO",
-  ];
 
   // Função para obter a cor do Chip baseado no status
   const getStatusColor = (status: string) => {
     switch (status?.toUpperCase()) {
-      case "EM USO":
+      case "ATIVO":
         return "success";
-      case "EM ESTOQUE":
-        return "primary";
-      case "EM MANUTENÇÃO":
-        return "warning";
-      case "DESCONTINUADO":
+      case "INATIVO":
         return "error";
-      case "FURTADO":
-        return "error";
-      case "FORA DE OPERAÇÃO":
-        return "default";
       default:
         return "default";
-    }
-  };
-
-  // Função para obter a variante do Chip
-  const getStatusVariant = (status: string) => {
-    switch (status?.toUpperCase()) {
-      case "EM USO":
-      case "EM ESTOQUE":
-      case "EM MANUTENÇÃO":
-      case "DESCONTINUADO":
-        return "filled";
-      default:
-        return "outlined";
-    }
-  };
-
-  // Função para obter cor da tab baseada no status
-  const getTabColor = (status: string) => {
-    switch (status) {
-      case "EM USO":
-        return theme.palette.success.main;
-      case "EM ESTOQUE":
-        return theme.palette.info.main;
-      case "EM MANUTENÇÃO":
-        return theme.palette.warning.main;
-      case "DESCONTINUADO":
-        return theme.palette.error.main;
-      case "FURTADO":
-        return theme.palette.error.dark;
-      case "FORA DE OPERAÇÃO":
-        return theme.palette.grey[600];
-      default:
-        return theme.palette.primary.main;
     }
   };
 
   const fetchInventario = async () => {
     setLoading(true);
     try {
-      const get = await InventarioService.findByFilter({
-        pesquisa,
-        equipamento: equipamento === "Todos" ? "" : equipamento,
-        setor: setor === "Todos" ? "" : setor,
-        status: selectedStatus === "Todos" ? "" : selectedStatus,
-        page,
+      const get = await GlpiService.getComputadores({
         limit: rowsPerPage,
+        page,
+        filter: pesquisa,
       });
-      setInventarios(get.result);
-      setTotalPages(get.total);
+      console.log(get);
+
+      const normalized = (get.data ?? []).map(normalizeGlpiRow);
+      setInventarios(normalized);
+
+      setTotalPages(get.totalcount ?? get.total ?? 0);
     } catch (error) {
       showToast("Erro ao carregar inventário", "error");
     } finally {
@@ -157,69 +122,7 @@ const Inventario = () => {
 
   useEffect(() => {
     fetchInventario();
-  }, [
-    flushHook,
-    equipamento,
-    pesquisa,
-    setor,
-    selectedStatus,
-    page,
-    rowsPerPage,
-  ]);
-
-  const fetchTotalStatus = async () => {
-    try {
-      const getTotalInventario = await InventarioService.findByFilter({});
-      const getTotalEmUso = await InventarioService.findByFilter({
-        status: "EM USO",
-      });
-      const getTotalEmEstoque = await InventarioService.findByFilter({
-        status: "EM ESTOQUE",
-      });
-      const getTotalEmManutencao = await InventarioService.findByFilter({
-        status: "EM MANUTENÇÃO",
-      });
-      const getTotalDescontinuado = await InventarioService.findByFilter({
-        status: "DESCONTINUADO",
-      });
-      const getTotalFurtado = await InventarioService.findByFilter({
-        status: "FURTADO",
-      });
-      const getTotalForaDeOperacao = await InventarioService.findByFilter({
-        status: "FORA DE OPERAÇÃO",
-      });
-
-      setTotalStatus({
-        todos: getTotalInventario.total || getTotalInventario.length || 0,
-        emUso: getTotalEmUso.total || getTotalEmUso.length || 0,
-        emEstoque: getTotalEmEstoque.total || getTotalEmEstoque.length || 0,
-        emManutencao:
-          getTotalEmManutencao.total || getTotalEmManutencao.length || 0,
-        descontinuado:
-          getTotalDescontinuado.total || getTotalDescontinuado.length || 0,
-        furtado: getTotalFurtado.total || getTotalFurtado.length || 0,
-        foraDeOperacao:
-          getTotalForaDeOperacao.total || getTotalForaDeOperacao.length || 0,
-      });
-    } catch (error) {
-      console.log(error);
-      showToast("Erro ao carregar totais", "error");
-    }
-  };
-
-  const statusMapping: { [key: string]: keyof typeof totalStatus } = {
-    Todos: "todos",
-    "EM USO": "emUso",
-    "EM ESTOQUE": "emEstoque",
-    "EM MANUTENÇÃO": "emManutencao",
-    DESCONTINUADO: "descontinuado",
-    FURTADO: "furtado",
-    "FORA DE OPERAÇÃO": "foraDeOperacao",
-  };
-
-  useEffect(() => {
-    fetchTotalStatus();
-  }, [flushHook]);
+  }, [flushHook, pesquisa, page, rowsPerPage]);
 
   const handleRefresh = () => {
     setFlushHook(!flushHook);
@@ -227,55 +130,6 @@ const Inventario = () => {
   };
 
   const totalPaginas = Math.ceil(totalPages / rowsPerPage);
-
-  const handleCreatePdfTermo = async (id: any) => {
-    try {
-      setLoadingTermoId(id);
-
-      const response = await InventarioService.createPdfTermo({ _id: id });
-
-      if (!response || !response.pdfBase64) {
-        throw new Error("Resposta vazia do servidor");
-      }
-
-      const byteCharacters = atob(response.pdfBase64);
-      const byteNumbers = Array.from(byteCharacters, (c) => c.charCodeAt(0));
-      const byteArray = new Uint8Array(byteNumbers);
-
-      const pdfBlob = new Blob([byteArray], { type: "application/pdf" });
-
-      if (pdfBlob.size === 0) {
-        throw new Error("Arquivo PDF vazio");
-      }
-
-      handleDownload({ pdfBlob, colaborador: response.colaborador });
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setLoadingTermoId(null);
-    }
-  };
-
-  const handleDownload = (blob: any) => {
-    const blobUrl = URL.createObjectURL(blob.pdfBlob);
-    const link = document.createElement("a");
-
-    link.href = blobUrl;
-    link.download = `Termo-de-Notebook - ${blob.colaborador}.pdf`;
-    link.style.display = "none";
-
-    document.body.appendChild(link);
-    link.click();
-
-    // Limpeza
-    setTimeout(() => {
-      document.body.removeChild(link);
-      URL.revokeObjectURL(blobUrl);
-    }, 100);
-
-    showToast("Contrato gerado com sucesso!", "success");
-    setFlushHook(!flushHook);
-  };
 
   return (
     <>
@@ -308,10 +162,10 @@ const Inventario = () => {
                 Gestão de Inventário
               </Typography>
               <Box display="flex" gap={2}>
-                <ModalCriarInventario
+                {/* <ModalCriarInventario
                   showToast={showToast}
                   setFlushHook={setFlushHook}
-                />
+                /> */}
                 <Box
                   onClick={handleRefresh}
                   sx={{
@@ -335,181 +189,7 @@ const Inventario = () => {
                 </Box>
               </Box>
             </Box>
-
-            {/* Cards de Resumo */}
-            <Grid container spacing={2} sx={{ mb: 3 }}>
-              <Grid size={{ xs: 6, md: 2.4 }}>
-                <Card
-                  sx={{
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-                    color: "white",
-                    borderRadius: "16px",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  }}
-                >
-                  <CardContent sx={{ textAlign: "center", p: 2 }}>
-                    <Typography variant="h4" fontWeight="bold">
-                      {totalStatus.todos}
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                      Total
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 6, md: 2.4 }}>
-                <Card
-                  sx={{
-                    background: `linear-gradient(135deg, ${theme.palette.success.main} 0%, ${theme.palette.success.dark} 100%)`,
-                    color: "white",
-                    borderRadius: "16px",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  }}
-                >
-                  <CardContent sx={{ textAlign: "center", p: 2 }}>
-                    <Typography variant="h4" fontWeight="bold">
-                      {totalStatus.emUso}
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                      Em Uso
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 6, md: 2.4 }}>
-                <Card
-                  sx={{
-                    background: `linear-gradient(135deg, ${theme.palette.info.main} 0%, ${theme.palette.info.dark} 100%)`,
-                    color: "white",
-                    borderRadius: "16px",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  }}
-                >
-                  <CardContent sx={{ textAlign: "center", p: 2 }}>
-                    <Typography variant="h4" fontWeight="bold">
-                      {totalStatus.emEstoque}
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                      Em Estoque
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 6, md: 2.4 }}>
-                <Card
-                  sx={{
-                    background: `linear-gradient(135deg, ${theme.palette.warning.main} 0%, ${theme.palette.warning.dark} 100%)`,
-                    color: "white",
-                    borderRadius: "16px",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  }}
-                >
-                  <CardContent sx={{ textAlign: "center", p: 2 }}>
-                    <Typography variant="h4" fontWeight="bold">
-                      {totalStatus.emManutencao}
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                      Manutenção
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-              <Grid size={{ xs: 6, md: 2.4 }}>
-                <Card
-                  sx={{
-                    background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.dark} 100%)`,
-                    color: "white",
-                    borderRadius: "16px",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                  }}
-                >
-                  <CardContent sx={{ textAlign: "center", p: 2 }}>
-                    <Typography variant="h4" fontWeight="bold">
-                      {totalStatus.descontinuado + totalStatus.furtado}
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                      Inativos
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
           </Box>
-
-          {/* Tabs de Status */}
-          <Paper
-            elevation={0}
-            sx={{
-              mb: 3,
-              borderRadius: "16px",
-              border: `1px solid ${theme.palette.divider}`,
-              overflow: "hidden",
-            }}
-          >
-            <Tabs
-              value={selectedStatus}
-              onChange={(_, newValue) => setSelectedStatus(newValue)}
-              variant="scrollable"
-              scrollButtons="auto"
-              sx={{
-                "& .MuiTab-root": {
-                  minHeight: 60,
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                  textTransform: "none",
-                  position: "relative",
-                  "&::after": {
-                    content: '""',
-                    position: "absolute",
-                    bottom: 0,
-                    left: "50%",
-                    width: 0,
-                    height: 3,
-                    backgroundColor: "currentColor",
-                    transition: "all 0.3s ease",
-                    transform: "translateX(-50%)",
-                  },
-                  "&.Mui-selected": {
-                    color: (tabProps: any) => getTabColor(tabProps.value),
-                    "&::after": {
-                      width: "80%",
-                    },
-                  },
-                },
-              }}
-            >
-              {statusList.map((status) => {
-                const statusKey = statusMapping[status];
-                const count = totalStatus[statusKey] || 0;
-
-                return (
-                  <Tab
-                    key={status}
-                    label={
-                      <Box sx={{ textAlign: "center" }}>
-                        <Typography variant="body2" fontWeight="inherit">
-                          {status}
-                        </Typography>
-                        <Typography
-                          variant="h6"
-                          fontWeight="bold"
-                          sx={{ mt: 0.5 }}
-                        >
-                          {count}
-                        </Typography>
-                      </Box>
-                    }
-                    value={status}
-                    sx={{
-                      color: getTabColor(status),
-                      minWidth: { xs: 120, md: 140 },
-                      px: 2,
-                    }}
-                  />
-                );
-              })}
-            </Tabs>
-          </Paper>
 
           {/* Filtros e Busca */}
           <Paper
@@ -549,79 +229,6 @@ const Inventario = () => {
                   flex: 1,
                 }}
               />
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: { xs: "100%", md: 200 },
-                  flex: 1,
-                }}
-              >
-                <InputLabel>Equipamento</InputLabel>
-                <Select
-                  label="Equipamento"
-                  value={equipamento}
-                  onChange={(e) => setEquipamento(e.target.value)}
-                  sx={{ borderRadius: "12px" }}
-                >
-                  {[
-                    "Todos",
-                    "DESKTOP",
-                    "NOTEBOOK",
-                    "MONITOR",
-                    "HEADSET",
-                    "MOUSE",
-                    "TECLADO",
-                    "TELEFONE CORPORATIVO",
-                    "IMPRESSORA",
-                    "SCANNER",
-                    "TABLET",
-                    "SERVIDOR",
-                  ].map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <FormControl
-                size="small"
-                sx={{
-                  minWidth: { xs: "100%", md: 200 },
-                  flex: 1,
-                }}
-              >
-                <InputLabel>Setor</InputLabel>
-                <Select
-                  label="Setor"
-                  value={setor}
-                  onChange={(e) => setSetor(e.target.value)}
-                  sx={{ borderRadius: "12px" }}
-                >
-                  {[
-                    "Todos",
-                    "CCO",
-                    "TI",
-                    "COMPRAS",
-                    "CONTRATOS",
-                    "FINANCEIRO",
-                    "RH",
-                    "DP",
-                    "CONTROLADORIA",
-                    "SEGURANÇA DO TRABALHO",
-                    "QUALIDADE",
-                    "COMERCIAL",
-                    "FISCAL",
-                    "GERENCIA",
-                    "DIRETORIA",
-                    "SUBCONTRATADOS",
-                    "MANUTENÇÃO",
-                  ].map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
             </Box>
           </Paper>
 
@@ -711,15 +318,15 @@ const Inventario = () => {
                     <TableCell sx={{ fontWeight: "bold", py: 2 }}>
                       Equipamento
                     </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                    {/* <TableCell sx={{ fontWeight: "bold", py: 2 }}>
                       Patrimônio
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell sx={{ fontWeight: "bold", py: 2 }}>
                       TAG
                     </TableCell>
-                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                    {/* <TableCell sx={{ fontWeight: "bold", py: 2 }}>
                       Setor
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell sx={{ fontWeight: "bold", py: 2 }}>
                       Nome Computador
                     </TableCell>
@@ -727,14 +334,15 @@ const Inventario = () => {
                       Nome Colaborador
                     </TableCell>
                     <TableCell sx={{ fontWeight: "bold", py: 2 }}>
-                      Localização
+                      Fabricante
                     </TableCell>
-                    <TableCell
-                      align="center"
-                      sx={{ fontWeight: "bold", py: 2 }}
-                    >
-                      Data de Entrega
+                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                      Processador
                     </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>
+                      Memória
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: "bold", py: 2 }}>SO</TableCell>
                     <TableCell sx={{ fontWeight: "bold", py: 2 }}>
                       Status
                     </TableCell>
@@ -761,41 +369,53 @@ const Inventario = () => {
                       }}
                     >
                       <TableCell sx={{ py: 1.5 }}>{item.equipamento}</TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
+                      {/* <TableCell sx={{ py: 1.5 }}>
                         <Chip
                           label={item.patrimonio || "N/A"}
                           size="small"
                           variant="outlined"
                           sx={{ fontWeight: 600 }}
                         />
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell sx={{ py: 1.5 }}>{item.tag || "-"}</TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
+                      {/* <TableCell sx={{ py: 1.5 }}>
                         <Chip
                           label={item.setor}
                           size="small"
                           variant="outlined"
                         />
-                      </TableCell>
+                      </TableCell> */}
                       <TableCell sx={{ py: 1.5, fontFamily: "monospace" }}>
                         {item.nomeComputador || "-"}
                       </TableCell>
                       <TableCell sx={{ py: 1.5 }}>
-                        {item.nomeColaborador || "-"}
-                      </TableCell>
-                      <TableCell sx={{ py: 1.5 }}>
-                        {item.localizacao || "-"}
-                      </TableCell>
-                      <TableCell align="center" sx={{ py: 1.5 }}>
-                        {item.dataEntrega
-                          ? moment(item.dataEntrega).format("DD/MM/YYYY")
+                        {item.nomeColaborador
+                          ? item.nomeColaborador
+                              .split("/")
+                              .map((parte: any, index: any) => (
+                                <span key={index}>
+                                  {parte.trim()}
+                                  <br />
+                                </span>
+                              ))
                           : "-"}
                       </TableCell>
+                      <TableCell sx={{ py: 1.5 }}>
+                        {item.fabricante || "-"}
+                      </TableCell>
+                      <TableCell align="center" sx={{ py: 1.5 }}>
+                        {item.processador}
+                      </TableCell>
+                      <TableCell align="center" sx={{ py: 1.5 }}>
+                        {item.memoria
+                          ? `${Math.floor(Number(item.memoria) / 1024)} GB`
+                          : "-"}
+                      </TableCell>
+                      <TableCell sx={{ py: 1.5 }}>{item.so}</TableCell>
                       <TableCell sx={{ py: 1.5 }}>
                         <Chip
                           label={item.status || "Não definido"}
                           color={getStatusColor(item.status)}
-                          variant={getStatusVariant(item.status)}
                           size="small"
                           sx={{
                             fontWeight: "bold",
@@ -814,12 +434,18 @@ const Inventario = () => {
                             g: 1,
                           }}
                         >
-                          <ModalEditarInventario
+                          {/* <ModalEditarInventario
                             item={item}
                             showToast={showToast}
                             setFlushHook={setFlushHook}
+                          /> */}
+                          <ModalGerarTermoCompromisso
+                            item={item}
+                            flushHook={flushHook}
+                            setFlushHook={setFlushHook}
+                            showToast={showToast}
                           />
-                          <Tooltip title="Editar Inventário">
+                          {/* <Tooltip title="Gerar Termo de Compromisso">
                             <IconButton
                               onClick={() => handleCreatePdfTermo(item._id)}
                               color="error"
@@ -837,7 +463,7 @@ const Inventario = () => {
                                 <PictureAsPdf fontSize="small" />
                               )}
                             </IconButton>
-                          </Tooltip>
+                          </Tooltip> */}
                         </Box>
                       </TableCell>
                     </TableRow>

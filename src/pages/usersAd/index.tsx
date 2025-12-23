@@ -18,13 +18,15 @@ import {
   useTheme,
 } from "@mui/material";
 import SidebarNew from "../../components/Sidebar";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ModalCriarUserAD from "./components/ModalCriarUserAD";
 import { useToast } from "../../components/Toast";
 import { UserAdService } from "../../stores/usersAd/service";
 import ModalEditarUserAD from "./components/ModalEditarUserAD";
+import { UserContext } from "../../UserContext";
 
 const UsersAd = () => {
+  const { user } = useContext(UserContext);
   const { showToast } = useToast();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -85,7 +87,9 @@ const UsersAd = () => {
               }}
               InputProps={{ style: { borderRadius: "10px" } }}
             />
-            <ModalCriarUserAD showToast={showToast} />
+            {user?.acessos?.administrador && (
+              <ModalCriarUserAD showToast={showToast} />
+            )}
           </Box>
         </Paper>
 
@@ -144,7 +148,7 @@ const UsersAd = () => {
                 <TableCell>Usuario</TableCell>
                 <TableCell>E-mail</TableCell>
                 <TableCell>Ativo</TableCell>
-                <TableCell>Ações</TableCell>
+                {user?.acessos?.administrador && <TableCell>Ações</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -161,13 +165,15 @@ const UsersAd = () => {
                       color={item.isDisabled === true ? "error" : "success"}
                     />
                   </TableCell>
-                  <TableCell>
-                    <ModalEditarUserAD
-                      item={item}
-                      showToast={showToast}
-                      setFlushHook={setFlushHook}
-                    />
-                  </TableCell>
+                  {user?.acessos?.administrador && (
+                    <TableCell>
+                      <ModalEditarUserAD
+                        item={item}
+                        showToast={showToast}
+                        setFlushHook={setFlushHook}
+                      />
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

@@ -5,14 +5,19 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   Grid,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
   TextField,
   Tooltip,
 } from "@mui/material";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ToDoService } from "../../../stores/toDo/service";
 import { UserContext } from "../../../UserContext";
+import { UserService } from "../../../stores/users/service";
 
 const ModalEditarToDo = ({ item }: any) => {
   const { user } = useContext(UserContext);
@@ -22,6 +27,7 @@ const ModalEditarToDo = ({ item }: any) => {
   const [descricao, setDescricao] = useState(item.descricao || "");
   const [prazoLimite, setPrazoLimite] = useState(item.prazoLimite || "");
   const [responsavel, setResponsavel] = useState(item.responsavel || "");
+  const [users, setUsers] = useState([]);
 
   const handleOpen = () => {
     setOpen(true);
@@ -44,6 +50,20 @@ const ModalEditarToDo = ({ item }: any) => {
       console.log(error);
     }
   };
+
+  const fetchUsersAtivos = async () => {
+    try {
+      const get = await UserService.getUsersAtivos();
+      console.log(get);
+      setUsers(get);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsersAtivos();
+  }, []);
 
   return (
     <>
@@ -107,7 +127,7 @@ const ModalEditarToDo = ({ item }: any) => {
 
             {user?.acessos?.administrador && (
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField
+                {/* <TextField
                   label="Colaborador"
                   size="small"
                   value={responsavel}
@@ -118,7 +138,21 @@ const ModalEditarToDo = ({ item }: any) => {
                   InputProps={{
                     sx: { borderRadius: "10px" },
                   }}
-                />
+                /> */}
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Colaborador</InputLabel>
+                  <Select
+                    label="Colaborador"
+                    value={responsavel}
+                    onChange={(e: any) => setResponsavel(e.target.value)}
+                    fullWidth
+                    sx={{ borderRadius: "10px" }}
+                  >
+                    {users.map((user: any) => (
+                      <MenuItem value={user.nome}>{user.nome}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
               </Grid>
             )}
           </Grid>
