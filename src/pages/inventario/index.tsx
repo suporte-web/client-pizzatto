@@ -108,12 +108,9 @@ const Inventario = () => {
         page,
         filter: pesquisa,
       });
-      console.log(get);
-
       const normalized = (get.data ?? []).map(normalizeGlpiRow);
       setInventarios(normalized);
       setTotal(get.total)
-
       setTotalPages(get.totalcount ?? get.total ?? 0);
     } catch (error) {
       showToast("Erro ao carregar inventário", "error");
@@ -210,7 +207,7 @@ const Inventario = () => {
             >
               <TextField
                 size="small"
-                label="Buscar Inventário"
+                label="Buscar por Nome de Computador"
                 fullWidth
                 value={pesquisa}
                 onChange={(e) => {
