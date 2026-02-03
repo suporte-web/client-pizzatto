@@ -33,14 +33,14 @@ const Login = () => {
   const containerProps: ContainerProps = {
     maxWidth: false,
     sx: {
-      // background: `url(${pizzattoImage}) no-repeat center center, linear-gradient(70deg, rgba(255,255,255,0.6) 10%, rgba(255,77,0,0.6) 100%)`,
-      background: `url(${pizzatto50AnosImage}) `,
+      background: `url(${pizzatto50AnosImage})`,
       backgroundSize: "contain",
       height: "100vh",
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
       padding: isMobile ? 2 : 0,
+      position: "relative",
     },
   };
 
@@ -48,9 +48,8 @@ const Login = () => {
   const [senha, setSenha] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
   const [seeSenha, setSeeSenha] = useState(false);
-  const [changeVisualizarSenha, setChangeVisualizarSenha] = useState<
-    "password" | "text"
-  >("password");
+  const [changeVisualizarSenha, setChangeVisualizarSenha] =
+    useState<"password" | "text">("password");
 
   const { showToast } = useToast();
 
@@ -59,15 +58,12 @@ const Login = () => {
     setLoading(true);
     try {
       const token = await loginUser({ email, senha });
-      setLoading(false);
-      console.log(token);
-
       localStorage.setItem("token", token);
       showToast("Login com sucesso", "success");
       window.location.replace(`/home`);
-    } catch (error: any) {
-      console.log(error);
+    } catch (error) {
       showToast("Erro ao fazer login", "error");
+    } finally {
       setLoading(false);
     }
   };
@@ -79,7 +75,45 @@ const Login = () => {
 
   return (
     <Container {...containerProps}>
-      <Grid container justifyContent="center" alignItems="center" spacing={4}>
+      {/* 🔥 BOTÃO PLANTÃO TI FIXO */}
+      <Box
+        sx={{
+          position: "fixed",
+          top: { xs: 16, md: 24 },
+          right: { xs: 16, md: 24 },
+          zIndex: 1300,
+        }}
+      >
+        <Button
+          component={Link}
+          href="/plantao/page-principal"
+          variant="contained"
+          color="error"
+          sx={{
+            borderRadius: "999px",
+            px: 3,
+            py: 1.2,
+            fontWeight: 800,
+            textTransform: "none",
+            fontSize: "0.95rem",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.35)",
+            animation: "pulse 2s infinite",
+            "@keyframes pulse": {
+              "0%": { transform: "scale(1)" },
+              "50%": { transform: "scale(1.08)" },
+              "100%": { transform: "scale(1)" },
+            },
+            "&:hover": {
+              transform: "scale(1.1)",
+              boxShadow: "0 12px 28px rgba(0,0,0,0.45)",
+            },
+          }}
+        >
+          🚨 Plantão TI
+        </Button>
+      </Box>
+
+      <Grid container justifyContent="center" alignItems="center">
         <Box
           component={Paper}
           elevation={7}
@@ -97,7 +131,6 @@ const Login = () => {
         >
           <Typography
             variant="h5"
-            component="h1"
             gutterBottom
             sx={{
               fontWeight: 600,
@@ -112,7 +145,6 @@ const Login = () => {
             <TextField
               type="email"
               label="E-mail"
-              variant="outlined"
               fullWidth
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -128,7 +160,6 @@ const Login = () => {
 
             <TextField
               label="Senha"
-              variant="outlined"
               fullWidth
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
@@ -137,11 +168,7 @@ const Login = () => {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton
-                      size="small"
-                      onClick={handleToggleSenhaVisibility}
-                      edge="end"
-                    >
+                    <IconButton onClick={handleToggleSenhaVisibility}>
                       {changeVisualizarSenha === "password" ? (
                         <Tooltip title="Ver senha">
                           <RemoveRedEyeOutlined />
@@ -174,33 +201,24 @@ const Login = () => {
                 height: 48,
                 fontWeight: 600,
                 textTransform: "none",
-                fontSize: "1rem",
-                boxShadow: "none",
-                "&:hover": {
-                  boxShadow: "none",
-                },
               }}
               onClick={handleSubmit}
               disabled={loading}
-              endIcon={loading && <CircularProgress size={"20px"} />}
+              endIcon={loading && <CircularProgress size={20} />}
             >
               Entrar
             </Button>
 
-            <Box sx={{ textAlign: "center", mb: 2 }}>
+            <Box sx={{ textAlign: "center" }}>
               <Link
                 component="button"
-                variant="body2"
                 onClick={() => navigate("/forgot-password")}
                 sx={{
                   color: theme.palette.secondary.main,
-                  textDecoration: "none",
                   fontWeight: 500,
                   cursor: "pointer",
-                  transition: "all 0.3s ease",
                   "&:hover": {
                     textDecoration: "underline",
-                    color: theme.palette.primary.dark,
                   },
                 }}
               >

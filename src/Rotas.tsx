@@ -14,10 +14,14 @@ import CadastrosContratos from "./pages/contratos/cadastros";
 import ContasOffice from "./pages/contasOffice";
 import ToDo from "./pages/toDo";
 import UsersAd from "./pages/usersAd";
+import PlantaoPagePrincipal from "./pages/plantaoTi/pagePrincipal";
+import PlantaoPageAdmin from "./pages/plantaoTi/pageAdmin";
 
 const Rotas = () => (
   <Routes>
     <Route path="/" index element={<Login />} />
+    <Route path="/plantao/page-principal" element={<PlantaoPagePrincipal />} />
+    <Route path="/plantao/page-admin" element={<PlantaoPageAdmin />} />
     <Route
       path="/home"
       element={
