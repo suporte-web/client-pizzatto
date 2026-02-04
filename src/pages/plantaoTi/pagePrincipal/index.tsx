@@ -27,6 +27,7 @@ import {
 import { motion } from "framer-motion";
 import { usePlantaoData } from "../../../hooks/use-plantao-data";
 import bgPlantao from '../../../imgs/bg-plantao.jpg';
+import LogoPizzatto from '../../../imgs/image.png';
 
 export default function PlantaoPagePrincipal() {
     const theme = useTheme();
@@ -336,7 +337,7 @@ export default function PlantaoPagePrincipal() {
                             }}
                         >
                             <img
-                                src="/src/imgs/image.png"
+                                src={LogoPizzatto}
                                 alt="Logo Plantão TI - Pizzattolog"
                                 style={{ width: '80%', height: '100%', objectFit: 'contain' }}
                             />
