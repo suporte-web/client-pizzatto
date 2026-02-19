@@ -48,7 +48,7 @@ const DEFAULT_ESCALA: EscalaSemanal = {
 const DEFAULT_JANELA: JanelaEspecial = { inicio: "18:00", fim: "07:00", contatoId: "" };
 
 const API_BASE =
-  (import.meta as any).env?.VITE_API_URL?.replace(/\/$/, "") || "http://localhost:2999";
+  (import.meta as any).env?.VITE_API_BACKEND?.replace(/\/$/, "") || "http://localhost:2999";
 
 export function usePlantaoData() {
   const { showToast } = useToast();
