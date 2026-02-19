@@ -96,7 +96,7 @@ export default function PlantaoPageAdmin() {
         });
 
         // Senha mestra "0000" caso não existam contatos
-        if (password === "0000" || usuarioEncontrado) {
+        if (usuarioEncontrado) {
             setIsAuthenticated(true);
             setLoggedUser(usuarioEncontrado ? usuarioEncontrado.nome : "Administrador");
             showToast("Acesso Permitido", 'success');
