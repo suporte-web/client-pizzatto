@@ -183,8 +183,7 @@ export function usePlantaoData() {
 
     try {
 
-      console.log("API_BASE:", API_BASE);
-      console.log("URL:", `${API_BASE}/plantao/config`);
+      
       console.log("payloadApi:", payloadApi);
 
       const res = await fetch(`${API_BASE}/plantao/update-config`, {
@@ -196,7 +195,7 @@ export function usePlantaoData() {
 
       if (!res.ok) {
         const errBody = await res.text().catch(() => "");
-        console.error("Erro PUT /plantao/update-config:", res.status, errBody);
+        console.error("DETALHES DO BACKEND:", errBody);
         throw new Error(`PUT /plantao/update-config falhou: ${res.status}`);
       }
 
