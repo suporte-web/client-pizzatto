@@ -196,8 +196,8 @@ export function usePlantaoData() {
 
       if (!res.ok) {
         const errBody = await res.text().catch(() => "");
-        console.error("Erro PUT /plantao/config:", res.status, errBody);
-        throw new Error(`PUT /plantao/config falhou: ${res.status}`);
+        console.error("Erro PUT /plantao/update-config:", res.status, errBody);
+        throw new Error(`PUT /plantao/update-config falhou: ${res.status}`);
       }
 
       await carregarDaApi();
