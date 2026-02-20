@@ -80,6 +80,8 @@ export function usePlantaoData() {
   const [configId, setConfigId] = useState<string>("");
 
   const carregarDaApi = async () => {
+
+    
     const res = await fetch(`${API_BASE}/plantao/config`, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
@@ -180,12 +182,17 @@ export function usePlantaoData() {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/plantao/config`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payloadApi),
-      });
+
+      console.log("API_BASE:", API_BASE);
+      console.log("URL:", `${API_BASE}/plantao/config`);
+      console.log("payloadApi:", payloadApi);
+
+      const res = await fetch(`${API_BASE}/plantao/update-config`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(payloadApi),
+     });
 
       if (!res.ok) {
         const errBody = await res.text().catch(() => "");
