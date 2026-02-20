@@ -73,7 +73,6 @@ export function usePlantaoData() {
     setConfigId(data.configId ?? "");
     setContatos(data.contatos ?? []);
 
-    setContatos(data.contatos ?? []);
     setEscalaSistemas(data.escalaSistemas ?? DEFAULT_ESCALA);
     setEscalaInfra(data.escalaInfra ?? DEFAULT_ESCALA);
 
@@ -134,58 +133,47 @@ export function usePlantaoData() {
   }, []);
 
   // 2) SALVAR: grava no backend e depois recarrega do backend (garante tela sincronizada)
-  const salvarTudo = async () => {
-    const contatosValidos = contatos.filter((c) => c.nome && c.nome.trim() !== "");
+    const salvarTudo = async () => {
+      const contatosValidos = contatos.filter((c) => c.nome && c.nome.trim() !== "");
 
-    if (contatosValidos.length !== contatos.length) {
-      setContatos(contatosValidos);
-    }
+      if (contatosValidos.length !== contatos.length) setContatos(contatosValidos);
 
-    // payload NO FORMATO DO BACKEND (sem contatoId)
-    const payloadApi = {
-      configId,
-      contatos: contatosValidos,
-      escalaSistemas,
-      escalaInfra,
-      janelaSistemas: { inicio: janelaSistemas.inicio, fim: janelaSistemas.fim },
-      janelaInfra: { inicio: janelaInfra.inicio, fim: janelaInfra.fim },
-    };
-
-    try {
-      const res = await fetch(`${API_BASE}/plantao/update-config`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(payloadApi),
-      });
-
-      if (!res.ok) {
-        const errBody = await res.text().catch(() => "");
-        console.error("Erro PUT /plantao/update-config:", res.status, errBody);
-        throw new Error(`PUT /plantao/update-config falhou: ${res.status}`);
-      }
-
-      // recarrega do banco pra garantir que está igual ao servidor
-      await carregarDaApi();
-      showToast("Dados salvos no servidor!", "success");
-    } catch (error) {
-      // fallback local
-      const payloadLocal = {
+      const payloadApi = {
+        ...(configId ? { configId } : {}), // ✅ não manda vazio
         contatos: contatosValidos,
         escalaSistemas,
         escalaInfra,
-        janelaSistemas,
-        janelaInfra,
+        janelaSistemas: { inicio: janelaSistemas.inicio, fim: janelaSistemas.fim },
+        janelaInfra: { inicio: janelaInfra.inicio, fim: janelaInfra.fim },
       };
 
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(payloadLocal));
-        showToast("API indisponível. Salvo localmente.", "warning");
-      } catch {
-        showToast("Limite de memória do navegador atingido.!", "error");
+        const res = await fetch(`${API_BASE}/plantao/config`, { // ✅ endpoint igual Postman
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(payloadApi),
+        });
+
+        if (!res.ok) {
+          const errBody = await res.text().catch(() => "");
+          console.error("Erro PUT /plantao/config:", res.status, errBody);
+          throw new Error(`PUT /plantao/config falhou: ${res.status}`);
+        }
+
+        await carregarDaApi();
+        showToast("Dados salvos no servidor!", "success");
+      } catch (error) {
+        // fallback local
+        const payloadLocal = { contatos: contatosValidos, escalaSistemas, escalaInfra, janelaSistemas, janelaInfra };
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(payloadLocal));
+          showToast("API indisponível. Salvo localmente.", "warning");
+        } catch {
+          showToast("Limite de memória do navegador atingido.!", "error");
+        }
       }
-    }
-  };
+    };
 
   const resetarPadrao = () => {
     if (confirm("Isso apagará todos os contatos e escalas. Confirmar?")) {
