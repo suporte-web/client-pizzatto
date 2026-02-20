@@ -58,6 +58,7 @@ export function usePlantaoData() {
   const [escalaInfra, setEscalaInfra] = useState<EscalaSemanal>(DEFAULT_ESCALA);
   const [janelaSistemas, setJanelaSistemas] = useState<JanelaEspecial>(DEFAULT_JANELA);
   const [janelaInfra, setJanelaInfra] = useState<JanelaEspecial>(DEFAULT_JANELA);
+  const [configId, setConfigId] = useState<string>("");
 
   const carregarDaApi = async () => {
     const res = await fetch(`${API_BASE}/plantao/config`, {
@@ -69,6 +70,8 @@ export function usePlantaoData() {
     if (!res.ok) throw new Error(`GET /plantao/config falhou: ${res.status}`);
 
     const data = (await res.json()) as ApiConfig;
+    setConfigId(data.configId ?? "");
+    setContatos(data.contatos ?? []);
 
     setContatos(data.contatos ?? []);
     setEscalaSistemas(data.escalaSistemas ?? DEFAULT_ESCALA);
@@ -140,6 +143,7 @@ export function usePlantaoData() {
 
     // payload NO FORMATO DO BACKEND (sem contatoId)
     const payloadApi = {
+      configId,
       contatos: contatosValidos,
       escalaSistemas,
       escalaInfra,
@@ -148,14 +152,18 @@ export function usePlantaoData() {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/plantao/config`, {
+      const res = await fetch(`${API_BASE}/plantao/update-config`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(payloadApi),
       });
 
-      if (!res.ok) throw new Error(`PUT /plantao/config falhou: ${res.status}`);
+      if (!res.ok) {
+        const errBody = await res.text().catch(() => "");
+        console.error("Erro PUT /plantao/update-config:", res.status, errBody);
+        throw new Error(`PUT /plantao/update-config falhou: ${res.status}`);
+      }
 
       // recarrega do banco pra garantir que está igual ao servidor
       await carregarDaApi();
@@ -205,5 +213,6 @@ export function usePlantaoData() {
     setJanelaInfra,
     salvarTudo,
     resetarPadrao,
+    configId,
   };
 }
