@@ -36,6 +36,7 @@ type ApiConfig = {
 };
 
 const STORAGE_KEY = "plantao_ti_data";
+
 const DEFAULT_ESCALA: EscalaSemanal = {
   segunda: "",
   terca: "",
@@ -45,10 +46,28 @@ const DEFAULT_ESCALA: EscalaSemanal = {
   sabado: "",
   domingo: "",
 };
+
 const DEFAULT_JANELA: JanelaEspecial = { inicio: "18:00", fim: "07:00", contatoId: "" };
 
 const API_BASE =
   (import.meta as any).env?.VITE_API_BACKEND?.replace(/\/$/, "") || "http://localhost:2999";
+
+// remove da escala qualquer nome que não exista em contatos
+function limparEscalaPorNomesValidos(
+  escala: EscalaSemanal,
+  nomesValidos: Set<string>
+): EscalaSemanal {
+  const validar = (v: string) => (v && nomesValidos.has(v) ? v : "");
+  return {
+    segunda: validar(escala.segunda),
+    terca: validar(escala.terca),
+    quarta: validar(escala.quarta),
+    quinta: validar(escala.quinta),
+    sexta: validar(escala.sexta),
+    sabado: validar(escala.sabado),
+    domingo: validar(escala.domingo),
+  };
+}
 
 export function usePlantaoData() {
   const { showToast } = useToast();
@@ -70,6 +89,7 @@ export function usePlantaoData() {
     if (!res.ok) throw new Error(`GET /plantao/config falhou: ${res.status}`);
 
     const data = (await res.json()) as ApiConfig;
+
     setConfigId(data.configId ?? "");
     setContatos(data.contatos ?? []);
 
@@ -105,6 +125,7 @@ export function usePlantaoData() {
         contatoId: "",
       },
     };
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(localPayload));
   };
 
@@ -114,7 +135,6 @@ export function usePlantaoData() {
       try {
         await carregarDaApi();
       } catch (err) {
-        // fallback local
         const savedData = localStorage.getItem(STORAGE_KEY);
         if (savedData) {
           try {
@@ -132,48 +152,66 @@ export function usePlantaoData() {
     })();
   }, []);
 
-  // 2) SALVAR: grava no backend e depois recarrega do backend (garante tela sincronizada)
-    const salvarTudo = async () => {
-      const contatosValidos = contatos.filter((c) => c.nome && c.nome.trim() !== "");
+  // 2) SALVAR
+  const salvarTudo = async () => {
+    const contatosValidos = contatos
+      .filter((c) => c.nome && c.nome.trim() !== "")
+      .map((c) => ({ ...c, nome: c.nome.trim() }));
 
-      if (contatosValidos.length !== contatos.length) setContatos(contatosValidos);
+    if (contatosValidos.length !== contatos.length) setContatos(contatosValidos);
 
-      const payloadApi = {
-        ...(configId ? { configId } : {}), // ✅ não manda vazio
+    // nomes permitidos para a escala (evita "out-of-range" e dados inválidos)
+    const nomesValidos = new Set(contatosValidos.map((c) => c.nome));
+
+    const escalaSistemasLimpa = limparEscalaPorNomesValidos(escalaSistemas, nomesValidos);
+    const escalaInfraLimpa = limparEscalaPorNomesValidos(escalaInfra, nomesValidos);
+
+    // opcional: já atualiza o estado pra UI parar de reclamar do MUI
+    setEscalaSistemas(escalaSistemasLimpa);
+    setEscalaInfra(escalaInfraLimpa);
+
+    const payloadApi = {
+      ...(configId ? { configId } : {}), // não manda vazio
+      contatos: contatosValidos,
+      escalaSistemas: escalaSistemasLimpa,
+      escalaInfra: escalaInfraLimpa,
+      janelaSistemas: { inicio: janelaSistemas.inicio, fim: janelaSistemas.fim },
+      janelaInfra: { inicio: janelaInfra.inicio, fim: janelaInfra.fim },
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/plantao/config`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(payloadApi),
+      });
+
+      if (!res.ok) {
+        const errBody = await res.text().catch(() => "");
+        console.error("Erro PUT /plantao/config:", res.status, errBody);
+        throw new Error(`PUT /plantao/config falhou: ${res.status}`);
+      }
+
+      await carregarDaApi();
+      showToast("Dados salvos no servidor!", "success");
+    } catch (error) {
+      const payloadLocal = {
         contatos: contatosValidos,
-        escalaSistemas,
-        escalaInfra,
-        janelaSistemas: { inicio: janelaSistemas.inicio, fim: janelaSistemas.fim },
-        janelaInfra: { inicio: janelaInfra.inicio, fim: janelaInfra.fim },
+        escalaSistemas: escalaSistemasLimpa,
+        escalaInfra: escalaInfraLimpa,
+        janelaSistemas,
+        janelaInfra,
       };
 
       try {
-        const res = await fetch(`${API_BASE}/plantao/config`, { // ✅ endpoint igual Postman
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify(payloadApi),
-        });
-
-        if (!res.ok) {
-          const errBody = await res.text().catch(() => "");
-          console.error("Erro PUT /plantao/config:", res.status, errBody);
-          throw new Error(`PUT /plantao/config falhou: ${res.status}`);
-        }
-
-        await carregarDaApi();
-        showToast("Dados salvos no servidor!", "success");
-      } catch (error) {
-        // fallback local
-        const payloadLocal = { contatos: contatosValidos, escalaSistemas, escalaInfra, janelaSistemas, janelaInfra };
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(payloadLocal));
-          showToast("API indisponível. Salvo localmente.", "warning");
-        } catch {
-          showToast("Limite de memória do navegador atingido.!", "error");
-        }
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payloadLocal));
+        showToast("API indisponível. Salvo localmente.", "warning");
+      } catch {
+        showToast("Limite de memória do navegador atingido.!", "error");
       }
-    };
+    }
+  };
 
   const resetarPadrao = () => {
     if (confirm("Isso apagará todos os contatos e escalas. Confirmar?")) {
