@@ -183,7 +183,7 @@ export default function PlantaoPagePrincipal() {
                                 lineHeight: 1.2,
                                 mb: 1
                             }}>
-                                {plantonista?.nome || "Não definido"}
+                                {plantonista?.nome || "Chamado via GLPI"}
                             </Typography>
 
                             <Stack direction="row" alignItems="center" spacing={0.5}>
