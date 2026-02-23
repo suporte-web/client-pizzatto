@@ -236,8 +236,16 @@ export default function PlantaoPagePrincipal() {
                                         }}>
                                             Telefone
                                         </Typography>
-                                        <Typography variant="h6" sx={{ fontWeight: 'bold', lineHeight: 1 }}>
-                                            {plantonista.telefone}
+                                        <Typography
+                                        variant="h6"
+                                        noWrap
+                                        sx={{
+                                            fontWeight: "bold",
+                                            lineHeight: 1,
+                                            whiteSpace: "nowrap",
+                                        }}
+                                        >
+                                        {plantonista.telefone}
                                         </Typography>
                                     </Box>
                                 </Stack>
