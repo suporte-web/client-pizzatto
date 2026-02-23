@@ -492,7 +492,7 @@ const PaginaPrincipalContratos = () => {
                     <TableCell align="center" sx={{ py: 1.5 }}>
                       <Chip
                         color={statusColors[item.status]}
-                        label={item.status || "Não definido"}
+                        label={item.status || "Horário sem plantonista — abra chamado no GLPI"}
                         size="small"
                         sx={{
                           fontWeight: "bold",
