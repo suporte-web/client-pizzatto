@@ -261,7 +261,7 @@ export default function PlantaoPagePrincipal() {
                     variant="body1"
                     sx={{ color: "text.secondary", fontWeight: 700 }}
                   >
-                    Abra chamado no GLPI
+                    Abrir chamado no GLPI
                   </Typography>
 
                   <Stack
