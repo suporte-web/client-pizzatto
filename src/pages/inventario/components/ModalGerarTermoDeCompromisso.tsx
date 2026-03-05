@@ -37,9 +37,9 @@ const ModalGerarTermoCompromisso = ({
 
   const [notebookActive, setNotebookActive] = useState(false);
   const [mouseActive, setMouseActive] = useState(false);
-  const [mouse, setMouse] = useState("Mouse Dell");
+  const [mouse, setMouse] = useState("Mouse Dell Pro - KM5221W");
   const [tecladoActive, setTecladoActive] = useState(false);
-  const [teclado, setTeclado] = useState("Teclado Dell");
+  const [teclado, setTeclado] = useState("Teclado Dell Pro - KM5221W");
 
   const [monitorActive, setMonitorActive] = useState(false);
   const [monitor, setMonitor] = useState("Monitor Dell 24 Polegadas");
@@ -94,7 +94,9 @@ const ModalGerarTermoCompromisso = ({
         colaborador,
         notebookActive,
         mouseActive,
+        mouse,
         tecladoActive,
+        teclado,
         monitorActive,
         monitor,
         headsetActive,
@@ -135,7 +137,7 @@ const ModalGerarTermoCompromisso = ({
     const link = document.createElement("a");
 
     link.href = blobUrl;
-    link.download = `Termo-de-Notebook - ${blob.colaborador}.pdf`;
+    link.download = `Termo-de-Compromisso - ${blob.colaborador}.pdf`;
     link.style.display = "none";
 
     document.body.appendChild(link);
