@@ -23,7 +23,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../components/Toast";
 import { loginUser } from "../../stores/auth/service";
-import pizzatto50AnosImage from "../../imgs/pizzatto 50 anos.jpg";
+import bgPlantao from '../../imgs/bg-plantao.jpg';
 
 const Login = () => {
   const theme = useTheme();
@@ -33,9 +33,11 @@ const Login = () => {
   const containerProps: ContainerProps = {
     maxWidth: false,
     sx: {
-      background: `url(${pizzatto50AnosImage})`,
-      backgroundSize: "contain",
-      height: "100vh",
+      backgroundImage: `url(${bgPlantao})`,
+      backgroundSize: "cover",
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: "center",
+      minHeight: "100vh",
       display: "flex",
       justifyContent: "center",
       alignItems: "center",

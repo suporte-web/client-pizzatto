@@ -37,7 +37,9 @@ const ModalGerarTermoCompromisso = ({
 
   const [notebookActive, setNotebookActive] = useState(false);
   const [mouseActive, setMouseActive] = useState(false);
+  const [mouse, setMouse] = useState("Mouse Dell");
   const [tecladoActive, setTecladoActive] = useState(false);
+  const [teclado, setTeclado] = useState("Teclado Dell");
 
   const [monitorActive, setMonitorActive] = useState(false);
   const [monitor, setMonitor] = useState("Monitor Dell 24 Polegadas");
@@ -362,7 +364,11 @@ const ModalGerarTermoCompromisso = ({
               </Box>
             </Box>
 
-            {(monitorActive || headsetActive || celularActive) && (
+            {(monitorActive ||
+              headsetActive ||
+              celularActive ||
+              tecladoActive ||
+              mouseActive) && (
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
                 <Typography sx={sx.sectionTitle}>Detalhes</Typography>
 
@@ -385,6 +391,28 @@ const ModalGerarTermoCompromisso = ({
                       fullWidth
                       value={headset}
                       onChange={(e) => setHeadset(e.target.value)}
+                      InputProps={{ sx: { borderRadius: 2.5 } }}
+                    />
+                  )}
+
+                  {tecladoActive && (
+                    <TextField
+                      size="small"
+                      label="Modelo do Teclado"
+                      fullWidth
+                      value={teclado}
+                      onChange={(e) => setTeclado(e.target.value)}
+                      InputProps={{ sx: { borderRadius: 2.5 } }}
+                    />
+                  )}
+
+                  {mouseActive && (
+                    <TextField
+                      size="small"
+                      label="Modelo do Mouse"
+                      fullWidth
+                      value={mouse}
+                      onChange={(e) => setMouse(e.target.value)}
                       InputProps={{ sx: { borderRadius: 2.5 } }}
                     />
                   )}
@@ -430,17 +458,17 @@ const ModalGerarTermoCompromisso = ({
                   )}
                 </Box>
                 {chipCelularActive && (
-                    <>
-                      <TextField
-                        size="small"
-                        label="Chip"
-                        fullWidth
-                        value={chipCelular}
-                        onChange={(e) => setChipCelular(e.target.value)}
-                        InputProps={{ sx: { borderRadius: 2.5 } }}
-                      />
-                    </>
-                  )}
+                  <>
+                    <TextField
+                      size="small"
+                      label="Chip"
+                      fullWidth
+                      value={chipCelular}
+                      onChange={(e) => setChipCelular(e.target.value)}
+                      InputProps={{ sx: { borderRadius: 2.5 } }}
+                    />
+                  </>
+                )}
               </Box>
             )}
           </Box>
