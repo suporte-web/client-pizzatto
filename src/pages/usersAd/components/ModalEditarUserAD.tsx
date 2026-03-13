@@ -14,7 +14,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { UserAdService } from "../../../stores/usersAd/service";
+import { UserAdService } from "../../../stores/adLdap/serviceUsersAd";
 
 // Tipo para as opções do autocomplete (label = nome, value = dn)
 type GroupOption = {

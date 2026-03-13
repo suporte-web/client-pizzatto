@@ -21,7 +21,7 @@ import SidebarNew from "../../components/Sidebar";
 import { useContext, useEffect, useState } from "react";
 import ModalCriarUserAD from "./components/ModalCriarUserAD";
 import { useToast } from "../../components/Toast";
-import { UserAdService } from "../../stores/usersAd/service";
+import { UserAdService } from "../../stores/adLdap/serviceUsersAd";
 import ModalEditarUserAD from "./components/ModalEditarUserAD";
 import { UserContext } from "../../UserContext";
 
@@ -87,7 +87,7 @@ const UsersAd = () => {
               }}
               InputProps={{ style: { borderRadius: "10px" } }}
             />
-            {user?.acessos?.administrador && (
+            {user?.roles.includes("ADMIN") && (
               <ModalCriarUserAD showToast={showToast} />
             )}
           </Box>
@@ -148,7 +148,9 @@ const UsersAd = () => {
                 <TableCell>Usuario</TableCell>
                 <TableCell>E-mail</TableCell>
                 <TableCell>Ativo</TableCell>
-                {user?.acessos?.administrador && <TableCell>Ações</TableCell>}
+                {/* {user?.acessos?.administrador &&  */}
+                <TableCell>Ações</TableCell>
+                {/* } */}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -165,15 +167,15 @@ const UsersAd = () => {
                       color={item.isDisabled === true ? "error" : "success"}
                     />
                   </TableCell>
-                  {user?.acessos?.administrador && (
-                    <TableCell>
-                      <ModalEditarUserAD
-                        item={item}
-                        showToast={showToast}
-                        setFlushHook={setFlushHook}
-                      />
-                    </TableCell>
-                  )}
+                  {/* {user?.acessos?.administrador && ( */}
+                  <TableCell>
+                    <ModalEditarUserAD
+                      item={item}
+                      showToast={showToast}
+                      setFlushHook={setFlushHook}
+                    />
+                  </TableCell>
+                  {/* )} */}
                 </TableRow>
               ))}
             </TableBody>

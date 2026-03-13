@@ -31,6 +31,7 @@ import {
   ShoppingBagOutlined,
   CurrencyExchangeOutlined,
   PriceCheckOutlined,
+  HowToRegOutlined,
 } from "@mui/icons-material";
 import type { JSX } from "react";
 
@@ -170,6 +171,12 @@ export const PRINCIPAL_FOLDER_OPTIONS: OuOption[] = [
     label: "Terceiros",
     value: "Terceiros",
     icon: <GroupsOutlined />,
+    color: "warning",
+  },
+  {
+    label: "Validação",
+    value: "OU=Validação,OU=PIZZATTOLOG,DC=pizzatto,DC=local",
+    icon: <HowToRegOutlined />,
     color: "warning",
   },
 ];

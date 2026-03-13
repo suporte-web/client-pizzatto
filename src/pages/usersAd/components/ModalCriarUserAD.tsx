@@ -28,7 +28,7 @@ import {
   SAO_PAULO_OPTIONS,
   TERCEIROS_OPTIONS,
 } from "./OuOptions";
-import { UserAdService } from "../../../stores/usersAd/service";
+import { UserAdService } from "../../../stores/adLdap/serviceUsersAd";
 
 const ModalCriarUserAD = ({ showToast }: any) => {
   const [open, setOpen] = useState(false);
