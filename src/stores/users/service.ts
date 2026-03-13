@@ -1,8 +1,7 @@
 import { Api } from "../../utils/api";
-import type { IUser } from "./types";
 
 export const UserService = {
-  create: async (data: any): Promise<IUser> => {
+  create: async (data: any) => {
     const create = await Api.post("/user/create", data);
     return create.data;
   },
