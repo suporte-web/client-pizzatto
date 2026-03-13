@@ -6,11 +6,11 @@ import React, {
   type ReactNode,
 } from "react";
 import { auth } from "./stores/auth/service";
-import type { IUser as User } from "./stores/users/types";
+// import type { IUser as User } from "./stores/users/types";
 
 interface UserContextProps {
-  user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  user: any | null;
+  setUser: React.Dispatch<React.SetStateAction<any | null>>;
   isLoading: boolean;
   logout: () => void;
 }
@@ -27,7 +27,7 @@ export const UserContext = createContext<UserContextProps>({
 });
 
 export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<any | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const logout = () => {
@@ -41,7 +41,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
       try {
         const token = localStorage.getItem("token");
         // console.log(token);
-        
+
         if (!token) {
           setIsLoading(false);
           window.location.replace("/");

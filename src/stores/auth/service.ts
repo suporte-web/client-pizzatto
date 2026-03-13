@@ -1,15 +1,16 @@
-import { Api } from "../../utils/api";
+import { createApi } from "../../utils/api";
+const usersAdApi = createApi(import.meta.env.VITE_API_BACKEND_AD);
 
-export const loginUser = async ({ email, senha }: any) => {
-  const response = await Api.post("/auth/login", {
-    email,
-    senha,
+export const loginUser = async ({ username, password }: any) => {
+  const response = await usersAdApi.post("/auth/login", {
+    username,
+    password,
   });
   return response.data;
 };
 
 export const verifyToken = async (token: string, email: string) => {
-  const response = await Api.post("/auth/verify", {
+  const response = await usersAdApi.post("/auth/verify", {
     code: token,
     email,
   });
@@ -17,6 +18,6 @@ export const verifyToken = async (token: string, email: string) => {
 };
 
 export const auth = async () => {
-  const response = await Api.get("/auth/me", {});
+  const response = await usersAdApi.get("/auth/me", {});
   return response.data;
 };

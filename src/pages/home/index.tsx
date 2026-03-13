@@ -11,6 +11,7 @@ import { UserContext } from "../../UserContext";
 import Sidebar from "../../components/Sidebar";
 import { blue, teal } from "@mui/material/colors";
 import ChangePassword from "./components/ChangePassword";
+import MuralRecados from "./components/MuralRecados";
 
 const Home = () => {
   const containerProps: ContainerProps = {
@@ -26,12 +27,13 @@ const Home = () => {
           p: 3,
           background: `linear-gradient(135deg, ${alpha(
             teal[50],
-            0.5
+            0.5,
           )} 0%, ${alpha(blue[50], 0.5)} 100%)`,
           minHeight: "100vh",
         }}
       >
         {user?.primeiroAcesso && <ChangePassword />}
+
         {/* Header Section */}
         <Box
           component={Paper}
@@ -54,9 +56,10 @@ const Home = () => {
             fontWeight="600"
             sx={{ textShadow: "0 2px 4px rgba(0,0,0,0.2)" }}
           >
-            Bem-vindo, {user?.nome}!
+            Bem-vindo, {user?.name}!
           </Typography>
         </Box>
+        <MuralRecados />
       </Container>
     </Sidebar>
   );

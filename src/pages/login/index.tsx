@@ -23,7 +23,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../../components/Toast";
 import { loginUser } from "../../stores/auth/service";
-import bgPlantao from '../../imgs/bg-plantao.jpg';
+import bgPlantao from "../../imgs/bg-plantao.jpg";
 
 const Login = () => {
   const theme = useTheme();
@@ -46,12 +46,13 @@ const Login = () => {
     },
   };
 
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
   const [seeSenha, setSeeSenha] = useState(false);
-  const [changeVisualizarSenha, setChangeVisualizarSenha] =
-    useState<"password" | "text">("password");
+  const [changeVisualizarSenha, setChangeVisualizarSenha] = useState<
+    "password" | "text"
+  >("password");
 
   const { showToast } = useToast();
 
@@ -59,7 +60,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const token = await loginUser({ email, senha });
+      const token = await loginUser({ username, password });
       localStorage.setItem("token", token);
       showToast("Login com sucesso", "success");
       window.location.replace(`/home`);
@@ -145,15 +146,15 @@ const Login = () => {
 
           <form style={{ width: "100%" }}>
             <TextField
-              type="email"
-              label="E-mail"
+              type="text"
+              label="Nome de Usuario"
               fullWidth
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               sx={{ mb: 2 }}
               InputProps={{
                 style: {
-                  borderRadius: "12px",
+                  borderRadius: "10px",
                   height: 48,
                   backgroundColor: "rgba(255, 255, 255, 0.8)",
                 },
@@ -163,8 +164,8 @@ const Login = () => {
             <TextField
               label="Senha"
               fullWidth
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               type={changeVisualizarSenha}
               sx={{ mb: 2 }}
               InputProps={{
@@ -184,7 +185,7 @@ const Login = () => {
                   </InputAdornment>
                 ),
                 style: {
-                  borderRadius: "12px",
+                  borderRadius: "10px",
                   height: 48,
                   backgroundColor: "rgba(255, 255, 255, 0.8)",
                 },

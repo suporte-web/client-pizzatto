@@ -16,6 +16,7 @@ import ToDo from "./pages/toDo";
 import UsersAd from "./pages/usersAd";
 import PlantaoPagePrincipal from "./pages/plantaoTi/pagePrincipal";
 import PlantaoPageAdmin from "./pages/plantaoTi/pageAdmin";
+import Organograma from "./pages/organograma";
 
 const Rotas = () => (
   <Routes>
@@ -112,6 +113,15 @@ const Rotas = () => (
       element={
         <UserProvider>
           <UsersAd />
+        </UserProvider>
+      }
+    />
+    
+    <Route
+      path="/organograma"
+      element={
+        <UserProvider>
+          <Organograma />
         </UserProvider>
       }
     />
