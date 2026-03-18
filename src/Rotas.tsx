@@ -17,6 +17,7 @@ import UsersAd from "./pages/usersAd";
 import PlantaoPagePrincipal from "./pages/plantaoTi/pagePrincipal";
 import PlantaoPageAdmin from "./pages/plantaoTi/pageAdmin";
 import Organograma from "./pages/organograma";
+import CalendarioInstitucionalPage from "./pages/calendarioInstitucional";
 
 const Rotas = () => (
   <Routes>
@@ -122,6 +123,15 @@ const Rotas = () => (
       element={
         <UserProvider>
           <Organograma />
+        </UserProvider>
+      }
+    />
+
+    <Route
+      path="/calendario-institucional"
+      element={
+        <UserProvider>
+          <CalendarioInstitucionalPage />
         </UserProvider>
       }
     />

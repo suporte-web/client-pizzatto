@@ -11,6 +11,7 @@ import {
   Microsoft,
   Checklist,
   AccountTreeOutlined,
+  CalendarMonth,
 } from "@mui/icons-material";
 import {
   alpha,
@@ -67,6 +68,7 @@ function titleFromPath(pathname: string) {
     "/cadastros-contratos": "Cadastros",
     "/to-do": "A Fazer",
     "/organograma": "Organograma",
+    "/calendario-institucional": "Calendário Institucional",
   };
 
   return map[pathname] ?? "Sistema";
@@ -704,6 +706,14 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               active={location.pathname === "/to-do"}
             >
               {!isCollapsed && "A Fazer"}
+            </StyledMenuItem>
+            <StyledMenuItem
+              collapsed={isCollapsed}
+              icon={<CalendarMonth />}
+              component={<Link to="/calendario-institucional" />}
+              active={location.pathname === "/calendario-institucional"}
+            >
+              {!isCollapsed && "Calendário Institucional"}
             </StyledMenuItem>
           </Menu>
         </Box>

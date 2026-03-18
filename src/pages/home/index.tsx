@@ -1,23 +1,16 @@
 import {
   Container,
-  Paper,
   type ContainerProps,
-  Typography,
-  Box,
   alpha,
 } from "@mui/material";
-import { useContext } from "react";
-import { UserContext } from "../../UserContext";
 import Sidebar from "../../components/Sidebar";
 import { blue, teal } from "@mui/material/colors";
-import ChangePassword from "./components/ChangePassword";
 import MuralRecados from "./components/MuralRecados";
 
 const Home = () => {
   const containerProps: ContainerProps = {
     maxWidth: false,
   };
-  const { user } = useContext(UserContext);
 
   return (
     <Sidebar title="Tela Inicial">
@@ -32,10 +25,8 @@ const Home = () => {
           minHeight: "100vh",
         }}
       >
-        {user?.primeiroAcesso && <ChangePassword />}
-
         {/* Header Section */}
-        <Box
+        {/* <Box
           component={Paper}
           elevation={0}
           sx={{
@@ -58,7 +49,7 @@ const Home = () => {
           >
             Bem-vindo, {user?.name}!
           </Typography>
-        </Box>
+        </Box> */}
         <MuralRecados />
       </Container>
     </Sidebar>

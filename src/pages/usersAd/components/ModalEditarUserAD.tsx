@@ -12,6 +12,7 @@ import {
   Tooltip,
   Typography,
   TextField,
+  Grid,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { UserAdService } from "../../../stores/adLdap/serviceUsersAd";
@@ -22,9 +23,18 @@ type GroupOption = {
   value: string; // dn (usado no backend)
 };
 
-// só para fins VISUAIS (nunca usar isso no DN!)
-// const removeAccents = (text: string) =>
-//   text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+type UserOption = {
+  label: string;
+  value: string; // distinguishedName
+  sAMAccountName?: string | null;
+  mail?: string | null;
+};
+
+const DEFAULTS = {
+  company: "Feira de Santana",
+  department: "Manutenção",
+  managerSamAccountName: "werbton.almeida",
+};
 
 const ModalEditarUserAD = ({ item, showToast, setFlushHook }: any) => {
   const [open, setOpen] = useState(false);
@@ -34,7 +44,24 @@ const ModalEditarUserAD = ({ item, showToast, setFlushHook }: any) => {
 
   // lista de DNs de grupos que vão ser enviados
   const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
+  const [company, setCompany] = useState(item.company);
+  const [department, setDepartment] = useState(item.department);
+  const [telephoneNumber, setTelephoneNumber] = useState(item.telephoneNumber);
+  const [mail, setMail] = useState(item.mail);
+  const [managerOptions, setManagerOptions] = useState<UserOption[]>([]);
+  const [selectedManager, setSelectedManager] = useState<UserOption | null>(
+    null,
+  );
 
+  const findDefaultManager = (options: UserOption[]) => {
+    return (
+      options.find(
+        (m) =>
+          (m.sAMAccountName || "").toLowerCase() ===
+          DEFAULTS.managerSamAccountName.toLowerCase(),
+      ) || null
+    );
+  };
   // garante que memberOf vire sempre string[]
   const normalizeMemberOf = (memberOf: any): string[] => {
     if (!memberOf) return [];
@@ -43,15 +70,31 @@ const ModalEditarUserAD = ({ item, showToast, setFlushHook }: any) => {
   };
 
   const handleOpen = () => {
+    setCompany(item.company || DEFAULTS.company);
+    setDepartment(item.department || DEFAULTS.department);
+    setTelephoneNumber(item.telephoneNumber || "");
+    setMail(item.mail || "");
+    setSelectedGroups(normalizeMemberOf(item.memberOf));
     setOpen(true);
-    console.log("Usuário:", item);
-    console.log("item.distinguishedName:", item.distinguishedName);
-    console.log("item.dn:", item.dn);
-    console.log("item.memberOf:", item.memberOf);
-
-    const initialGroups = normalizeMemberOf(item.memberOf);
-    setSelectedGroups(initialGroups);
   };
+
+  useEffect(() => {
+    if (!open || managerOptions.length === 0) return;
+
+    // tenta manter o manager atual do usuário
+    if (item.manager) {
+      const managerFound = managerOptions.find((m) => m.value === item.manager);
+
+      if (managerFound) {
+        setSelectedManager(managerFound);
+        return;
+      }
+    }
+
+    // fallback para manager padrão
+    const defaultManager = findDefaultManager(managerOptions);
+    setSelectedManager(defaultManager);
+  }, [open, item.manager, managerOptions]);
 
   const handleClose = () => {
     setOpen(false);
@@ -76,10 +119,16 @@ const ModalEditarUserAD = ({ item, showToast, setFlushHook }: any) => {
   const handleEditar = async () => {
     try {
       await UserAdService.update({
-        // posso até ignorar o dn que veio do front, vamos confiar no login
         sAMAccountName: item.sAMAccountName,
-        targetGroupsDns: selectedGroups, // DNs dos grupos
+        telephoneNumber,
+        mail,
+        company,
+        department,
+        // managerDn: selectedManager?.value ?? null,
+        targetGroupsDns: selectedGroups,
+        managerSamAccountName: selectedManager?.sAMAccountName,
       });
+
       showToast("Sucesso ao Editar Usuario do AD!", "success");
       setFlushHook((prev: any) => !prev);
     } catch (error) {
@@ -103,13 +152,11 @@ const ModalEditarUserAD = ({ item, showToast, setFlushHook }: any) => {
     }
   };
 
-  const fetchData = async () => {
+  const fetchGroups = async () => {
     try {
       const data = await UserAdService.getGroupsUsersAd();
-      // data esperado: [{ name: string, dn: string }, ...]
       const mapped: GroupOption[] = data.map((g: any) => ({
-        // aqui você pode optar por exibir com ou sem acento
-        label: g.name, // ou removeAccents(g.name) se quiser exibir sem acento
+        label: g.name,
         value: g.dn,
       }));
       setGroupOptions(mapped);
@@ -118,8 +165,24 @@ const ModalEditarUserAD = ({ item, showToast, setFlushHook }: any) => {
     }
   };
 
+  const fetchManagers = async () => {
+    try {
+      const data = await UserAdService.getAllUsersForManager();
+      const mapped: UserOption[] = data.map((u: any) => ({
+        label: u.label,
+        value: u.value,
+        sAMAccountName: u.sAMAccountName,
+        mail: u.mail,
+      }));
+      setManagerOptions(mapped);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    fetchData();
+    fetchGroups();
+    fetchManagers();
   }, []);
 
   return (
@@ -137,20 +200,97 @@ const ModalEditarUserAD = ({ item, showToast, setFlushHook }: any) => {
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 2,
             mt: 1,
           }}
         >
-          <Button
-            variant="contained"
-            onClick={handleResetPasswordAndForceChange}
-            sx={{ borderRadius: "10px" }}
-          >
-            Redefinir Senha
-          </Button>
+          <Grid container spacing={2}>
+            <Grid size={{ xs: 12, md: 12 }}>
+              <Button
+                variant="contained"
+                fullWidth
+                onClick={handleResetPasswordAndForceChange}
+                sx={{ borderRadius: "10px" }}
+              >
+                Redefinir Senha
+              </Button>
+            </Grid>
 
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                fullWidth
+                value={telephoneNumber}
+                onChange={(e) => {
+                  setTelephoneNumber(e.target.value);
+                }}
+                size="small"
+                placeholder="Telephone Number"
+                InputProps={{ style: { borderRadius: "10px" } }}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                fullWidth
+                value={mail}
+                onChange={(e) => {
+                  setMail(e.target.value);
+                }}
+                size="small"
+                placeholder="E-mail"
+                InputProps={{ style: { borderRadius: "10px" } }}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                fullWidth
+                value={company}
+                onChange={(e) => {
+                  setCompany(e.target.value);
+                }}
+                size="small"
+                placeholder="Company"
+                InputProps={{ style: { borderRadius: "10px" } }}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                fullWidth
+                value={department}
+                onChange={(e) => {
+                  setDepartment(e.target.value);
+                }}
+                size="small"
+                placeholder="Department"
+                InputProps={{ style: { borderRadius: "10px" } }}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, md: 12 }}>
+              <Autocomplete<UserOption, false, false, false>
+                options={managerOptions}
+                value={selectedManager}
+                onChange={(_event, value) => {
+                  setSelectedManager(value);
+                }}
+                getOptionLabel={(option) => option.label || ""}
+                isOptionEqualToValue={(option, value) =>
+                  option.value === value.value
+                }
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    fullWidth
+                    size="small"
+                    placeholder="Selecione o manager"
+                    InputProps={{
+                      ...params.InputProps,
+                      style: { borderRadius: "10px" },
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+          </Grid>
           {/* AutoComplete para adicionar grupos */}
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
             <Typography variant="subtitle2">Adicionar grupo:</Typography>
 
             <Autocomplete<GroupOption, false, false, false>
@@ -222,7 +362,6 @@ const ModalEditarUserAD = ({ item, showToast, setFlushHook }: any) => {
             variant="contained"
             sx={{ borderRadius: "10px" }}
             onClick={handleEditar}
-            disabled={selectedGroups.length === 0}
           >
             Editar
           </Button>

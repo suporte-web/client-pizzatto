@@ -125,7 +125,7 @@ const Login = () => {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            bgcolor: "rgba(255,77,0, 0.46)",
+            bgcolor: "rgba(255,77,0, 0.46)", 
             padding: 4,
             borderRadius: "16px",
             width: isMobile ? "100%" : 400,
@@ -141,7 +141,7 @@ const Login = () => {
               mb: 3,
             }}
           >
-            Gestor de Contratos
+            Intranet - Pizzattolog
           </Typography>
 
           <form style={{ width: "100%" }}>

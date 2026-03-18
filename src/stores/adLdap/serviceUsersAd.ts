@@ -25,6 +25,11 @@ export const UserAdService = {
     return get.data;
   },
 
+  getAllUsersForManager: async () => {
+    const get = await usersAdApi.get(`/ad-users/get-all-users-for-manager`);
+    return get.data;
+  },
+
   update: async (data: any) => {
     const upd = await usersAdApi.post(`/ad-users/update`, data);
     return upd.data;
