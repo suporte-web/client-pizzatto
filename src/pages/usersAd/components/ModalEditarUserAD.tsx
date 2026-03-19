@@ -31,9 +31,9 @@ type UserOption = {
 };
 
 const DEFAULTS = {
-  company: "Feira de Santana",
-  department: "Manutenção",
-  managerSamAccountName: "werbton.almeida",
+  company: "",
+  department: "",
+  managerSamAccountName: "",
 };
 
 const ModalEditarUserAD = ({ item, showToast, setFlushHook }: any) => {
