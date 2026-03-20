@@ -17,7 +17,8 @@ import UsersAd from "./pages/usersAd";
 import PlantaoPagePrincipal from "./pages/plantaoTi/pagePrincipal";
 import PlantaoPageAdmin from "./pages/plantaoTi/pageAdmin";
 import Organograma from "./pages/organograma";
-import CalendarioInstitucionalPage from "./pages/calendarioInstitucional";
+import CalendarioInstitucional from "./pages/calendarioInstitucional";
+import AssinaturaEmail from "./pages/assinaturaEmail";
 
 const Rotas = () => (
   <Routes>
@@ -131,7 +132,15 @@ const Rotas = () => (
       path="/calendario-institucional"
       element={
         <UserProvider>
-          <CalendarioInstitucionalPage />
+          <CalendarioInstitucional />
+        </UserProvider>
+      }
+    />
+    <Route
+      path="/assinatura-email"
+      element={
+        <UserProvider>
+          <AssinaturaEmail />
         </UserProvider>
       }
     />

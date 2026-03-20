@@ -16,7 +16,6 @@ import {
   FormControlLabel,
   FormGroup,
   Grid,
-  IconButton,
   InputLabel,
   ListItemText,
   MenuItem,
@@ -147,12 +146,14 @@ const ModalCreateMural = ({ setFlushHook }: any) => {
   return (
     <>
       <Tooltip title="Adicionar Mural">
-        <IconButton
+        <Button
+          variant="contained"
+          fullWidth
           onClick={handleOpen}
-          sx={{ bgcolor: "#FF4D00", color: "white" }}
+          sx={{ bgcolor: "#FF4D00", color: "white", borderRadius: "10px" }}
         >
-          <Add />
-        </IconButton>
+          <Add /> Adicionar Mural
+        </Button>
       </Tooltip>
 
       <Dialog open={open} onClose={handleClose} fullScreen>

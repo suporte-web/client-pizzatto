@@ -1,10 +1,8 @@
 import {
   Box,
-  Container,
   Divider,
   Paper,
   Typography,
-  type ContainerProps,
 } from "@mui/material";
 import { orange } from "@mui/material/colors";
 import { useUser } from "../../../UserContext";
@@ -14,9 +12,9 @@ import { MuralService } from "../../../stores/mural/service";
 import moment from "moment";
 
 const MuralRecados = () => {
-  const containerProps: ContainerProps = {
-    maxWidth: false,
-  };
+  // const containerProps: ContainerProps = {
+  //   maxWidth: false,
+  // };
   const { user } = useUser();
 
   const [murais, setMurais] = useState([]);
@@ -41,7 +39,8 @@ const MuralRecados = () => {
   }, []);
 
   return (
-    <Container {...containerProps}>
+    // <Container {...containerProps}>
+    <>
       {user?.roles.includes("ADMIN", "ENDOMARKETING") && (
         <ModalCreateMural setFlushHook={setFlushHook} />
       )}
@@ -181,7 +180,8 @@ const MuralRecados = () => {
           </Box>
         </>
       )}
-    </Container>
+      {/* </Container> */}
+    </>
   );
 };
 

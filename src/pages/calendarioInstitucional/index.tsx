@@ -28,7 +28,7 @@ import { orange, grey } from "@mui/material/colors";
 
 const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
-const CalendarioInstitucionalPage = () => {
+const CalendarioInstitucional = () => {
   const containerProps: ContainerProps = {
     maxWidth: false,
   };
@@ -237,4 +237,4 @@ const CalendarioInstitucionalPage = () => {
   );
 };
 
-export default CalendarioInstitucionalPage;
+export default CalendarioInstitucional;

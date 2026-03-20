@@ -1,11 +1,8 @@
-import {
-  Container,
-  type ContainerProps,
-  alpha,
-} from "@mui/material";
+import { Container, type ContainerProps, Divider, alpha } from "@mui/material";
 import Sidebar from "../../components/Sidebar";
 import { blue, teal } from "@mui/material/colors";
 import MuralRecados from "./components/MuralRecados";
+import ModalCreateAssinaturaEmail from "../assinaturaEmail/components/ModalCreateAssinaturaEmail";
 
 const Home = () => {
   const containerProps: ContainerProps = {
@@ -50,6 +47,8 @@ const Home = () => {
             Bem-vindo, {user?.name}!
           </Typography>
         </Box> */}
+        <ModalCreateAssinaturaEmail />
+        <Divider sx={{ mt: 2, mb: 2 }} />
         <MuralRecados />
       </Container>
     </Sidebar>

@@ -12,6 +12,7 @@ import {
   Checklist,
   AccountTreeOutlined,
   CalendarMonth,
+  AlternateEmail,
 } from "@mui/icons-material";
 import {
   alpha,
@@ -69,6 +70,7 @@ function titleFromPath(pathname: string) {
     "/to-do": "A Fazer",
     "/organograma": "Organograma",
     "/calendario-institucional": "Calendário Institucional",
+    "/assinatura-email": "Assinatura de E-mail",
   };
 
   return map[pathname] ?? "Sistema";
@@ -194,6 +196,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
   const menuScrollRef = useRef<HTMLDivElement | null>(null);
   const adminWrapperRef = useRef<HTMLDivElement | null>(null);
   const contratosWrapperRef = useRef<HTMLDivElement | null>(null);
+  const endoMarketingWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const [openAdminPopout, setOpenAdminPopout] = useState(false);
   const [adminPopoutTop, setAdminPopoutTop] = useState<number>(0);
@@ -204,6 +207,12 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
   const [openAdminExpanded, setOpenAdminExpanded] = useState(false);
   const [openInfraExpanded, setOpenInfraExpanded] = useState(false);
   const [openContratosExpanded, setOpenContratosExpanded] = useState(false);
+
+  const [openEndoMarketingPopout, setOpenEndoMarketingPopout] = useState(false);
+  const [endoMarketingPopoutTop, setEndoMarketingPopoutTop] =
+    useState<number>(0);
+  const [openEndoMarketingExpanded, setOpenEndoMarketingExpanded] =
+    useState(false);
 
   const calcTopFromElement = (el: HTMLElement | null) => {
     if (!el) return 0;
@@ -226,6 +235,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
       setOpenAdminExpanded(false);
       setOpenInfraExpanded(false);
       setOpenContratosExpanded(false);
+      setOpenEndoMarketingExpanded(false);
     }
   }, [isCollapsed]);
 
@@ -298,6 +308,17 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
     [],
   );
 
+  const endoMarketingItems = useMemo(
+    () => [
+      {
+        label: "Assinatura de E-mail",
+        path: "/assinatura-email",
+        icon: <AlternateEmail />,
+      },
+    ],
+    [],
+  );
+
   const adminRoutes = useMemo(
     () => [
       "/users-ad",
@@ -320,6 +341,8 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
     [],
   );
 
+  const endoMarketingRoutes = useMemo(() => ["/assinatura-email"], []);
+
   const adminIsActive = useMemo(
     () => adminRoutes.includes(location.pathname),
     [adminRoutes, location.pathname],
@@ -335,6 +358,11 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
     [contratosRoutes, location.pathname],
   );
 
+  const endoMarketingIsActive = useMemo(
+    () => endoMarketingRoutes.includes(location.pathname),
+    [endoMarketingRoutes, location.pathname],
+  );
+
   const recalcAdminTop = () => {
     const root = adminWrapperRef.current;
     const btn = root?.querySelector(".ps-menu-button") as HTMLElement | null;
@@ -345,6 +373,12 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
     const root = contratosWrapperRef.current;
     const btn = root?.querySelector(".ps-menu-button") as HTMLElement | null;
     setContratosPopoutTop(calcTopFromElement(btn));
+  };
+
+  const recalcEndoMarketingTop = () => {
+    const root = endoMarketingWrapperRef.current;
+    const btn = root?.querySelector(".ps-menu-button") as HTMLElement | null;
+    setEndoMarketingPopoutTop(calcTopFromElement(btn));
   };
 
   useEffect(() => {
@@ -372,6 +406,19 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
 
     return () => el.removeEventListener("scroll", onScroll);
   }, [openContratosPopout, isCollapsed]);
+
+  useEffect(() => {
+    if (!openEndoMarketingPopout || !isCollapsed) return;
+    const el = menuScrollRef.current;
+    if (!el) return;
+
+    const onScroll = () => recalcEndoMarketingTop();
+    el.addEventListener("scroll", onScroll, { passive: true });
+
+    recalcEndoMarketingTop();
+
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [openEndoMarketingPopout, isCollapsed]);
 
   if (!user) {
     return (
@@ -698,6 +745,58 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                 ))}
               </StyledSubMenu>
             </Box>
+
+            {user.roles?.includes("ADMIN", "ENDOMARKETING") && (
+              <Box
+                ref={endoMarketingWrapperRef}
+                onMouseEnter={() => {
+                  if (!isCollapsed) return;
+                  recalcEndoMarketingTop();
+                  setOpenEndoMarketingPopout(true);
+                }}
+                onMouseLeave={() => {
+                  if (!isCollapsed) return;
+                  setOpenEndoMarketingPopout(false);
+                }}
+                sx={{ position: "relative" }}
+              >
+                <StyledSubMenu
+                  collapsed={isCollapsed}
+                  label={!isCollapsed && "EndoMarketing"}
+                  icon={<AlternateEmail />}
+                  open={
+                    isCollapsed
+                      ? openEndoMarketingPopout
+                      : openEndoMarketingExpanded
+                  }
+                  onOpenChange={(open) => {
+                    if (!isCollapsed) setOpenEndoMarketingExpanded(open);
+                  }}
+                  className={endoMarketingIsActive ? "ps-active" : undefined}
+                  rootStyles={
+                    isCollapsed
+                      ? {
+                          ["& .ps-submenu-content"]: {
+                            top: `${endoMarketingPopoutTop}px`,
+                          },
+                        }
+                      : undefined
+                  }
+                >
+                  {endoMarketingItems.map((item) => (
+                    <StyledMenuItem
+                      key={item.path}
+                      collapsed={isCollapsed}
+                      icon={item.icon}
+                      component={<Link to={item.path} />}
+                      active={location.pathname === item.path}
+                    >
+                      {item.label}
+                    </StyledMenuItem>
+                  ))}
+                </StyledSubMenu>
+              </Box>
+            )}
 
             <StyledMenuItem
               collapsed={isCollapsed}
