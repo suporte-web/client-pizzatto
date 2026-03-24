@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
-import pizzattoImage from "../ ../../../imgs/PizzattoLog_logo.png";
+import pizzattoImage from "../../../../imgs/PizzattoLog_logo.png";
 
 type PositionValue = number | string | null | undefined;
 
