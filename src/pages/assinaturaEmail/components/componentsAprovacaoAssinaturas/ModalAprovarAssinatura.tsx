@@ -1,4 +1,4 @@
-import { Close, HighlightOffOutlined } from "@mui/icons-material";
+import { Check, Close, VerifiedOutlined } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -8,40 +8,31 @@ import {
   DialogTitle,
   Divider,
   IconButton,
-  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
-import { red } from "@mui/material/colors";
+import { green } from "@mui/material/colors";
 import { useState } from "react";
-import { AssinaturaEmailService } from "../../../stores/assinaturaEmail/service";
+import { AssinaturaEmailService } from "../../../../stores/assinaturaEmail/service";
 
-const ModalReprovarAssinatura = ({ item }: any) => {
+const ModalAprovarAssinatura = ({ item }: any) => {
   const [open, setOpen] = useState(false);
-  const [motivo, setMotivo] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleOpen = () => setOpen(true);
-
   const handleClose = () => {
-    if (!loading) {
-      setOpen(false);
-      setMotivo("");
-    }
+    if (!loading) setOpen(false);
   };
 
-  const handleReprovarAssinatura = async () => {
+  const handleAprovarAssinatura = async () => {
     try {
-      if (!motivo.trim()) return;
-
       setLoading(true);
 
       await AssinaturaEmailService.updateValidacao({
         id: item.id,
         nome: item.nome,
         email: item.email,
-        status: "REPROVADO",
-        motivo: motivo.trim(),
+        status: "APROVADO",
       });
 
       handleClose();
@@ -54,29 +45,29 @@ const ModalReprovarAssinatura = ({ item }: any) => {
 
   return (
     <>
-      <Tooltip title="Reprovar assinatura">
+      <Tooltip title="Aprovar assinatura">
         <IconButton
           onClick={handleOpen}
           sx={{
-            bgcolor: red[100],
-            color: red[800],
+            bgcolor: green[100],
+            color: green[800],
             border: "1px solid",
-            borderColor: red[200],
+            borderColor: green[200],
             transition: "0.2s",
             "&:hover": {
-              bgcolor: red[200],
+              bgcolor: green[200],
               transform: "scale(1.05)",
             },
           }}
         >
-          <Close />
+          <Check />
         </IconButton>
       </Tooltip>
 
       <Dialog
         open={open}
         onClose={handleClose}
-        maxWidth="sm"
+        maxWidth="xs"
         fullWidth
         PaperProps={{
           sx: {
@@ -87,9 +78,9 @@ const ModalReprovarAssinatura = ({ item }: any) => {
       >
         <DialogTitle sx={{ pb: 1 }}>
           <Box display="flex" alignItems="center" gap={1}>
-            <HighlightOffOutlined sx={{ color: red[600], fontSize: 28 }} />
+            <VerifiedOutlined sx={{ color: green[600], fontSize: 28 }} />
             <Typography variant="h6" fontWeight={700}>
-              Reprovar assinatura
+              Aprovar assinatura
             </Typography>
           </Box>
         </DialogTitle>
@@ -98,16 +89,15 @@ const ModalReprovarAssinatura = ({ item }: any) => {
 
         <DialogContent sx={{ pt: 3 }}>
           <Typography variant="body1" sx={{ mb: 2 }}>
-            Você está prestes a reprovar a assinatura do colaborador:
+            Você está prestes a aprovar a assinatura do colaborador:
           </Typography>
 
           <Box
             sx={{
-              bgcolor: "#fdf4f4",
+              bgcolor: "#f5f5f5",
               borderRadius: 2,
               p: 2,
-              border: "1px solid #f0d4d4",
-              mb: 2.5,
+              border: "1px solid #e0e0e0",
             }}
           >
             <Typography variant="subtitle1" fontWeight={700}>
@@ -121,33 +111,23 @@ const ModalReprovarAssinatura = ({ item }: any) => {
             )}
           </Box>
 
-          <TextField
-            fullWidth
-            multiline
-            minRows={4}
-            label="Motivo da reprovação"
-            placeholder="Descreva o motivo da reprovação para que o colaborador possa corrigir a assinatura..."
-            value={motivo}
-            onChange={(e) => setMotivo(e.target.value)}
-            disabled={loading}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-              },
-            }}
-          />
-
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>
-            Esse motivo será enviado ao colaborador por e-mail.
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: 2 }}
+          >
+            Após a aprovação, a assinatura será liberada para uso e o colaborador
+            será notificado por e-mail.
           </Typography>
         </DialogContent>
 
         <DialogActions sx={{ px: 3, pb: 2, pt: 1, gap: 1 }}>
           <Button
             variant="outlined"
-            color="inherit"
+            color="error"
             onClick={handleClose}
             disabled={loading}
+            startIcon={<Close />}
             sx={{
               borderRadius: 2,
               textTransform: "none",
@@ -160,10 +140,10 @@ const ModalReprovarAssinatura = ({ item }: any) => {
 
           <Button
             variant="contained"
-            color="error"
-            onClick={handleReprovarAssinatura}
-            disabled={loading || !motivo.trim()}
-            startIcon={<Close />}
+            color="success"
+            onClick={handleAprovarAssinatura}
+            disabled={loading}
+            startIcon={<Check />}
             sx={{
               borderRadius: 2,
               textTransform: "none",
@@ -172,7 +152,7 @@ const ModalReprovarAssinatura = ({ item }: any) => {
               boxShadow: "none",
             }}
           >
-            {loading ? "Reprovando..." : "Reprovar"}
+            {loading ? "Aprovando..." : "Aprovar"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -180,4 +160,4 @@ const ModalReprovarAssinatura = ({ item }: any) => {
   );
 };
 
-export default ModalReprovarAssinatura;
+export default ModalAprovarAssinatura;

@@ -2,12 +2,31 @@ import { Container, type ContainerProps, Divider, alpha } from "@mui/material";
 import Sidebar from "../../components/Sidebar";
 import { blue, teal } from "@mui/material/colors";
 import MuralRecados from "./components/MuralRecados";
-import ModalCreateAssinaturaEmail from "../assinaturaEmail/components/ModalCreateAssinaturaEmail";
+import ModalCreateAssinaturaEmail from "../assinaturaEmail/components/componentsAprovacaoAssinaturas/ModalCreateAssinaturaEmail";
+import { useCallback, useEffect, useState } from "react";
+import { AssinaturaPadraoService } from "../../stores/assinaturaPadrao/services";
 
 const Home = () => {
   const containerProps: ContainerProps = {
     maxWidth: false,
   };
+
+  const [flushHook, setFlushHook] = useState(false);
+  const [assinaturaPadrao, setAssinaturaPadrao] = useState({});
+
+  const fetchDataAssinaturasPadrao = useCallback(async () => {
+    try {
+      const getAtual = await AssinaturaPadraoService.findAtual();
+
+      setAssinaturaPadrao(getAtual);
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDataAssinaturasPadrao();
+  }, [fetchDataAssinaturasPadrao, flushHook]);
 
   return (
     <Sidebar title="Tela Inicial">
@@ -22,32 +41,10 @@ const Home = () => {
           minHeight: "100vh",
         }}
       >
-        {/* Header Section */}
-        {/* <Box
-          component={Paper}
-          elevation={0}
-          sx={{
-            background: `linear-gradient(135deg, yellow 0%, #FF4D00 100%)`,
-            color: "white",
-            p: 4,
-            borderRadius: 3,
-            mb: 4,
-            mt: 4,
-            textAlign: "center",
-            boxShadow: "0 12px 20px rgba(0,0,0,0.1)",
-          }}
-        >
-          <Typography
-            variant="h3"
-            component="h1"
-            gutterBottom
-            fontWeight="600"
-            sx={{ textShadow: "0 2px 4px rgba(0,0,0,0.2)" }}
-          >
-            Bem-vindo, {user?.name}!
-          </Typography>
-        </Box> */}
-        <ModalCreateAssinaturaEmail />
+        <ModalCreateAssinaturaEmail
+          setFlushHook={setFlushHook}
+          assinaturaPadrao={assinaturaPadrao}
+        />
         <Divider sx={{ mt: 2, mb: 2 }} />
         <MuralRecados />
       </Container>

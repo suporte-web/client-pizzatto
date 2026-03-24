@@ -15,20 +15,57 @@ import {
   Typography,
 } from "@mui/material";
 import { useMemo, useRef, useState } from "react";
-import { toBlob } from "html-to-image";
 import type {
   ChangeEvent,
   MouseEvent as ReactMouseEvent,
   TouchEvent as ReactTouchEvent,
 } from "react";
-import pizzattoImage from "../../../imgs/PizzattoLog_logo.png";
+import pizzattoImage from "../../../../imgs/PizzattoLog_logo.png";
 import { orange } from "@mui/material/colors";
 import { useMask } from "@react-input/mask";
-import { useToast } from "../../../components/Toast";
-import { AssinaturaEmailService } from "../../../stores/assinaturaEmail/service";
 import { removeBackground } from "@imgly/background-removal";
+import { useToast } from "../../../../components/Toast";
+import { useUser } from "../../../../UserContext";
+import { AssinaturaPadraoService } from "../../../../stores/assinaturaPadrao/services";
 
 type FontSizeKey = "pequeno" | "medio" | "grande";
+type PositionKey = "foto" | "nome" | "departamento" | "telefone" | "logo";
+type LayoutPresetKey = "padrao" | "compacto" | "centralizado";
+
+type Positions = Record<PositionKey, { x: number; y: number }>;
+
+type SignatureTemplate = {
+  backgroundUrl: string;
+  positions: Positions;
+  textColor: string;
+  fontSize: FontSizeKey;
+  photoSize: number;
+  logoHeight: number;
+};
+
+type SignatureData = {
+  nome: string;
+  departamento: string;
+  telefone: string;
+  email: string;
+  fotoUrl: string;
+};
+
+type PhoneFieldProps = {
+  value: string;
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
+type DraggingState = {
+  key: PositionKey;
+  offsetX: number;
+  offsetY: number;
+} | null;
+
+const SIGNATURE_WIDTH = 520;
+const SIGNATURE_HEIGHT = 220;
+const PHOTO_SIZE = 110;
+const DEFAULT_LOGO_HEIGHT = 32;
 
 const fontSizeOptions = [
   { label: "Pequeno", value: "pequeno" },
@@ -40,64 +77,93 @@ const fontSizePresets: Record<
   FontSizeKey,
   {
     nome: number;
-    cargo: number;
+    departamento: number;
     contato: number;
   }
 > = {
   pequeno: {
     nome: 20,
-    cargo: 12,
+    departamento: 12,
     contato: 12,
   },
   medio: {
     nome: 24,
-    cargo: 14,
+    departamento: 14,
     contato: 14,
   },
   grande: {
     nome: 28,
-    cargo: 16,
+    departamento: 16,
     contato: 16,
   },
 };
 
-type SignatureData = {
-  nome: string;
-  cargo: string;
-  telefone: string;
-  email: string;
-  fotoUrl: string;
-  backgroundUrl: string;
-};
-
-type PhoneFieldProps = {
-  value: string;
-  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-};
-
-type PositionKey = "foto" | "nome" | "cargo" | "telefone" | "email" | "logo";
-
-type Positions = Record<PositionKey, { x: number; y: number }>;
-
-type LayoutPresetKey = "padrao" | "compacto" | "centralizado";
-
-type DraggingState = {
-  key: PositionKey;
-  offsetX: number;
-  offsetY: number;
-} | null;
-
-const SIGNATURE_WIDTH = 520;
-const SIGNATURE_HEIGHT = 220;
-const PHOTO_SIZE = 110;
-
 const DRAG_BOX_SIZES: Record<PositionKey, { width: number; height: number }> = {
   foto: { width: PHOTO_SIZE, height: PHOTO_SIZE },
   nome: { width: 260, height: 34 },
-  cargo: { width: 220, height: 24 },
+  departamento: { width: 220, height: 24 },
   telefone: { width: 260, height: 24 },
-  email: { width: 280, height: 24 },
-  logo: { width: 110, height: 32 },
+  logo: { width: 110, height: DEFAULT_LOGO_HEIGHT },
+};
+
+export const layoutPresets: Record<
+  LayoutPresetKey,
+  {
+    label: string;
+    positions: Positions;
+    textColor: string;
+  }
+> = {
+  padrao: {
+    label: "Padrão",
+    positions: {
+      foto: { x: 24, y: 42 },
+      nome: { x: 160, y: 35 },
+      departamento: { x: 160, y: 65 },
+      telefone: { x: 160, y: 135 },
+      logo: { x: 160, y: 155 },
+    },
+    textColor: "#1f1f1f",
+  },
+  compacto: {
+    label: "Compacto",
+    positions: {
+      foto: { x: 20, y: 42 },
+      nome: { x: 140, y: 35 },
+      departamento: { x: 140, y: 65 },
+      telefone: { x: 140, y: 130 },
+      logo: { x: 140, y: 155 },
+    },
+    textColor: "#1f1f1f",
+  },
+  centralizado: {
+    label: "Centralizado",
+    positions: {
+      foto: { x: 55, y: 42 },
+      nome: { x: 185, y: 35 },
+      departamento: { x: 185, y: 65 },
+      telefone: { x: 185, y: 135 },
+      logo: { x: 185, y: 155 },
+    },
+    textColor: "#1f1f1f",
+  },
+};
+
+const clonePositions = (positions: Positions): Positions => ({
+  foto: { ...positions.foto },
+  nome: { ...positions.nome },
+  departamento: { ...positions.departamento },
+  telefone: { ...positions.telefone },
+  logo: { ...positions.logo },
+});
+
+const defaultTemplate: SignatureTemplate = {
+  backgroundUrl: "",
+  positions: clonePositions(layoutPresets.padrao.positions),
+  textColor: layoutPresets.padrao.textColor,
+  fontSize: "medio",
+  photoSize: PHOTO_SIZE,
+  logoHeight: DEFAULT_LOGO_HEIGHT,
 };
 
 function PhoneField({ value, onChange }: PhoneFieldProps) {
@@ -128,72 +194,8 @@ const toDataUrl = (fileOrBlob: Blob): Promise<string> =>
     reader.readAsDataURL(fileOrBlob);
   });
 
-const colorOptions = [
-  { label: "Preto", value: "#1f1f1f" },
-  { label: "Branco", value: "#ffffff" },
-  { label: "Laranja", value: "#ff6f00" },
-  { label: "Azul", value: "#1565c0" },
-  { label: "Verde", value: "#2e7d32" },
-  { label: "Roxo", value: "#6a1b9a" },
-  { label: "Vermelho", value: "#c62828" },
-];
-
-export const layoutPresets: Record<
-  LayoutPresetKey,
-  {
-    label: string;
-    positions: Positions;
-    textColor: string;
-  }
-> = {
-  padrao: {
-    label: "Padrão",
-    positions: {
-      foto: { x: 24, y: 42 },
-      nome: { x: 160, y: 35 },
-      cargo: { x: 160, y: 65 },
-      telefone: { x: 160, y: 110 },
-      email: { x: 160, y: 135 },
-      logo: { x: 160, y: 155 },
-    },
-    textColor: "#1f1f1f",
-  },
-  compacto: {
-    label: "Compacto",
-    positions: {
-      foto: { x: 20, y: 42 },
-      nome: { x: 140, y: 35 },
-      cargo: { x: 140, y: 65 },
-      telefone: { x: 140, y: 110 },
-      email: { x: 140, y: 130 },
-      logo: { x: 140, y: 155 },
-    },
-    textColor: "#1f1f1f",
-  },
-  centralizado: {
-    label: "Centralizado",
-    positions: {
-      foto: { x: 55, y: 42 },
-      nome: { x: 185, y: 35 },
-      cargo: { x: 185, y: 65 },
-      telefone: { x: 185, y: 110 },
-      email: { x: 185, y: 135 },
-      logo: { x: 185, y: 155 },
-    },
-    textColor: "#1f1f1f",
-  },
-};
-
-const clonePositions = (positions: Positions): Positions => ({
-  foto: { ...positions.foto },
-  nome: { ...positions.nome },
-  cargo: { ...positions.cargo },
-  telefone: { ...positions.telefone },
-  email: { ...positions.email },
-  logo: { ...positions.logo },
-});
-
-const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
+const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
+  const { user } = useUser();
   const { showToast } = useToast();
   const assinaturaRef = useRef<HTMLDivElement>(null);
 
@@ -201,42 +203,67 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
   const [selectedLayout, setSelectedLayout] =
     useState<LayoutPresetKey>("padrao");
   const [dragging, setDragging] = useState<DraggingState>(null);
+  const [backgroundFile, setBackgroundFile] = useState<File | null>(null);
 
   const [form, setForm] = useState<SignatureData>({
-    nome: "",
-    cargo: "",
-    telefone: "",
-    email: "",
+    nome: user?.name || "",
+    departamento: user?.department || "",
+    telefone: user?.telephoneNumber || "",
+    email: user?.mail || "",
     fotoUrl: "",
-    backgroundUrl: "",
   });
 
-  const [positions, setPositions] = useState<Positions>(
-    clonePositions(layoutPresets.padrao.positions),
+  const [selectedElement, setSelectedElement] = useState<PositionKey | null>(
+    null,
   );
-  const [textColor, setTextColor] = useState(layoutPresets.padrao.textColor);
-  const [fontSize, setFontSize] = useState<FontSizeKey>("medio");
 
-  const currentFontSize = fontSizePresets[fontSize];
+  const [template, setTemplate] = useState<SignatureTemplate>(defaultTemplate);
 
+  const currentFontSize = fontSizePresets[template.fontSize];
   const telefoneCompleto = /^\(\d{2}\) \d{5}-\d{4}$/.test(form.telefone);
 
+  const normalizeHexColor = (value: string) => {
+    const hex = value.trim();
+
+    if (/^#[0-9A-Fa-f]{6}$/.test(hex)) return hex;
+    if (/^#[0-9A-Fa-f]{3}$/.test(hex)) {
+      return `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`;
+    }
+
+    return "#1f1f1f";
+  };
+
   const handleOpen = () => setOpen(true);
+
   const handleClose = () => {
     setDragging(null);
+    setSelectedElement(null);
     setOpen(false);
+  };
+
+  const handleSelectElement = (key: PositionKey) => {
+    setSelectedElement(key);
   };
 
   const handleChangeLayout = (layoutKey: LayoutPresetKey) => {
     setSelectedLayout(layoutKey);
-    setPositions(clonePositions(layoutPresets[layoutKey].positions));
-    setTextColor(layoutPresets[layoutKey].textColor);
+
+    setTemplate((prev) => ({
+      ...prev,
+      positions: clonePositions(layoutPresets[layoutKey].positions),
+      textColor: layoutPresets[layoutKey].textColor,
+    }));
   };
 
   const handleResetLayout = () => {
-    setPositions(clonePositions(layoutPresets[selectedLayout].positions));
-    setTextColor(layoutPresets[selectedLayout].textColor);
-    setFontSize("medio");
+    setTemplate((prev) => ({
+      ...prev,
+      positions: clonePositions(layoutPresets[selectedLayout].positions),
+      textColor: layoutPresets[selectedLayout].textColor,
+      fontSize: "medio",
+      photoSize: PHOTO_SIZE,
+      logoHeight: DEFAULT_LOGO_HEIGHT,
+    }));
   };
 
   const handleChange =
@@ -285,10 +312,11 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
       const rect = assinaturaRef.current.getBoundingClientRect();
       const pointer = getPointerPosition(event);
 
+      setSelectedElement(key);
       setDragging({
         key,
-        offsetX: pointer.clientX - rect.left - positions[key].x,
-        offsetY: pointer.clientY - rect.top - positions[key].y,
+        offsetX: pointer.clientX - rect.left - template.positions[key].x,
+        offsetY: pointer.clientY - rect.top - template.positions[key].y,
       });
     };
 
@@ -307,11 +335,14 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
     const nextX = Math.min(Math.max(0, rawX), maxX);
     const nextY = Math.min(Math.max(0, rawY), maxY);
 
-    setPositions((prev) => ({
+    setTemplate((prev) => ({
       ...prev,
-      [dragging.key]: {
-        x: nextX,
-        y: nextY,
+      positions: {
+        ...prev.positions,
+        [dragging.key]: {
+          x: nextX,
+          y: nextY,
+        },
       },
     }));
   };
@@ -338,7 +369,8 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
     try {
       const previewUrl = await toDataUrl(file);
 
-      setForm((prev) => ({
+      setBackgroundFile(file);
+      setTemplate((prev) => ({
         ...prev,
         backgroundUrl: previewUrl,
       }));
@@ -377,37 +409,31 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
         width: ${SIGNATURE_WIDTH}px;
         height: ${SIGNATURE_HEIGHT}px;
         font-family: Arial, sans-serif;
-        color: ${textColor};
+        color: ${template.textColor};
         overflow: hidden;
         border: 1px solid #e0e0e0;
         border-radius: 12px;
         ${
-          form.backgroundUrl
-            ? `background-image: url('${form.backgroundUrl}');
-       background-size: cover;
-       background-position: center top;
-       background-repeat: no-repeat;
-       background-color: #ffffff;`
+          template.backgroundUrl
+            ? `background-image: url('${template.backgroundUrl}');
+               background-size: cover;
+               background-position: center top;
+               background-repeat: no-repeat;
+               background-color: #ffffff;`
             : "background-color: #ffffff;"
         }
       ">
-        <div style="
-          position: absolute;
-          inset: 0;
-          border-radius: 12px;
-        "></div>
-
         <img
           src="${form.fotoUrl || "https://via.placeholder.com/90x90.png?text=Foto"}"
           alt="Foto"
-          width="${PHOTO_SIZE}"
-          height="${PHOTO_SIZE}"
+          width="${template.photoSize}"
+          height="${template.photoSize}"
           style="
             position: absolute;
-            left: ${positions.foto.x}px;
-            top: ${positions.foto.y}px;
-            width: ${PHOTO_SIZE}px;
-            height: ${PHOTO_SIZE}px;
+            left: ${template.positions.foto.x}px;
+            top: ${template.positions.foto.y}px;
+            width: ${template.photoSize}px;
+            height: ${template.photoSize}px;
             border-radius: 50%;
             object-fit: cover;
             object-position: center top;
@@ -418,11 +444,11 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
 
         <div style="
           position: absolute;
-          left: ${positions.nome.x}px;
-          top: ${positions.nome.y}px;
+          left: ${template.positions.nome.x}px;
+          top: ${template.positions.nome.y}px;
           font-size: ${currentFontSize.nome}px;
           font-weight: 800;
-          color: ${textColor};
+          color: ${template.textColor};
           z-index: 2;
           white-space: nowrap;
         ">
@@ -431,58 +457,43 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
 
         <div style="
           position: absolute;
-          left: ${positions.cargo.x}px;
-          top: ${positions.cargo.y}px;
-          font-size: ${currentFontSize.cargo}px;
-          color: ${textColor};
+          left: ${template.positions.departamento.x}px;
+          top: ${template.positions.departamento.y}px;
+          font-size: ${currentFontSize.departamento}px;
+          color: ${template.textColor};
           z-index: 2;
           white-space: nowrap;
         ">
-          ${form.cargo || "Cargo"}
+          ${form.departamento || "Departamento"}
         </div>
 
         <div style="
           position: absolute;
-          left: ${positions.telefone.x}px;
-          top: ${positions.telefone.y}px;
+          left: ${template.positions.telefone.x}px;
+          top: ${template.positions.telefone.y}px;
           font-size: ${currentFontSize.contato}px;
-          color: ${textColor};
+          color: ${template.textColor};
           z-index: 2;
           white-space: nowrap;
         ">
           <strong>Telefone:</strong> ${form.telefone || "(00) 00000-0000"}
         </div>
 
-        <div style="
-          position: absolute;
-          left: ${positions.email.x}px;
-          top: ${positions.email.y}px;
-          font-size: ${currentFontSize.contato}px;
-          color: ${textColor};
-          z-index: 2;
-          white-space: nowrap;
-        ">
-          <strong>E-mail:</strong>
-          <a href="mailto:${form.email}" style="color: ${textColor}; text-decoration: none;">
-            ${form.email || "email@empresa.com.br"}
-          </a>
-        </div>
-
         <img
           src="${pizzattoImage}"
           alt="Logo"
-          height="28"
+          height="${template.logoHeight}"
           style="
             position: absolute;
-            left: ${positions.logo.x}px;
-            top: ${positions.logo.y}px;
-            height: 28px;
+            left: ${template.positions.logo.x}px;
+            top: ${template.positions.logo.y}px;
+            height: ${template.logoHeight}px;
             z-index: 2;
           "
         />
       </div>
     `.trim();
-  }, [form, textColor, positions, currentFontSize]);
+  }, [form, template, currentFontSize]);
 
   const handleCriarAssinatura = async () => {
     try {
@@ -491,65 +502,71 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
         return;
       }
 
-      if (!assinaturaRef.current) {
-        showToast("Não foi possível gerar a assinatura.", "error");
+      if (!backgroundFile) {
+        showToast("Faça o upload do background.", "warning");
         return;
       }
-
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      const blob = await toBlob(assinaturaRef.current, {
-        pixelRatio: 3,
-        cacheBust: true,
-        backgroundColor: "#ffffff",
-      });
-
-      if (!blob) {
-        showToast(
-          "Não foi possível converter a assinatura em imagem.",
-          "error",
-        );
-        return;
-      }
-
-      const file = new File(
-        [blob],
-        `assinatura-${form.nome || "colaborador"}.jpg`,
-        {
-          type: "image/jpeg",
-        },
-      );
 
       const formData = new FormData();
-      formData.append("nome", form.nome);
-      formData.append("cargo", form.cargo);
-      formData.append("telefone", form.telefone);
-      formData.append("email", form.email);
-      formData.append("foto", file);
+      formData.append("corFont", template.textColor);
+      formData.append("fontSize", template.fontSize);
 
-      await AssinaturaEmailService.create(formData);
+      formData.append("photoX", String(Math.round(template.positions.foto.x)));
+      formData.append("photoY", String(Math.round(template.positions.foto.y)));
+      formData.append("photoSize", String(template.photoSize));
+
+      formData.append("nomeX", String(Math.round(template.positions.nome.x)));
+      formData.append("nomeY", String(Math.round(template.positions.nome.y)));
+
+      formData.append(
+        "departamentoX",
+        String(Math.round(template.positions.departamento.x)),
+      );
+      formData.append(
+        "departamentoY",
+        String(Math.round(template.positions.departamento.y)),
+      );
+
+      formData.append(
+        "telefoneX",
+        String(Math.round(template.positions.telefone.x)),
+      );
+      formData.append(
+        "telefoneY",
+        String(Math.round(template.positions.telefone.y)),
+      );
+
+      formData.append("logoX", String(Math.round(template.positions.logo.x)));
+      formData.append("logoY", String(Math.round(template.positions.logo.y)));
+      formData.append("logoHeight", String(template.logoHeight));
+
+      formData.append("background", backgroundFile);
+
+      await AssinaturaPadraoService.create(formData);
       await navigator.clipboard.writeText(htmlAssinatura);
 
-      showToast("Assinatura criada com sucesso!", "success");
+      showToast("Template de assinatura salvo com sucesso!", "success");
       setFlushHook((prev: any) => !prev);
       handleClose();
     } catch (error) {
-      console.error("Erro ao criar assinatura:", error);
-      showToast("Não foi possível criar a assinatura.", "error");
+      console.error("Erro ao criar assinatura padrão:", error);
+      showToast("Não foi possível salvar a assinatura padrão.", "error");
     }
   };
 
   const draggableItemSx = (key: PositionKey) => ({
     position: "absolute" as const,
-    left: positions[key].x,
-    top: positions[key].y,
-    color: textColor,
+    left: template.positions[key].x,
+    top: template.positions[key].y,
+    color: template.textColor,
     zIndex: 3,
     cursor: dragging?.key === key ? "grabbing" : "grab",
     userSelect: "none" as const,
     WebkitUserSelect: "none" as const,
     touchAction: "none" as const,
     transition: dragging?.key === key ? "none" : "box-shadow 0.2s ease",
+    outline: selectedElement === key ? "2px dashed #ff9800" : "none",
+    outlineOffset: 2,
     "&:hover": {
       boxShadow: "0 0 0 1px rgba(255,255,255,0.65)",
       borderRadius: 1,
@@ -558,7 +575,7 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
 
   return (
     <>
-      <Tooltip title="Criar Assinatura">
+      <Tooltip title="Criar Assinatura Padrão">
         <Button
           variant="contained"
           onClick={handleOpen}
@@ -570,7 +587,7 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
             "&:hover": { bgcolor: orange[300] },
           }}
         >
-          <Add /> Criar Assinatura
+          <Add /> Criar Assinatura Padrão
         </Button>
       </Tooltip>
 
@@ -591,11 +608,9 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
             fontWeight: 800,
             borderBottom: "1px solid",
             borderColor: "divider",
-            // background:
-            //   "linear-gradient(90deg, rgba(255,243,224,1) 0%, rgba(255,255,255,1) 100%)",
           }}
         >
-          Gerar Assinatura de E-mail
+          Gerar Assinatura de E-mail Pré-definida
         </DialogTitle>
 
         <DialogContent dividers sx={{ p: 3 }}>
@@ -640,52 +655,71 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 4 }}>
-                      <TextField
-                        select
-                        label="Cor do texto"
-                        value={textColor}
-                        onChange={(event) => setTextColor(event.target.value)}
-                        fullWidth
-                        size="small"
-                        InputProps={{ style: { borderRadius: 12 } }}
-                        slotProps={{
-                          inputLabel: {
-                            shrink: true,
-                          },
-                        }}
-                      >
-                        {colorOptions.map((color) => (
-                          <MenuItem key={color.value} value={color.value}>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 1,
-                              }}
-                            >
-                              <Box
-                                sx={{
-                                  width: 16,
-                                  height: 16,
-                                  borderRadius: "50%",
-                                  backgroundColor: color.value,
-                                  border: "1px solid #ccc",
-                                }}
-                              />
-                              {color.label}
-                            </Box>
-                          </MenuItem>
-                        ))}
-                      </TextField>
+                      <Stack spacing={1}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1,
+                          }}
+                        >
+                          <Box
+                            component="input"
+                            type="color"
+                            value={normalizeHexColor(template.textColor)}
+                            onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                              setTemplate((prev) => ({
+                                ...prev,
+                                textColor: event.target.value,
+                              }))
+                            }
+                            sx={{
+                              width: 52,
+                              height: 40,
+                              p: 0,
+                              border: "1px solid",
+                              borderColor: "divider",
+                              borderRadius: 2,
+                              backgroundColor: "transparent",
+                              cursor: "pointer",
+                            }}
+                          />
+                          
+                          <TextField
+                            value={template.textColor}
+                            onChange={(event) =>
+                              setTemplate((prev) => ({
+                                ...prev,
+                                textColor: event.target.value,
+                              }))
+                            }
+                            onBlur={(event) =>
+                              setTemplate((prev) => ({
+                                ...prev,
+                                textColor: normalizeHexColor(
+                                  event.target.value,
+                                ),
+                              }))
+                            }
+                            fullWidth
+                            size="small"
+                            placeholder="#1f1f1f"
+                            InputProps={{ style: { borderRadius: 12 } }}
+                          />
+                        </Box>
+                      </Stack>
                     </Grid>
 
                     <Grid size={{ xs: 12, md: 4 }}>
                       <TextField
                         select
                         label="Tamanho da fonte"
-                        value={fontSize}
+                        value={template.fontSize}
                         onChange={(event) =>
-                          setFontSize(event.target.value as FontSizeKey)
+                          setTemplate((prev) => ({
+                            ...prev,
+                            fontSize: event.target.value as FontSizeKey,
+                          }))
                         }
                         fullWidth
                         size="small"
@@ -710,10 +744,10 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
                   />
 
                   <TextField
-                    label="Cargo"
+                    label="Departamento"
                     fullWidth
-                    value={form.cargo}
-                    onChange={handleChange("cargo")}
+                    value={form.departamento}
+                    onChange={handleChange("departamento")}
                     size="small"
                     InputProps={{ style: { borderRadius: 12 } }}
                   />
@@ -734,13 +768,6 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
 
                   <Grid container spacing={2}>
                     <Grid size={{ xs: 12, md: 6 }}>
-                      {/* <Box
-                    sx={{
-                      display: "flex",
-                      gap: 1,
-                      flexWrap: "wrap",
-                    }}
-                    > */}
                       <Button
                         variant="outlined"
                         component="label"
@@ -756,6 +783,7 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
                         />
                       </Button>
                     </Grid>
+
                     <Grid size={{ xs: 12, md: 6 }}>
                       <Button
                         variant="outlined"
@@ -783,11 +811,31 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
                   >
                     Resetar layout
                   </Button>
-                  {/* </Box> */}
+
+                  {selectedElement && (
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        p: 2,
+                        borderRadius: 2,
+                        border: "1px solid",
+                        borderColor: "divider",
+                        backgroundColor: "#fff",
+                      }}
+                    >
+                      <Typography variant="subtitle2" fontWeight={700} mb={1}>
+                        Elemento selecionado: {selectedElement}
+                      </Typography>
+                      <Typography variant="body2">
+                        X: {Math.round(template.positions[selectedElement].x)} |
+                        Y: {Math.round(template.positions[selectedElement].y)}
+                      </Typography>
+                    </Paper>
+                  )}
 
                   <Typography variant="caption" color="text.secondary">
-                    Você pode arrastar foto, nome, cargo, telefone, e-mail e
-                    logo diretamente na pré-visualização.
+                    Você pode arrastar foto, nome, departamento, telefone e logo
+                    diretamente na pré-visualização.
                   </Typography>
                 </Stack>
               </Paper>
@@ -839,10 +887,10 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
                       boxShadow: "0 14px 35px rgba(31, 41, 55, 0.12)",
                     }}
                   >
-                    {form.backgroundUrl && (
+                    {template.backgroundUrl && (
                       <Box
                         component="img"
-                        src={form.backgroundUrl}
+                        src={template.backgroundUrl}
                         alt="Fundo da assinatura"
                         sx={{
                           position: "absolute",
@@ -863,8 +911,6 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
                       sx={{
                         position: "absolute",
                         inset: 0,
-                        // background:
-                        //   "linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.28) 100%)",
                         zIndex: 1,
                       }}
                     />
@@ -878,12 +924,13 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
                       // alt="Foto do colaborador"
                       onMouseDown={startDrag("foto")}
                       onTouchStart={startDrag("foto")}
+                      onClick={() => handleSelectElement("foto")}
                       sx={{
                         position: "absolute",
-                        left: positions.foto.x,
-                        top: positions.foto.y,
-                        width: PHOTO_SIZE,
-                        height: PHOTO_SIZE,
+                        left: template.positions.foto.x,
+                        top: template.positions.foto.y,
+                        width: template.photoSize,
+                        height: template.photoSize,
                         borderRadius: "50%",
                         objectFit: "cover",
                         objectPosition: "center top",
@@ -891,7 +938,10 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
                         border: "3px solid rgba(255,255,255,0.95)",
                         backgroundColor: "transparent",
                         zIndex: 3,
-                        boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+                        boxShadow:
+                          selectedElement === "foto"
+                            ? "0 0 0 2px #ff9800"
+                            : "0 8px 20px rgba(0,0,0,0.12)",
                         cursor: dragging?.key === "foto" ? "grabbing" : "grab",
                         userSelect: "none",
                         WebkitUserSelect: "none",
@@ -907,6 +957,7 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
                       fontWeight={800}
                       onMouseDown={startDrag("nome")}
                       onTouchStart={startDrag("nome")}
+                      onClick={() => handleSelectElement("nome")}
                       sx={{
                         ...draggableItemSx("nome"),
                         fontSize: `${currentFontSize.nome}px`,
@@ -918,21 +969,23 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
 
                     <Typography
                       component="div"
-                      onMouseDown={startDrag("cargo")}
-                      onTouchStart={startDrag("cargo")}
+                      onMouseDown={startDrag("departamento")}
+                      onTouchStart={startDrag("departamento")}
+                      onClick={() => handleSelectElement("departamento")}
                       sx={{
-                        ...draggableItemSx("cargo"),
-                        fontSize: `${currentFontSize.cargo}px`,
+                        ...draggableItemSx("departamento"),
+                        fontSize: `${currentFontSize.departamento}px`,
                         lineHeight: 1.2,
                       }}
                     >
-                      {form.cargo || "Cargo"}
+                      {form.departamento || "Departamento"}
                     </Typography>
 
                     <Typography
                       component="div"
                       onMouseDown={startDrag("telefone")}
                       onTouchStart={startDrag("telefone")}
+                      onClick={() => handleSelectElement("telefone")}
                       sx={{
                         ...draggableItemSx("telefone"),
                         fontSize: `${currentFontSize.contato}px`,
@@ -943,36 +996,28 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
                       {form.telefone || "(00) 00000-0000"}
                     </Typography>
 
-                    <Typography
-                      component="div"
-                      onMouseDown={startDrag("email")}
-                      onTouchStart={startDrag("email")}
-                      sx={{
-                        ...draggableItemSx("email"),
-                        fontSize: `${currentFontSize.contato}px`,
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      <strong>E-mail:</strong>{" "}
-                      {form.email || "email@empresa.com.br"}
-                    </Typography>
-
                     <Box
                       component="img"
                       src={pizzattoImage}
                       alt="Logo"
                       onMouseDown={startDrag("logo")}
                       onTouchStart={startDrag("logo")}
+                      onClick={() => handleSelectElement("logo")}
                       sx={{
                         position: "absolute",
-                        left: positions.logo.x,
-                        top: positions.logo.y,
-                        height: 32,
+                        left: template.positions.logo.x,
+                        top: template.positions.logo.y,
+                        height: template.logoHeight,
                         zIndex: 3,
                         cursor: dragging?.key === "logo" ? "grabbing" : "grab",
                         userSelect: "none",
                         WebkitUserSelect: "none",
                         touchAction: "none",
+                        outline:
+                          selectedElement === "logo"
+                            ? "2px dashed #ff9800"
+                            : "none",
+                        outlineOffset: 2,
                         "&:hover": {
                           filter: "drop-shadow(0 0 6px rgba(255,255,255,0.8))",
                         },
@@ -1017,4 +1062,4 @@ const ModalCreateAssinaturaEmail = ({ setFlushHook }: any) => {
   );
 };
 
-export default ModalCreateAssinaturaEmail;
+export default ModalCreateAssinaturaPadrao;
