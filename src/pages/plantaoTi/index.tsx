@@ -13,45 +13,51 @@ import {
   alpha,
   useTheme,
   Stack,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import {
-  Phone,
+  // Phone,
   AccessTime,
-  Person,
   Computer,
   Storage,
   CheckCircle,
   CalendarToday,
   ArrowBack,
+  Phone,
+  PhoneAndroid,
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
-import { usePlantaoData } from "../../../hooks/use-plantao-data";
-import bgPlantao from "../../../imgs/bg-plantao.jpg";
-import LogoPizzatto from "../../../imgs/image.png";
+import bgPlantao from "../../imgs/bg-plantao.jpg";
+import LogoPizzatto from "../../imgs/image.png";
+import { PlantaoService } from "../../stores/plantao/service";
 
-export default function PlantaoPagePrincipal() {
+const PlantaoPrincipal = () => {
   const theme = useTheme();
-  const { contatos, escalaSistemas, escalaInfra, janelaSistemas, janelaInfra } =
-    usePlantaoData();
   const [agora, setAgora] = useState(new Date());
+  const [escalas, setEscalas] = useState<any>({});
 
   useEffect(() => {
     const timer = setInterval(() => setAgora(new Date()), 30000);
     return () => clearInterval(timer);
   }, []);
 
-  const diasSemana = [
-    "domingo",
-    "segunda",
-    "terca",
-    "quarta",
-    "quinta",
-    "sexta",
-    "sabado",
-  ] as const;
+  const fetchData = async () => {
+    try {
+      const get = await PlantaoService.getPlantonistaDiaSemana();
+      console.log(get);
+
+      setEscalas(get);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const diaSemanaIndex = agora.getDay();
-  const diaSemanaChave = diasSemana[diaSemanaIndex];
 
   const horaAtualStr = agora.toLocaleTimeString("pt-BR", {
     hour: "2-digit",
@@ -64,42 +70,11 @@ export default function PlantaoPagePrincipal() {
     month: "long",
   });
 
-  const verificarSeEstaAtivo = (inicio: string, fim: string) => {
-    const [hAtu, mAtu] = horaAtualStr.split(":").map(Number);
-    const [hIni, mIni] = inicio.split(":").map(Number);
-    const [hFim, mFim] = fim.split(":").map(Number);
-
-    const totalAtu = hAtu * 60 + mAtu;
-    const totalIni = hIni * 60 + mIni;
-    const totalFim = hFim * 60 + mFim;
-
-    if (totalIni > totalFim) {
-      return totalAtu >= totalIni || totalAtu <= totalFim;
-    }
-    return totalAtu >= totalIni && totalAtu <= totalFim;
-  };
-
-  // === LÓGICA SISTEMAS ===
   const isFimDeSemana = diaSemanaIndex === 0 || diaSemanaIndex === 6;
 
-  const isHorarioSistemas = verificarSeEstaAtivo(
-    janelaSistemas.inicio,
-    janelaSistemas.fim
-  );
-  const isPlantaoAtivoSis = isFimDeSemana || isHorarioSistemas;
+  const isPlantaoAtivoSis = isFimDeSemana || escalas.sistemas;
 
-  const nomeSistemas = escalaSistemas[diaSemanaChave];
-  const plantonistaSis = contatos.find((c) => c.nome === nomeSistemas);
-
-  // === LÓGICA INFRA ===
-  const isHorarioInfra = verificarSeEstaAtivo(
-    janelaInfra.inicio,
-    janelaInfra.fim
-  );
-  const isPlantaoAtivoInfra = isFimDeSemana || isHorarioInfra;
-
-  const nomeInfra = escalaInfra[diaSemanaChave];
-  const plantonistaInfra = contatos.find((c) => c.nome === nomeInfra);
+  const isPlantaoAtivoInfra = isFimDeSemana || escalas.infra;
 
   const PlantaoCard = ({
     titulo,
@@ -136,7 +111,7 @@ export default function PlantaoPagePrincipal() {
             background: ativo
               ? `radial-gradient(circle at center, ${alpha(
                   corBorda,
-                  0.2
+                  0.2,
                 )} 0%, transparent 70%)`
               : "transparent",
             filter: "blur(40px)",
@@ -212,14 +187,17 @@ export default function PlantaoPagePrincipal() {
                     sx={{
                       borderColor: alpha(theme.palette.text.secondary, 0.2),
                       color: "text.secondary",
-                      backgroundColor: alpha(theme.palette.background.default, 0.5),
+                      backgroundColor: alpha(
+                        theme.palette.background.default,
+                        0.5,
+                      ),
                     }}
                   />
                 )}
               </Box>
 
               {/* Nome ou mensagem fora de horário */}
-              {ativo ? (
+              {ativo && plantonista ? (
                 <>
                   <Typography
                     variant="h3"
@@ -234,7 +212,9 @@ export default function PlantaoPagePrincipal() {
                   </Typography>
 
                   <Stack direction="row" alignItems="center" spacing={0.5}>
-                    <AccessTime sx={{ fontSize: 14, color: "text.secondary" }} />
+                    <AccessTime
+                      sx={{ fontSize: 14, color: "text.secondary" }}
+                    />
                     <Typography
                       variant="body2"
                       sx={{ color: "text.secondary", fontWeight: 500 }}
@@ -270,7 +250,9 @@ export default function PlantaoPagePrincipal() {
                     spacing={0.5}
                     sx={{ mt: 1 }}
                   >
-                    <AccessTime sx={{ fontSize: 14, color: "text.secondary" }} />
+                    <AccessTime
+                      sx={{ fontSize: 14, color: "text.secondary" }}
+                    />
                     <Typography
                       variant="body2"
                       sx={{ color: "text.secondary", fontWeight: 500 }}
@@ -341,29 +323,27 @@ export default function PlantaoPagePrincipal() {
                     </Typography>
                   </Box>
                 </Stack>
-
-                <Button
-                  component="a"
-                  href={`tel:${plantonista.telefone}`}
-                  variant="contained"
-                  size="small"
-                  sx={{
-                    backgroundColor: theme.palette.success.dark,
-                    color: "white",
-                    fontWeight: "bold",
-                    textTransform: "none",
-                    boxShadow: theme.shadows[2],
-                    px: 3,
-                    py: 1,
-                    borderRadius: 2,
-                    "&:hover": {
-                      backgroundColor: theme.palette.success.main,
-                      boxShadow: theme.shadows[4],
-                    },
-                  }}
-                >
-                  Acionamento somente por ligação
-                </Button>
+                <Tooltip title={"Ligar para Telefone"}>
+                  <IconButton
+                    component="a"
+                    href={`tel:${plantonista.telefone}`}
+                    // variant="contained"
+                    size="small"
+                    sx={{
+                      backgroundColor: theme.palette.success.dark,
+                      color: "white",
+                      fontWeight: "bold",
+                      textTransform: "none",
+                      boxShadow: theme.shadows[2],
+                      "&:hover": {
+                        backgroundColor: theme.palette.success.main,
+                        boxShadow: theme.shadows[4],
+                      },
+                    }}
+                  >
+                    <PhoneAndroid />
+                  </IconButton>
+                </Tooltip>
               </Paper>
             )}
           </CardContent>
@@ -483,28 +463,6 @@ export default function PlantaoPagePrincipal() {
             >
               Voltar para Login
             </Button>
-
-            <Button
-              variant="outlined"
-              startIcon={<Person />}
-              onClick={() => {
-                window.location.replace("/plantao/page-admin");
-              }}
-              sx={{
-                backdropFilter: "blur(10px)",
-                backgroundColor: alpha(theme.palette.common.white, 0.2),
-                color: "white",
-                borderColor: alpha(theme.palette.common.white, 0.3),
-                "&:hover": {
-                  backgroundColor: alpha(theme.palette.common.white, 0.3),
-                  borderColor: alpha(theme.palette.common.white, 0.4),
-                },
-                boxShadow: theme.shadows[4],
-                borderRadius: 2,
-              }}
-            >
-              Painel Admin
-            </Button>
           </Box>
         </Box>
 
@@ -514,7 +472,7 @@ export default function PlantaoPagePrincipal() {
             <PlantaoCard
               titulo="Sistemas"
               icon={Computer}
-              plantonista={plantonistaSis}
+              plantonista={escalas.sistemas}
               ativo={isPlantaoAtivoSis}
               corBorda={theme.palette.warning.main}
               corIcone={theme.palette.warning.main}
@@ -524,7 +482,7 @@ export default function PlantaoPagePrincipal() {
             <PlantaoCard
               titulo="Infraestrutura / Redes"
               icon={Storage}
-              plantonista={plantonistaInfra}
+              plantonista={escalas.infra}
               ativo={isPlantaoAtivoInfra}
               corBorda={theme.palette.info.main}
               corIcone={theme.palette.info.main}
@@ -539,10 +497,7 @@ export default function PlantaoPagePrincipal() {
             sx={{
               color: alpha(theme.palette.common.white, 0.6),
               fontWeight: 500,
-              textShadow: `0 1px 2px ${alpha(
-                theme.palette.common.black,
-                0.3
-              )}`,
+              textShadow: `0 1px 2px ${alpha(theme.palette.common.black, 0.3)}`,
             }}
           >
             Atualização automática em tempo real
@@ -551,4 +506,6 @@ export default function PlantaoPagePrincipal() {
       </Container>
     </Box>
   );
-}
+};
+
+export default PlantaoPrincipal;

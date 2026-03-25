@@ -14,17 +14,16 @@ import CadastrosContratos from "./pages/contratos/cadastros";
 import ContasOffice from "./pages/contasOffice";
 import ToDo from "./pages/toDo";
 import UsersAd from "./pages/usersAd";
-import PlantaoPagePrincipal from "./pages/plantaoTi/pagePrincipal";
-import PlantaoPageAdmin from "./pages/plantaoTi/pageAdmin";
+import PlantaoPagePrincipal from "./pages/plantaoTi";
 import Organograma from "./pages/organograma";
 import CalendarioInstitucional from "./pages/calendarioInstitucional";
 import AssinaturaEmail from "./pages/assinaturaEmail";
+import PlantaoAdmin from "./pages/plantaoAdmin";
 
 const Rotas = () => (
   <Routes>
     <Route path="/" index element={<Login />} />
     <Route path="/plantao/page-principal" element={<PlantaoPagePrincipal />} />
-    <Route path="/plantao/page-admin" element={<PlantaoPageAdmin />} />
     <Route
       path="/home"
       element={
@@ -141,6 +140,14 @@ const Rotas = () => (
       element={
         <UserProvider>
           <AssinaturaEmail />
+        </UserProvider>
+      }
+    />
+    <Route
+      path="/plantao"
+      element={
+        <UserProvider>
+          <PlantaoAdmin />
         </UserProvider>
       }
     />

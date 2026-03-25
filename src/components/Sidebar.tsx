@@ -13,6 +13,8 @@ import {
   AccountTreeOutlined,
   CalendarMonth,
   AlternateEmail,
+  GradeOutlined,
+  WorkOutline,
 } from "@mui/icons-material";
 import {
   alpha,
@@ -71,6 +73,7 @@ function titleFromPath(pathname: string) {
     "/organograma": "Organograma",
     "/calendario-institucional": "Calendário Institucional",
     "/assinatura-email": "Assinatura de E-mail",
+    plantao: "Plantão",
   };
 
   return map[pathname] ?? "Sistema";
@@ -268,8 +271,13 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
     [],
   );
 
-  const infraItems = useMemo(
+  const tiItems = useMemo(
     () => [
+      {
+        label: "Plantão",
+        path: "/plantao",
+        icon: <WorkOutline />,
+      },
       {
         label: "Inventário",
         path: "/inventario",
@@ -661,7 +669,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                         </Typography>
                       </Box>
 
-                      {infraItems.map((item) => (
+                      {tiItems.map((item) => (
                         <StyledMenuItem
                           key={item.path}
                           collapsed={isCollapsed}
@@ -676,7 +684,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                   ) : (
                     <StyledSubMenu
                       collapsed={isCollapsed}
-                      label="Infraestrutura"
+                      label="TI"
                       icon={<Inventory2Outlined />}
                       open={openInfraExpanded}
                       onOpenChange={(open) => {
@@ -684,7 +692,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                       }}
                       className={infraIsActive ? "ps-active" : undefined}
                     >
-                      {infraItems.map((item) => (
+                      {tiItems.map((item) => (
                         <StyledMenuItem
                           key={item.path}
                           collapsed={isCollapsed}
@@ -763,7 +771,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                 <StyledSubMenu
                   collapsed={isCollapsed}
                   label={!isCollapsed && "EndoMarketing"}
-                  icon={<AlternateEmail />}
+                  icon={<GradeOutlined />}
                   open={
                     isCollapsed
                       ? openEndoMarketingPopout
@@ -806,14 +814,17 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
             >
               {!isCollapsed && "A Fazer"}
             </StyledMenuItem>
-            <StyledMenuItem
-              collapsed={isCollapsed}
-              icon={<CalendarMonth />}
-              component={<Link to="/calendario-institucional" />}
-              active={location.pathname === "/calendario-institucional"}
-            >
-              {!isCollapsed && "Calendário Institucional"}
-            </StyledMenuItem>
+
+            {user.roles?.includes("ADMIN") && (
+              <StyledMenuItem
+                collapsed={isCollapsed}
+                icon={<CalendarMonth />}
+                component={<Link to="/calendario-institucional" />}
+                active={location.pathname === "/calendario-institucional"}
+              >
+                {!isCollapsed && "Calendário Institucional"}
+              </StyledMenuItem>
+            )}
           </Menu>
         </Box>
 
