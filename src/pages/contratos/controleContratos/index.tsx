@@ -112,16 +112,12 @@ const ControleContratos = () => {
   const handleGerarContrato = async () => {
     setLoading(true);
     try {
-      console.log("Iniciando geração de PDF...");
-
       const response = await ContratosService.createPdfContrato({
         _id: params._id,
         usuario: user?.nome,
         status: "AGUARDANDO ASSINATURA",
       });
-
-      console.log("Response recebido:", response);
-
+      
       // Verificar se a resposta é válida
       if (!response) {
         throw new Error("Resposta vazia do servidor");

@@ -111,8 +111,6 @@ const ModalCriarValoresContrato = ({ showToast, setFlushHook }: any) => {
   const handleSubmit = async () => {
     try {
       if (validateForm()) {
-        console.log("Dados do contrato:", formData);
-
         await ValoresContratosService.create(formData);
         handleClose();
         showToast("Sucesso ao criar Valor de Contrato!", "success");

@@ -1,0 +1,320 @@
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Chip,
+  Avatar,
+  Paper,
+  alpha,
+  useTheme,
+  Stack,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
+import {
+  AccessTime,
+  CheckCircle,
+  CalendarToday,
+  Phone,
+  PhoneAndroid,
+} from "@mui/icons-material";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+
+const PlantaoCard = ({
+  titulo,
+  icon: Icon,
+  plantonista,
+  ativo,
+  corBorda,
+  corIcone,
+}: {
+  titulo: string;
+  icon: any;
+  plantonista: any;
+  ativo: boolean;
+  corBorda: string;
+  corIcone: string;
+}) => {
+  const theme = useTheme();
+  const [agora, setAgora] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setAgora(new Date()), 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const horaAtualStr = agora.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  const dataHojeFormatada = agora.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{ flex: 1 }}
+    >
+      <Box
+        sx={{
+          position: "relative",
+          height: "100%",
+          "&:before": {
+            content: '""',
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            borderRadius: 3,
+            background: ativo
+              ? `radial-gradient(circle at center, ${alpha(
+                  corBorda,
+                  0.2,
+                )} 0%, transparent 70%)`
+              : "transparent",
+            filter: "blur(40px)",
+            zIndex: 0,
+          },
+        }}
+      >
+        <Card
+          sx={{
+            height: "100%",
+            borderTop: 4,
+            borderColor: corBorda,
+            backdropFilter: "blur(10px)",
+            backgroundColor: alpha(theme.palette.background.paper, 0.8),
+            boxShadow: theme.shadows[8],
+            position: "relative",
+            zIndex: 1,
+            borderRadius: 3,
+            overflow: "hidden",
+          }}
+        >
+          <CardContent
+            sx={{
+              p: 4,
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
+            }}
+          >
+            <Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  mb: 3,
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={1}>
+                  <Icon sx={{ color: corIcone, fontSize: 20 }} />
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: "bold",
+                      textTransform: "uppercase",
+                      letterSpacing: 1,
+                      color: "text.secondary",
+                    }}
+                  >
+                    {titulo}
+                  </Typography>
+                </Stack>
+
+                {ativo ? (
+                  <Chip
+                    icon={<CheckCircle sx={{ fontSize: 16 }} />}
+                    label="ATIVO"
+                    sx={{
+                      backgroundColor: theme.palette.success.main,
+                      color: "white",
+                      fontWeight: "bold",
+                      boxShadow: theme.shadows[1],
+                    }}
+                    size="small"
+                  />
+                ) : (
+                  <Chip
+                    icon={<CalendarToday sx={{ fontSize: 16 }} />}
+                    label="FORA DE HORÁRIO"
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      borderColor: alpha(theme.palette.text.secondary, 0.2),
+                      color: "text.secondary",
+                      backgroundColor: alpha(
+                        theme.palette.background.default,
+                        0.5,
+                      ),
+                    }}
+                  />
+                )}
+              </Box>
+
+              {/* Nome ou mensagem fora de horário */}
+              {ativo && plantonista ? (
+                <>
+                  <Typography
+                    variant="h3"
+                    sx={{
+                      fontWeight: 900,
+                      color: "text.primary",
+                      lineHeight: 1.2,
+                      mb: 1,
+                    }}
+                  >
+                    {plantonista?.nome || "Plantonista não definido"}
+                  </Typography>
+
+                  <Stack direction="row" alignItems="center" spacing={0.5}>
+                    <AccessTime
+                      sx={{ fontSize: 14, color: "text.secondary" }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary", fontWeight: 500 }}
+                    >
+                      {horaAtualStr} • {dataHojeFormatada}
+                    </Typography>
+                  </Stack>
+                </>
+              ) : (
+                <>
+                  <Typography
+                    variant="h4"
+                    sx={{
+                      fontWeight: 900,
+                      color: "text.primary",
+                      lineHeight: 1.2,
+                      mb: 1,
+                    }}
+                  >
+                    Fora de horário
+                  </Typography>
+
+                  <Typography
+                    variant="body1"
+                    sx={{ color: "text.secondary", fontWeight: 700 }}
+                  >
+                    Abrir chamado no GLPI
+                  </Typography>
+
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    spacing={0.5}
+                    sx={{ mt: 1 }}
+                  >
+                    <AccessTime
+                      sx={{ fontSize: 14, color: "text.secondary" }}
+                    />
+                    <Typography
+                      variant="body2"
+                      sx={{ color: "text.secondary", fontWeight: 500 }}
+                    >
+                      {horaAtualStr} • {dataHojeFormatada}
+                    </Typography>
+                  </Stack>
+                </>
+              )}
+            </Box>
+
+            {/* Telefone só quando estiver ativo e tiver plantonista */}
+            {ativo && plantonista && (
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: 2,
+                  border: 1,
+                  borderColor: alpha(corBorda, 0.2),
+                  backgroundColor: alpha(corBorda, 0.05),
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 2,
+                  transition: "all 0.3s ease",
+                }}
+              >
+                <Stack direction="row" alignItems="center" spacing={2}>
+                  <Avatar
+                    sx={{
+                      bgcolor: corBorda,
+                      color: "white",
+                      boxShadow: 3,
+                      animation: "pulse 2s infinite",
+                      "@keyframes pulse": {
+                        "0%": { transform: "scale(1)" },
+                        "50%": { transform: "scale(1.05)" },
+                        "100%": { transform: "scale(1)" },
+                      },
+                    }}
+                  >
+                    <Phone />
+                  </Avatar>
+
+                  <Box>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: "bold",
+                        textTransform: "uppercase",
+                        color: "text.secondary",
+                      }}
+                    >
+                      Telefone
+                    </Typography>
+
+                    <Typography
+                      variant="h6"
+                      noWrap
+                      sx={{
+                        fontWeight: "bold",
+                        lineHeight: 1,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {plantonista.telefone}
+                    </Typography>
+                  </Box>
+                </Stack>
+                <Tooltip title={"Ligar para Telefone"}>
+                  <IconButton
+                    component="a"
+                    href={`tel:${plantonista.telefone}`}
+                    // variant="contained"
+                    size="small"
+                    sx={{
+                      backgroundColor: theme.palette.success.dark,
+                      color: "white",
+                      fontWeight: "bold",
+                      textTransform: "none",
+                      boxShadow: theme.shadows[2],
+                      "&:hover": {
+                        backgroundColor: theme.palette.success.main,
+                        boxShadow: theme.shadows[4],
+                      },
+                    }}
+                  >
+                    <PhoneAndroid />
+                  </IconButton>
+                </Tooltip>
+              </Paper>
+            )}
+          </CardContent>
+        </Card>
+      </Box>
+    </motion.div>
+  );
+};
+export default PlantaoCard;

@@ -97,8 +97,6 @@ const ModalEditarInventario = ({ item, showToast, setFlushHook }: any) => {
         maquina: maquina ? maquina : undefined,
       };
 
-      console.log("Dados sendo atualizados:", dadosAtualizados);
-
       // Chamar o serviço de atualização
       await InventarioService.update({ _id: item._id, ...dadosAtualizados });
 

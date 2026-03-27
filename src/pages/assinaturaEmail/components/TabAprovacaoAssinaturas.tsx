@@ -216,8 +216,8 @@ const TabAprovacaoAssinaturas = ({
                     </Typography>
                   </Box>
                   <Box sx={{ display: "flex", gap: 2 }}>
-                    <ModalReprovarAssinatura item={item} />
-                    <ModalAprovarAssinatura item={item} />
+                    <ModalReprovarAssinatura item={item} setFlushHook={setFlushHook} />
+                    <ModalAprovarAssinatura item={item} setFlushHook={setFlushHook} />
                   </Box>
                 </Box>
 

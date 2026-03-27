@@ -115,8 +115,6 @@ const ModalCriarInventario = ({ showToast, setFlushHook }: any) => {
       // Formatar dados antes de enviar
       const dadosFormatados = formatarDadosParaEnvio();
 
-      console.log("Dados sendo enviados:", dadosFormatados); // Para debug
-
       await InventarioService.create(dadosFormatados);
       showToast("Sucesso ao Criar Inventário!", "success");
       setFlushHook((prev: any) => !prev);
@@ -170,8 +168,6 @@ const ModalCriarInventario = ({ showToast, setFlushHook }: any) => {
           ])
         );
 
-        console.log("Enviando dados da linha:", cleanedData); // Para debug
-
         await InventarioService.createBySpreadsheet(cleanedData);
         successCount++;
       } catch (error: any) {
@@ -207,8 +203,6 @@ const ModalCriarInventario = ({ showToast, setFlushHook }: any) => {
         raw: false, // Converte números e datas para string
         defval: "", // Valor padrão para células vazias
       });
-
-      console.log("Dados processados da planilha:", result);
 
       if (result.length === 0) {
         showToast("A planilha está vazia", "error");

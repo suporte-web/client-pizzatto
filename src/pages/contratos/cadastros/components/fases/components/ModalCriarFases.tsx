@@ -39,8 +39,6 @@ const ModalCriarFases = ({ showToast, setFlushHook }: any) => {
 
   const handleChange =
     (field: keyof FaseData) => (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-      console.log("Novo valor:", value);
       setFormData((prev) => ({
         ...prev,
         [field]: event.target.value,
@@ -66,9 +64,6 @@ const ModalCriarFases = ({ showToast, setFlushHook }: any) => {
   const handleSubmit = async () => {
     try {
       if (validateForm()) {
-        console.log("Dados da fase:", formData);
-
-        // Supondo que o método de criação seja adequado para esse tipo de dado
         await FaseService.create(formData);
         handleClose();
         showToast("Fase criada com sucesso!", "success");

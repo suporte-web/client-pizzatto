@@ -94,8 +94,6 @@ const ModalCriarContasOffice = ({ setFlushHook, showToast }: any) => {
           ])
         );
 
-        console.log("Enviando dados da linha:", cleanedData); // Para debug
-
         await ContaOfficeService.createBySpreadsheet(cleanedData);
         successCount++;
       } catch (error: any) {
@@ -131,8 +129,6 @@ const ModalCriarContasOffice = ({ setFlushHook, showToast }: any) => {
         raw: false, // Converte números e datas para string
         defval: "", // Valor padrão para células vazias
       });
-
-      console.log("Dados processados da planilha:", result);
 
       if (result.length === 0) {
         showToast("A planilha está vazia", "error");

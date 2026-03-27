@@ -137,8 +137,6 @@ const ModalEditarFiliais = ({ showToast, setFlushHook, item }: any) => {
   const handleSubmit = async () => {
     try {
       if (validateForm()) {
-        console.log("Dados da Filial:", formData);
-
         await FilialService.update({ ...formData, _id: item._id });
         handleClose();
         showToast("Sucesso ao editar Filial!", "success");

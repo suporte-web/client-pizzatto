@@ -6,7 +6,6 @@ const FindAddressByCep = ({ cepAddress, setCepAddress, setInfoCep }: any) => {
   const handleFindByCep = async () => {
     try {
       const get = await cep(cepAddress);
-      console.log(get);
       setInfoCep(get);
     } catch (error) {
       console.log(error);

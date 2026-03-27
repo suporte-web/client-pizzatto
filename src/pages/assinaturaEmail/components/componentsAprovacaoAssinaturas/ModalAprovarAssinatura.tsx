@@ -15,7 +15,7 @@ import { green } from "@mui/material/colors";
 import { useState } from "react";
 import { AssinaturaEmailService } from "../../../../stores/assinaturaEmail/service";
 
-const ModalAprovarAssinatura = ({ item }: any) => {
+const ModalAprovarAssinatura = ({ item, setFlushHook }: any) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -35,6 +35,7 @@ const ModalAprovarAssinatura = ({ item }: any) => {
         status: "APROVADO",
       });
 
+      setFlushHook((prev: any) => !prev);
       handleClose();
     } catch (error) {
       console.log(error);
@@ -111,13 +112,9 @@ const ModalAprovarAssinatura = ({ item }: any) => {
             )}
           </Box>
 
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mt: 2 }}
-          >
-            Após a aprovação, a assinatura será liberada para uso e o colaborador
-            será notificado por e-mail.
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+            Após a aprovação, a assinatura será liberada para uso e o
+            colaborador será notificado por e-mail.
           </Typography>
         </DialogContent>
 

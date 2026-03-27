@@ -51,7 +51,6 @@ const UsersAd = () => {
       });
       setUsersAd(get.data);
       setTotalPages(get.total);
-      console.log(get);
     } catch (error) {
       console.log(error);
     } finally {
@@ -147,6 +146,8 @@ const UsersAd = () => {
                 <TableCell>Nome</TableCell>
                 <TableCell>Usuario</TableCell>
                 <TableCell>E-mail</TableCell>
+                <TableCell>Departamento</TableCell>
+                <TableCell>Filial</TableCell>
                 <TableCell>Ativo</TableCell>
                 {/* {user?.acessos?.administrador &&  */}
                 <TableCell>Ações</TableCell>
@@ -159,6 +160,8 @@ const UsersAd = () => {
                   <TableCell>{item.cn}</TableCell>
                   <TableCell>{item.sAMAccountName}</TableCell>
                   <TableCell>{item.userPrincipalName}</TableCell>
+                  <TableCell>{item.department}</TableCell>
+                  <TableCell>{item.company}</TableCell>
                   <TableCell>
                     <Chip
                       label={

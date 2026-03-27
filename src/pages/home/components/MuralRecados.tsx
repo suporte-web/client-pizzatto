@@ -1,9 +1,4 @@
-import {
-  Box,
-  Divider,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { Box, Divider, Paper, Typography } from "@mui/material";
 import { orange } from "@mui/material/colors";
 import { useUser } from "../../../UserContext";
 import { useEffect, useState } from "react";
@@ -46,6 +41,7 @@ const MuralRecados = () => {
       )}
       {murais.length >= 1 && (
         <>
+          <Divider sx={{ mt: 2, mb: 1 }} />
           <Box
             sx={{
               display: "flex",

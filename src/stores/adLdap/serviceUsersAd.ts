@@ -15,7 +15,7 @@ export const UserAdService = {
   getUsersAdByFilter: async (data: any) => {
     const filter = await usersAdApi.post(
       `/ad-users/get-users-ad-by-filter`,
-      data
+      data,
     );
     return filter.data;
   },
@@ -36,10 +36,12 @@ export const UserAdService = {
   },
 
   resetPasswordAndForceChange: async (data: any) => {
-    const reset = await usersAdApi.post(
-      `/ad-users/reset-password`,
-      data
-    );
+    const reset = await usersAdApi.post(`/ad-users/reset-password`, data);
     return reset.data;
+  },
+
+  getAllSetoresUsersAd: async () => {
+    const get = await usersAdApi.get(`/ad-users/get-all-setores-users-ad`);
+    return get.data;
   },
 };

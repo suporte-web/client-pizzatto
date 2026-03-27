@@ -208,7 +208,6 @@ const ChangePassword = () => {
     const fetch = async () => {
       if (!user) return;
       const result = await UserService.findOne(user._id);
-      console.log(result);
       setPrimeiroAcesso(result.primeiroAcesso);
     };
     fetch();

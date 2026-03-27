@@ -38,8 +38,6 @@ const ConfiguracaoHorarios = () => {
     try {
       const get = await PlantaoService.getAllEscalasAndHorarios();
 
-      console.log(get);
-      
       setJanelaSistemas({
         inicio: get?.janelaSisInicio ?? "08:00",
         fim: get?.janelaSisFim ?? "18:00",

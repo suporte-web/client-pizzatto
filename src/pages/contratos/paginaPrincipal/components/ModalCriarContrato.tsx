@@ -75,8 +75,6 @@ const ModalCriarContrato = ({ showToast, setFlushHook }: any) => {
 
       const dadosFormatados = formatarDadosParaEnvio();
 
-      console.log("Dados sendo enviados:", dadosFormatados); // Para debug
-
       await ContratosService.create(dadosFormatados);
       showToast("Sucesso ao Criar Contrato!", "success");
       setFlushHook((prev: any) => !prev);

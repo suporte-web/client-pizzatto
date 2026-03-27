@@ -85,16 +85,12 @@ const ModalCriarPop = ({ setFluskHook }: any) => {
 
   const handleCreate = async () => {
     try {
-      console.log("Arquivos para upload:", uploadedFiles);
-
       if (uploadedFiles.length === 0) {
         showToast("Nenhum arquivo selecionado", "warning");
         return;
       }
 
       for (const uploadedFile of uploadedFiles) {
-        console.log("Enviando arquivo:", uploadedFile.file);
-
         const formData = new FormData();
 
         // O campo deve ser 'file' para match com @FileInterceptor('file')
@@ -106,17 +102,17 @@ const ModalCriarPop = ({ setFluskHook }: any) => {
         formData.append("size", uploadedFile.file.size.toString());
         formData.append(
           "filePath",
-          `uploads/${Date.now()}_${uploadedFile.file.name}`
+          `uploads/${Date.now()}_${uploadedFile.file.name}`,
         );
 
         // Debug
-        console.log("Conteúdo do FormData:");
-        for (const [key, value] of formData.entries()) {
-          console.log(
-            key,
-            value instanceof File ? `File: ${value.name}` : value
-          );
-        }
+        // console.log("Conteúdo do FormData:");
+        // for (const [key, value] of formData.entries()) {
+        //   console.log(
+        //     key,
+        //     value instanceof File ? `File: ${value.name}` : value,
+        //   );
+        // }
 
         await PopsService.create(formData);
       }

@@ -169,8 +169,6 @@ const ModalCriarClientes = ({ showToast, setFlushHook }: any) => {
   const handleSubmit = async () => {
     try {
       if (validateForm()) {
-        console.log("Dados do cliente:", formData);
-
         await ClienteService.create(formData);
         handleClose();
         showToast("Sucesso ao criar Cliente!", "success");

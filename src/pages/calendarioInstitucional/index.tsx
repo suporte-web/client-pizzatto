@@ -12,29 +12,63 @@ import {
   MenuItem,
   Select,
   TextField,
-  Tooltip,
   Typography,
   type ContainerProps,
 } from "@mui/material";
 import SidebarNew from "../../components/Sidebar";
 import {
-  Add,
   RefreshOutlined,
   ChevronLeft,
   ChevronRight,
+  Event,
 } from "@mui/icons-material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { orange, grey } from "@mui/material/colors";
+import ModalCreateCalendario from "./components/ModalCreateCalendario";
+import { CalendarioService } from "../../stores/calendario/service";
+import { UserAdService } from "../../stores/adLdap/serviceUsersAd";
+import ModalSeeEventos from "./components/ModalSeeEventos";
+import { useUser } from "../../UserContext";
 
 const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+type CalendarioItem = {
+  id: string;
+  nome: string;
+  data: string;
+  horario?: string;
+  local?: string;
+  criadoPor?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  area?: string;
+  descricao?: string;
+};
+
+type CalendarDay = {
+  day: number | null;
+  isToday: boolean;
+  dateKey: string | null;
+};
 
 const CalendarioInstitucional = () => {
   const containerProps: ContainerProps = {
     maxWidth: false,
   };
+  const { user } = useUser();
 
-  const [setores, setSetores] = useState("");
+  const [departamentos, setDepartamentos] = useState<string[]>([]);
+  const [departamento, setDepartamento] = useState("");
+  const [pesquisa, setPesquisa] = useState("");
+
+  const [calendarios, setCalendarios] = useState<CalendarioItem[]>([]);
   const [currentDate, setCurrentDate] = useState(new Date());
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>("");
+  const [selectedEvents, setSelectedEvents] = useState<CalendarioItem[]>([]);
+
+  const [flushHook, setFlushHook] = useState(false);
 
   const today = new Date();
 
@@ -44,6 +78,24 @@ const CalendarioInstitucional = () => {
       year: "numeric",
     });
   }, [currentDate]);
+
+  const eventosPorDia = useMemo(() => {
+    const mapa: Record<string, CalendarioItem[]> = {};
+
+    for (const evento of calendarios) {
+      if (!evento?.data) continue;
+
+      const chave = evento.data;
+
+      if (!mapa[chave]) {
+        mapa[chave] = [];
+      }
+
+      mapa[chave].push(evento);
+    }
+
+    return mapa;
+  }, [calendarios]);
 
   const calendarDays = useMemo(() => {
     const year = currentDate.getFullYear();
@@ -55,13 +107,10 @@ const CalendarioInstitucional = () => {
     const startWeekDay = firstDayOfMonth.getDay();
     const totalDays = lastDayOfMonth.getDate();
 
-    const days: Array<{
-      day: number | null;
-      isToday: boolean;
-    }> = [];
+    const days: CalendarDay[] = [];
 
     for (let i = 0; i < startWeekDay; i++) {
-      days.push({ day: null, isToday: false });
+      days.push({ day: null, isToday: false, dateKey: null });
     }
 
     for (let day = 1; day <= totalDays; day++) {
@@ -70,7 +119,9 @@ const CalendarioInstitucional = () => {
         month === today.getMonth() &&
         year === today.getFullYear();
 
-      days.push({ day, isToday });
+      const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+      days.push({ day, isToday, dateKey });
     }
 
     return days;
@@ -78,15 +129,65 @@ const CalendarioInstitucional = () => {
 
   const handlePrevMonth = () => {
     setCurrentDate(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1)
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1),
     );
   };
 
   const handleNextMonth = () => {
     setCurrentDate(
-      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1)
+      (prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1),
     );
   };
+
+  const handleResetFilters = () => {
+    setPesquisa("");
+    setDepartamento("");
+    setFlushHook((prev: any) => !prev);
+    setCurrentDate(new Date());
+  };
+
+  const handleOpenDayEvents = (dateKey: string, eventos: CalendarioItem[]) => {
+    setSelectedDate(dateKey);
+    setSelectedEvents(eventos);
+    setDialogOpen(true);
+  };
+
+  const fetchData = async () => {
+    try {
+      const find = await CalendarioService.findByFilter({
+        data: currentDate,
+        departamento: user.roles?.includes(
+          "ADMIN",
+          "ENDOMARKETING",
+          "PESSOAS_E_CULTURA",
+        )
+          ? departamento
+          : user?.department,
+        pesquisa,
+      });
+
+      setCalendarios(find.result ?? []);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [pesquisa, departamento, currentDate, flushHook]);
+
+  const fetchArea = async () => {
+    try {
+      const get = await UserAdService.getAllSetoresUsersAd();
+      setDepartamentos(get ?? []);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchArea();
+  }, []);
 
   return (
     <SidebarNew>
@@ -95,35 +196,49 @@ const CalendarioInstitucional = () => {
           <TextField
             size="small"
             fullWidth
+            value={pesquisa}
+            onChange={(e) => {
+              setPesquisa(e.target.value);
+            }}
             label="Pesquisar informações"
             InputProps={{ style: { borderRadius: "10px" } }}
           />
 
-          <FormControl fullWidth size="small">
-            <InputLabel>Setor</InputLabel>
-            <Select
-              value={setores}
-              label="Setor"
-              onChange={(e) => setSetores(e.target.value)}
-              sx={{ borderRadius: "10px" }}
-            >
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-          </FormControl>
+          {user?.roles?.includes(
+            "ADMIN",
+            "ENDOMARKETING",
+            "PESSOAS_E_CULTURA",
+          ) && (
+            <>
+              <FormControl fullWidth size="small">
+                <InputLabel>Departamento</InputLabel>
+                <Select
+                  value={departamento}
+                  label="Departamento"
+                  onChange={(e) => setDepartamento(e.target.value)}
+                  sx={{ borderRadius: "10px" }}
+                >
+                  {departamentos.map((item) => (
+                    <MenuItem key={item} value={item}>
+                      {item}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-          <Tooltip title="Resetar Informações">
-            <IconButton sx={{ borderRadius: "10px", bgcolor: orange[200] }}>
-              <RefreshOutlined />
-            </IconButton>
-          </Tooltip>
+              <IconButton
+                sx={{ borderRadius: "10px", bgcolor: orange[200] }}
+                onClick={handleResetFilters}
+              >
+                <RefreshOutlined />
+              </IconButton>
 
-          <Tooltip title="Criar Evento">
-            <IconButton sx={{ bgcolor: orange[200] }}>
-              <Add />
-            </IconButton>
-          </Tooltip>
+              <ModalCreateCalendario
+                setFlushHook={setFlushHook}
+                departamentos={departamentos}
+              />
+            </>
+          )}
         </Box>
 
         <Divider sx={{ m: 2 }} />
@@ -165,7 +280,7 @@ const CalendarioInstitucional = () => {
                     sx={{
                       display: "grid",
                       gridTemplateColumns: "repeat(7, 1fr)",
-                      gap: 1,
+                      gap: 0.5,
                       mb: 1,
                     }}
                   >
@@ -174,7 +289,7 @@ const CalendarioInstitucional = () => {
                         key={day}
                         sx={{
                           textAlign: "center",
-                          py: 1,
+                          py: 0.5,
                         }}
                       >
                         <Typography
@@ -194,44 +309,101 @@ const CalendarioInstitucional = () => {
                     sx={{
                       display: "grid",
                       gridTemplateColumns: "repeat(7, 1fr)",
-                      gap: 1,
+                      gap: 0.5,
                     }}
                   >
-                    {calendarDays.map((item, index) => (
-                      <Box
-                        key={`${item.day}-${index}`}
-                        sx={{
-                          aspectRatio: "1 / 1",
-                          minHeight: 42,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: 2,
-                          bgcolor: item.isToday ? orange[300] : grey[100],
-                          color: item.isToday ? "#fff" : "text.primary",
-                          fontWeight: item.isToday ? 700 : 500,
-                          transition: "0.2s",
-                          cursor: item.day ? "pointer" : "default",
-                          "&:hover": {
-                            bgcolor: item.day
-                              ? item.isToday
-                                ? orange[400]
-                                : grey[200]
-                              : "transparent",
-                          },
-                        }}
-                      >
-                        <Typography variant="body2">
-                          {item.day ?? ""}
-                        </Typography>
-                      </Box>
-                    ))}
+                    {calendarDays.map((item, index) => {
+                      const eventosDoDia = item.dateKey
+                        ? (eventosPorDia[item.dateKey] ?? [])
+                        : [];
+
+                      const temEvento = eventosDoDia.length > 0;
+
+                      const content = (
+                        <Box
+                          sx={{
+                            height: 50,
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            borderRadius: "10px",
+                            bgcolor: item.isToday ? orange[300] : grey[100],
+                            color: item.isToday ? "#fff" : "text.primary",
+                            fontWeight: item.isToday ? 700 : 500,
+                            transition: "0.2s",
+                            cursor:
+                              item.day && temEvento ? "pointer" : "default",
+                            p: 0.5,
+                            "&:hover": {
+                              bgcolor:
+                                item.day && temEvento
+                                  ? item.isToday
+                                    ? orange[400]
+                                    : grey[200]
+                                  : item.isToday
+                                    ? orange[300]
+                                    : grey[100],
+                            },
+                          }}
+                          onClick={() => {
+                            if (item.dateKey && temEvento) {
+                              handleOpenDayEvents(item.dateKey, eventosDoDia);
+                            }
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 600, fontSize: "0.8rem" }}
+                          >
+                            {item.day ?? ""}
+                          </Typography>
+
+                          {temEvento && (
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0.3,
+                              }}
+                            >
+                              <Event sx={{ fontSize: 12 }} />
+                              <Typography
+                                variant="caption"
+                                sx={{ fontSize: "0.6rem", fontWeight: 700 }}
+                              >
+                                {eventosDoDia.length}
+                              </Typography>
+                            </Box>
+                          )}
+                        </Box>
+                      );
+
+                      if (!item.day) {
+                        return (
+                          <Box key={`empty-${index}`} sx={{ height: 50 }}>
+                            {content}
+                          </Box>
+                        );
+                      }
+
+                      return <Box key={item.dateKey}>{content}</Box>;
+                    })}
                   </Box>
                 </CardContent>
               </Card>
             </Grid>
           </Grid>
         </Box>
+
+        <ModalSeeEventos
+          dialogOpen={dialogOpen}
+          setDialogOpen={setDialogOpen}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          selectedEvents={selectedEvents}
+          setSelectedEvents={setSelectedEvents}
+        />
       </Container>
     </SidebarNew>
   );

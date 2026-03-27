@@ -117,8 +117,6 @@ const ModalEditarValoresContrato = ({ item, showToast, setFlushHook }: any) => {
   const handleSubmit = async () => {
     try {
       if (validateForm()) {
-        console.log("Dados do contrato:", formData);
-
         await ValoresContratosService.update(formData);
         handleClose();
         showToast("Sucesso ao atualizar Valor de Contrato!", "success");

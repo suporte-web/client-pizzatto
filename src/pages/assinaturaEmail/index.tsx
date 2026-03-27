@@ -19,7 +19,7 @@ const AssinaturaEmail = () => {
   const [assinaturasPadrao, setAssinaturasPadrao] = useState<any[]>([]);
   const [assinaturaPadrao, setAssinaturaPadrao] = useState({});
 
-  const fetchDataAssinaturasToAprovar = useCallback(async () => {
+  const fetchDataAssinaturasToAprovar = async () => {
     setLoading(true);
     try {
       const get = await AssinaturaEmailService.findByFilter({
@@ -37,11 +37,15 @@ const AssinaturaEmail = () => {
     } finally {
       setLoading(false);
     }
-  }, [pesquisa, page, rowsPerPage]);
+  };
 
   useEffect(() => {
     fetchDataAssinaturasToAprovar();
-  }, [fetchDataAssinaturasToAprovar, flushHook]);
+  }, [pesquisa, page, rowsPerPage, flushHook]);
+
+  useEffect(() => {
+    fetchDataAssinaturasToAprovar();
+  }, [flushHook]);
 
   const fetchDataAssinaturasPadrao = useCallback(async () => {
     setLoading(true);
@@ -76,7 +80,6 @@ const AssinaturaEmail = () => {
           <Tabs
             value={tab}
             onChange={(_, newValue) => {
-              console.log("novo tab:", newValue);
               setTab(newValue);
             }}
           >

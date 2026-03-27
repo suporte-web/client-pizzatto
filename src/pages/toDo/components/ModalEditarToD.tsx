@@ -54,7 +54,7 @@ const ModalEditarToDo = ({ item }: any) => {
   const fetchUsersAtivos = async () => {
     try {
       const get = await UserService.getUsersAtivos();
-      console.log(get);
+      
       setUsers(get);
     } catch (error) {
       console.log(error);

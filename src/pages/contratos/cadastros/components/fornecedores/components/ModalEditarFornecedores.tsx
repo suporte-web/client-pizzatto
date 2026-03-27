@@ -160,8 +160,6 @@ const ModalEditarFornecedor = ({ showToast, setFlushHook, item }: any) => {
   const handleSubmit = async () => {
     try {
       if (validateForm()) {
-        console.log("Dados do fornecedor:", formData);
-
         await FornecedorService.update({ ...formData, _id: item._id });
         handleClose();
         showToast("Sucesso ao editar Fornecedor!", "success");

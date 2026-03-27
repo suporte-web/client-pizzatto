@@ -40,7 +40,6 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     const fetchUser = async () => {
       try {
         const token = localStorage.getItem("token");
-        // console.log(token);
 
         if (!token) {
           setIsLoading(false);

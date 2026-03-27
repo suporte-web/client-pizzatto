@@ -16,7 +16,7 @@ import { red } from "@mui/material/colors";
 import { useState } from "react";
 import { AssinaturaEmailService } from "../../../../stores/assinaturaEmail/service";
 
-const ModalReprovarAssinatura = ({ item }: any) => {
+const ModalReprovarAssinatura = ({ item, setFlushHook }: any) => {
   const [open, setOpen] = useState(false);
   const [motivo, setMotivo] = useState("");
   const [loading, setLoading] = useState(false);
@@ -44,6 +44,7 @@ const ModalReprovarAssinatura = ({ item }: any) => {
         motivo: motivo.trim(),
       });
 
+      setFlushHook((prev: any) => !prev)
       handleClose();
     } catch (error) {
       console.log(error);

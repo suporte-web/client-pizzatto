@@ -160,8 +160,6 @@ const ModalEditarCliente = ({ showToast, setFlushHook, item }: any) => {
   const handleSubmit = async () => {
     try {
       if (validateForm()) {
-        console.log("Dados do cliente:", formData);
-
         await ClienteService.update({ ...formData, _id: item._id });
         handleClose();
         showToast("Sucesso ao editar Cliente!", "success");

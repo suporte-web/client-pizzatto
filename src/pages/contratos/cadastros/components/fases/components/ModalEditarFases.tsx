@@ -61,9 +61,6 @@ const ModalEditarFases = ({ item, showToast, setFlushHook }: any) => {
   const handleSubmit = async () => {
     try {
       if (validateForm()) {
-        console.log("Dados da fase:", formData);
-
-        // Supondo que o método de criação seja adequado para esse tipo de dado
         await FaseService.update(formData);
         handleClose();
         showToast("Fase editada com sucesso!", "success");
