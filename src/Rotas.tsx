@@ -19,6 +19,7 @@ import Organograma from "./pages/organograma";
 import CalendarioInstitucional from "./pages/calendarioInstitucional";
 import AssinaturaEmail from "./pages/assinaturaEmail";
 import PlantaoAdmin from "./pages/plantaoAdmin";
+import Politicas from "./pages/politicas";
 
 const Rotas = () => (
   <Routes>
@@ -148,6 +149,14 @@ const Rotas = () => (
       element={
         <UserProvider>
           <PlantaoAdmin />
+        </UserProvider>
+      }
+    />
+    <Route
+      path="/politicas"
+      element={
+        <UserProvider>
+          <Politicas />
         </UserProvider>
       }
     />

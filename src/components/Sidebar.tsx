@@ -15,6 +15,7 @@ import {
   AlternateEmail,
   GradeOutlined,
   WorkOutline,
+  LocalPoliceOutlined,
 } from "@mui/icons-material";
 import {
   alpha,
@@ -73,7 +74,8 @@ function titleFromPath(pathname: string) {
     "/organograma": "Organograma",
     "/calendario-institucional": "Calendário Institucional",
     "/assinatura-email": "Assinatura de E-mail",
-    plantao: "Plantão",
+    "/plantao": "Plantão",
+    "/politicas": "Politicas",
   };
 
   return map[pathname] ?? "Sistema";
@@ -823,6 +825,16 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                 active={location.pathname === "/calendario-institucional"}
               >
                 {!isCollapsed && "Calendário Institucional"}
+              </StyledMenuItem>
+            )}
+            {user.roles?.includes("ADMIN") && (
+              <StyledMenuItem
+                collapsed={isCollapsed}
+                icon={<LocalPoliceOutlined />}
+                component={<Link to="/politicas" />}
+                active={location.pathname === "/politicas"}
+              >
+                {!isCollapsed && "Politicas"}
               </StyledMenuItem>
             )}
           </Menu>

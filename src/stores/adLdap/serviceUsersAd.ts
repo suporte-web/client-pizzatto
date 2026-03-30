@@ -44,4 +44,9 @@ export const UserAdService = {
     const get = await usersAdApi.get(`/ad-users/get-all-setores-users-ad`);
     return get.data;
   },
+
+  getAllActiveUsers: async () => {
+    const get = await usersAdApi.get(`/ad-users/get-all-users-ad-actives`);
+    return get.data;
+  },
 };

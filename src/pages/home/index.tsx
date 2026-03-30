@@ -5,6 +5,7 @@ import MuralRecados from "./components/MuralRecados";
 import ModalCreateAssinaturaEmail from "../assinaturaEmail/components/componentsAprovacaoAssinaturas/ModalCreateAssinaturaEmail";
 import { useCallback, useEffect, useState } from "react";
 import { AssinaturaPadraoService } from "../../stores/assinaturaPadrao/services";
+import PoliticasAceites from "./components/PoliticasAceites";
 
 const Home = () => {
   const containerProps: ContainerProps = {
@@ -47,6 +48,7 @@ const Home = () => {
         />
         <Divider sx={{ mt: 2, mb: 2 }} />
         <MuralRecados />
+        <PoliticasAceites />
       </Container>
     </Sidebar>
   );
