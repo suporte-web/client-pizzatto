@@ -42,13 +42,9 @@ const MembrosDaEquipe = () =>
     };
 
     const addContato = () => {
-      const id =
-        typeof crypto !== "undefined" && "randomUUID" in crypto
-          ? crypto.randomUUID()
-          : String(Date.now());
       setContatos((prev: any) => [
         ...prev,
-        { id, nome: "", telefone: "", area: "Sistemas" },
+        { nome: "", telefone: "", area: "Sistemas" },
       ]);
     };
 
