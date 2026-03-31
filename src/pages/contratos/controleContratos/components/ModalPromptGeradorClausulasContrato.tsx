@@ -89,8 +89,6 @@ const ModalPromptGeradorClausulas = ({
         }
       );
 
-      console.log(upd);
-
       // 🔴 Ajuste aqui conforme o retorno da sua API
       // Exemplo: se vier em upd.data.clausulasIa, troque a linha abaixo
       setClausulasIaTexto(upd?.clausulasIa || upd?.data?.clausulasIa || "");
