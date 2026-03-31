@@ -1,24 +1,60 @@
-import { Box, Divider, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Checkbox,
+  Divider,
+  Paper,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { orange } from "@mui/material/colors";
 import { useUser } from "../../../UserContext";
 import { useEffect, useState } from "react";
 import ModalCreateMural from "./componentsMural/ModalCreateMural";
 import { MuralService } from "../../../stores/mural/service";
-import moment from "moment";
+import { MuralLikeService } from "../../../stores/muralLike/service";
+import { Favorite, FavoriteBorder } from "@mui/icons-material";
+import ModalCreateComentarioMural from "./componentsMural/ModalCreateComentarioMural";
+import { MuralComentarioService } from "../../../stores/muralComentario/service";
 
 const MuralRecados = () => {
-  // const containerProps: ContainerProps = {
-  //   maxWidth: false,
-  // };
   const { user } = useUser();
 
-  const [murais, setMurais] = useState([]);
+  const [murais, setMurais] = useState<any[]>([]);
   const [flushHook, setFlushHook] = useState(false);
+
+  const [comentarios, setComentarios] = useState<any[]>([]);
+  const [loadingComentarios, setLoadingComentarios] = useState(false);
 
   const fetchGetMural = async () => {
     try {
-      const get = await MuralService.getAllByFilial();
-      setMurais(get);
+      const getMurais = await MuralService.getAllByFilial();
+
+      const muraisComDados = await Promise.all(
+        getMurais.map(async (mural: any) => {
+          try {
+            const [likes, comentarios] = await Promise.all([
+              MuralLikeService.findByMural({ muralId: mural.id }),
+              MuralComentarioService.findByMural({ muralId: mural.id }),
+            ]);
+
+            return {
+              ...mural,
+              likes: Array.isArray(likes) ? likes : [],
+              comentarios: Array.isArray(comentarios) ? comentarios : [],
+            };
+          } catch (error) {
+            console.log(`Erro ao buscar dados do mural ${mural.id}:`, error);
+
+            return {
+              ...mural,
+              likes: [],
+              comentarios: [],
+            };
+          }
+        }),
+      );
+
+      setMurais(muraisComDados);
     } catch (error) {
       console.log(error);
     }
@@ -33,15 +69,55 @@ const MuralRecados = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const handleToggleLikeMural = async (item: any) => {
+    try {
+      const usuarioJaCurtiu = item.likes?.some(
+        (like: any) => like.muralId === item.id && like.nome === user?.nome,
+      );
+
+      if (usuarioJaCurtiu) {
+        return;
+      }
+
+      await MuralLikeService.create({
+        muralId: item.id,
+        codigo: user?.codigo,
+        nome: user?.nome,
+      });
+
+      fetchGetMural();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchComentarios = async (muralId: string) => {
+    try {
+      setLoadingComentarios(true);
+
+      const response = await MuralComentarioService.findByMural({
+        muralId,
+      });
+
+      setComentarios(Array.isArray(response) ? response : []);
+    } catch (error) {
+      console.log(error);
+      setComentarios([]);
+    } finally {
+      setLoadingComentarios(false);
+    }
+  };
+
   return (
-    // <Container {...containerProps}>
     <>
-      {user?.roles.includes("ADMIN", "ENDOMARKETING") && (
-        <ModalCreateMural setFlushHook={setFlushHook} />
-      )}
+      {user?.roles?.some((role: string) =>
+        ["ADMIN", "ENDOMARKETING"].includes(role),
+      ) && <ModalCreateMural setFlushHook={setFlushHook} />}
+
       {murais.length >= 1 && (
         <>
           <Divider sx={{ mt: 2, mb: 1 }} />
+
           <Box
             sx={{
               display: "flex",
@@ -64,11 +140,23 @@ const MuralRecados = () => {
             }}
           >
             {murais.map((item: any) => {
+              console.log(item);
+
+              const totalLikes = item.likes?.length || 0;
+
+              const totalComentario = item.comentarios?.length || 0;
+
+              const usuarioJaCurtiu = item.likes?.some(
+                (like: any) =>
+                  like.muralId === item.id && like.nome === user?.name,
+              );
+
               return (
                 <Paper
                   key={item.id}
                   elevation={7}
                   sx={{
+                    position: "relative",
                     borderRadius: "16px",
                     overflow: "hidden",
                     border:
@@ -110,11 +198,13 @@ const MuralRecados = () => {
                         py: 0.5,
                         borderRadius: "8px",
                         boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+                        zIndex: 1,
                       }}
                     >
                       IMPORTANTE
                     </Box>
                   )}
+
                   {item.caminhoImagem && (
                     <Box
                       component="img"
@@ -155,18 +245,43 @@ const MuralRecados = () => {
                     <Box
                       sx={{
                         display: "flex",
-                        flexDirection: { xs: "column", md: "row" },
+                        alignItems: "center",
                         justifyContent: "space-between",
-                        gap: 1,
+                        gap: 2,
                       }}
                     >
-                      <Typography variant="body2" color="text.secondary">
-                        <strong>Criado por:</strong> {item.criadoPor}
-                      </Typography>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <Tooltip title="Curtir Mural">
+                            <Checkbox
+                              icon={<FavoriteBorder />}
+                              checked={!!usuarioJaCurtiu}
+                              onChange={() => handleToggleLikeMural(item)}
+                              checkedIcon={<Favorite />}
+                            />
+                          </Tooltip>
+                          <Typography variant="body2" fontWeight={600}>
+                            {totalLikes}
+                          </Typography>
+                        </Box>
 
-                      <Typography variant="body2" color="text.secondary">
-                        <strong>Criado em:</strong>{" "}
-                        {moment(item.createdAt).format("DD/MM/YYYY HH:mm")}
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <ModalCreateComentarioMural
+                            muralId={item.id}
+                            fetchComentarios={fetchComentarios}
+                            comentarios={comentarios}
+                            loadingComentarios={loadingComentarios}
+                          />
+                          <Typography variant="body2" fontWeight={600}>
+                            {totalComentario}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      <Typography variant="caption" color="text.secondary">
+                        Criado por: {item.criadoPor}
                       </Typography>
                     </Box>
                   </Box>
@@ -176,7 +291,6 @@ const MuralRecados = () => {
           </Box>
         </>
       )}
-      {/* </Container> */}
     </>
   );
 };
