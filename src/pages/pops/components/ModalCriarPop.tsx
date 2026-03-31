@@ -104,16 +104,6 @@ const ModalCriarPop = ({ setFluskHook }: any) => {
           "filePath",
           `uploads/${Date.now()}_${uploadedFile.file.name}`,
         );
-
-        // Debug
-        // console.log("Conteúdo do FormData:");
-        // for (const [key, value] of formData.entries()) {
-        //   console.log(
-        //     key,
-        //     value instanceof File ? `File: ${value.name}` : value,
-        //   );
-        // }
-
         await PopsService.create(formData);
       }
 

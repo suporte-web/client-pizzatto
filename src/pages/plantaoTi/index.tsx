@@ -3,31 +3,14 @@ import {
   Box,
   Typography,
   Button,
-  // Card,
-  // CardContent,
-  // Chip,
   Container,
   Grid,
   Avatar,
   Paper,
   alpha,
   useTheme,
-  // Stack,
-  // IconButton,
-  // Tooltip,
 } from "@mui/material";
-import {
-  // Phone,
-  // AccessTime,
-  Computer,
-  Storage,
-  // CheckCircle,
-  // CalendarToday,
-  ArrowBack,
-  // Phone,
-  // PhoneAndroid,
-} from "@mui/icons-material";
-// import { motion } from "framer-motion";
+import { Computer, Storage, ArrowBack } from "@mui/icons-material";
 import bgPlantao from "../../imgs/bg-plantao.jpg";
 import LogoPizzatto from "../../imgs/image.png";
 import { PlantaoService } from "../../stores/plantao/service";
@@ -76,7 +59,7 @@ const PlantaoPrincipal = () => {
   const fetchData = async () => {
     try {
       const get = await PlantaoService.getPlantonistaDiaSemana();
-      
+
       setEscalas(get);
     } catch (error) {
       console.log(error);
@@ -90,23 +73,38 @@ const PlantaoPrincipal = () => {
   const diaSemanaIndex = agora.getDay();
   const isFimDeSemana = diaSemanaIndex === 0 || diaSemanaIndex === 6;
 
+  const diasSemana = [
+    "domingo",
+    "segunda",
+    "terca",
+    "quarta",
+    "quinta",
+    "sexta",
+    "sabado",
+  ];
+
+  const diaSemanaAtual = diasSemana[diaSemanaIndex];
+
+  const normalizar = (valor?: string) =>
+    valor
+      ?.normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
+
   const isPlantaoAtivoSis = isFimDeSemana
     ? !!escalas?.sistemas
-    : escalas?.sistemas?.diaSemana === diaSemanaIndex &&
+    : normalizar(escalas?.diaSemana) === normalizar(diaSemanaAtual) &&
       estaDentroDoHorario(
-        escalas?.sistemas?.horaInicio,
-        escalas?.sistemas?.horaFim,
+        escalas?.sistemas?.inicio,
+        escalas?.sistemas?.fim,
         agora,
       );
 
   const isPlantaoAtivoInfra = isFimDeSemana
     ? !!escalas?.infra
-    : escalas?.infra?.diaSemana === diaSemanaIndex &&
-      estaDentroDoHorario(
-        escalas?.infra?.horaInicio,
-        escalas?.infra?.horaFim,
-        agora,
-      );
+    : normalizar(escalas?.diaSemana) === normalizar(diaSemanaAtual) &&
+      estaDentroDoHorario(escalas?.infra?.inicio, escalas?.infra?.fim, agora);
 
   return (
     <Box

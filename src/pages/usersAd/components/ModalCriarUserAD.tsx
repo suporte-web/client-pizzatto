@@ -103,9 +103,6 @@ const ModalCriarUserAD = ({ showToast }: any) => {
         ouPath,
       };
 
-      // TODO: enviar para API
-      console.log("Payload para criação do usuário:", payload);
-
       await UserAdService.create(payload);
 
       showToast("Usuário criado com sucesso!", "success");
