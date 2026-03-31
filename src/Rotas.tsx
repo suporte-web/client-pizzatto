@@ -20,6 +20,7 @@ import CalendarioInstitucional from "./pages/calendarioInstitucional";
 import AssinaturaEmail from "./pages/assinaturaEmail";
 import PlantaoAdmin from "./pages/plantaoAdmin";
 import Politicas from "./pages/politicas";
+import Holerites from "./pages/holerites";
 
 const Rotas = () => (
   <Routes>
@@ -157,6 +158,14 @@ const Rotas = () => (
       element={
         <UserProvider>
           <Politicas />
+        </UserProvider>
+      }
+    />
+    <Route
+      path="/holerites"
+      element={
+        <UserProvider>
+          <Holerites />
         </UserProvider>
       }
     />

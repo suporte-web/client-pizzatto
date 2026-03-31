@@ -140,7 +140,6 @@ const MuralRecados = () => {
             }}
           >
             {murais.map((item: any) => {
-              console.log(item);
 
               const totalLikes = item.likes?.length || 0;
 

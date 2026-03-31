@@ -13,7 +13,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { toBlob } from "html-to-image";
 import type { ChangeEvent } from "react";
 import pizzattoImage from "../../../../imgs/PizzattoLog_logo.png";
@@ -193,119 +193,119 @@ const ModalCreateAssinaturaEmail = ({
     }
   };
 
-  const htmlAssinatura = useMemo(() => {
-    const textColor = assinaturaPadrao?.corFont || "#1f1f1f";
-    const backgroundUrl = assinaturaPadrao?.caminhoBackground || "";
-    const photoX = assinaturaPadrao?.photoX ?? 24;
-    const photoY = assinaturaPadrao?.photoY ?? 42;
-    const photoSize = assinaturaPadrao?.photoSize ?? DEFAULT_PHOTO_SIZE;
-    const nomeX = assinaturaPadrao?.nomeX ?? 160;
-    const nomeY = assinaturaPadrao?.nomeY ?? 35;
-    const departamentoX = assinaturaPadrao?.departamentoX ?? 160;
-    const departamentoY = assinaturaPadrao?.departamentoY ?? 65;
-    const telefoneX = assinaturaPadrao?.telefoneX ?? 160;
-    const telefoneY = assinaturaPadrao?.telefoneY ?? 110;
-    const logoX = assinaturaPadrao?.logoX ?? 160;
-    const logoY = assinaturaPadrao?.logoY ?? 155;
-    const logoHeight = assinaturaPadrao?.logoHeight ?? DEFAULT_LOGO_HEIGHT;
+  // const htmlAssinatura = useMemo(() => {
+  //   const textColor = assinaturaPadrao?.corFont || "#1f1f1f";
+  //   const backgroundUrl = assinaturaPadrao?.caminhoBackground || "";
+  //   const photoX = assinaturaPadrao?.photoX ?? 24;
+  //   const photoY = assinaturaPadrao?.photoY ?? 42;
+  //   const photoSize = assinaturaPadrao?.photoSize ?? DEFAULT_PHOTO_SIZE;
+  //   const nomeX = assinaturaPadrao?.nomeX ?? 160;
+  //   const nomeY = assinaturaPadrao?.nomeY ?? 35;
+  //   const departamentoX = assinaturaPadrao?.departamentoX ?? 160;
+  //   const departamentoY = assinaturaPadrao?.departamentoY ?? 65;
+  //   const telefoneX = assinaturaPadrao?.telefoneX ?? 160;
+  //   const telefoneY = assinaturaPadrao?.telefoneY ?? 110;
+  //   const logoX = assinaturaPadrao?.logoX ?? 160;
+  //   const logoY = assinaturaPadrao?.logoY ?? 155;
+  //   const logoHeight = assinaturaPadrao?.logoHeight ?? DEFAULT_LOGO_HEIGHT;
 
-    return `
-      <div style="
-        position: relative;
-        width: ${SIGNATURE_WIDTH}px;
-        height: ${SIGNATURE_HEIGHT}px;
-        font-family: Arial, sans-serif;
-        color: ${textColor};
-        overflow: hidden;
-        border: 1px solid #e0e0e0;
-        border-radius: 12px;
-        ${
-          backgroundUrl
-            ? `background-image: url('${backgroundUrl}');
-               background-size: cover;
-               background-position: center top;
-               background-repeat: no-repeat;
-               background-color: #ffffff;`
-            : "background-color: #ffffff;"
-        }
-      ">
-        <div style="
-          position: absolute;
-          inset: 0;
-          border-radius: 12px;
-        "></div>
+  //   return `
+  //     <div style="
+  //       position: relative;
+  //       width: ${SIGNATURE_WIDTH}px;
+  //       height: ${SIGNATURE_HEIGHT}px;
+  //       font-family: Arial, sans-serif;
+  //       color: ${textColor};
+  //       overflow: hidden;
+  //       border: 1px solid #e0e0e0;
+  //       border-radius: 12px;
+  //       ${
+  //         backgroundUrl
+  //           ? `background-image: url('${backgroundUrl}');
+  //              background-size: cover;
+  //              background-position: center top;
+  //              background-repeat: no-repeat;
+  //              background-color: #ffffff;`
+  //           : "background-color: #ffffff;"
+  //       }
+  //     ">
+  //       <div style="
+  //         position: absolute;
+  //         inset: 0;
+  //         border-radius: 12px;
+  //       "></div>
 
-        <img
-          src="${form.fotoUrl || "https://via.placeholder.com/90x90.png?text=Foto"}"
-          alt="Foto"
-          width="${photoSize}"
-          height="${photoSize}"
-          style="
-            position: absolute;
-            left: ${photoX}px;
-            top: ${photoY}px;
-            width: ${photoSize}px;
-            height: ${photoSize}px;
-            border-radius: 50%;
-            object-fit: cover;
-            object-position: center top;
-            border: 2px solid #fff;
-            z-index: 2;
-          "
-        />
+  //       <img
+  //         src="${form.fotoUrl || "https://via.placeholder.com/90x90.png?text=Foto"}"
+  //         alt="Foto"
+  //         width="${photoSize}"
+  //         height="${photoSize}"
+  //         style="
+  //           position: absolute;
+  //           left: ${photoX}px;
+  //           top: ${photoY}px;
+  //           width: ${photoSize}px;
+  //           height: ${photoSize}px;
+  //           border-radius: 50%;
+  //           object-fit: cover;
+  //           object-position: center top;
+  //           border: 2px solid #fff;
+  //           z-index: 2;
+  //         "
+  //       />
 
-        <div style="
-          position: absolute;
-          left: ${nomeX}px;
-          top: ${nomeY}px;
-          font-size: ${currentFontSize.nome}px;
-          font-weight: 800;
-          color: ${textColor};
-          z-index: 2;
-          white-space: nowrap;
-        ">
-          ${form.nome || "Nome do Colaborador"}
-        </div>
+  //       <div style="
+  //         position: absolute;
+  //         left: ${nomeX}px;
+  //         top: ${nomeY}px;
+  //         font-size: ${currentFontSize.nome}px;
+  //         font-weight: 800;
+  //         color: ${textColor};
+  //         z-index: 2;
+  //         white-space: nowrap;
+  //       ">
+  //         ${form.nome || "Nome do Colaborador"}
+  //       </div>
 
-        <div style="
-          position: absolute;
-          left: ${departamentoX}px;
-          top: ${departamentoY}px;
-          font-size: ${currentFontSize.departamento}px;
-          color: ${textColor};
-          z-index: 2;
-          white-space: nowrap;
-        ">
-          ${form.departamento || "Departamento"}
-        </div>
+  //       <div style="
+  //         position: absolute;
+  //         left: ${departamentoX}px;
+  //         top: ${departamentoY}px;
+  //         font-size: ${currentFontSize.departamento}px;
+  //         color: ${textColor};
+  //         z-index: 2;
+  //         white-space: nowrap;
+  //       ">
+  //         ${form.departamento || "Departamento"}
+  //       </div>
 
-        <div style="
-          position: absolute;
-          left: ${telefoneX}px;
-          top: ${telefoneY}px;
-          font-size: ${currentFontSize.contato}px;
-          color: ${textColor};
-          z-index: 2;
-          white-space: nowrap;
-        ">
-          <strong>Telefone:</strong> ${form.telefone || "(00) 00000-0000"}
-        </div>
+  //       <div style="
+  //         position: absolute;
+  //         left: ${telefoneX}px;
+  //         top: ${telefoneY}px;
+  //         font-size: ${currentFontSize.contato}px;
+  //         color: ${textColor};
+  //         z-index: 2;
+  //         white-space: nowrap;
+  //       ">
+  //         <strong>Telefone:</strong> ${form.telefone || "(00) 00000-0000"}
+  //       </div>
 
-        <img
-          src="${pizzattoImage}"
-          alt="Logo"
-          height="${logoHeight}"
-          style="
-            position: absolute;
-            left: ${logoX}px;
-            top: ${logoY}px;
-            height: ${logoHeight}px;
-            z-index: 2;
-          "
-        />
-      </div>
-    `.trim();
-  }, [assinaturaPadrao, form, currentFontSize]);
+  //       <img
+  //         src="${pizzattoImage}"
+  //         alt="Logo"
+  //         height="${logoHeight}"
+  //         style="
+  //           position: absolute;
+  //           left: ${logoX}px;
+  //           top: ${logoY}px;
+  //           height: ${logoHeight}px;
+  //           z-index: 2;
+  //         "
+  //       />
+  //     </div>
+  //   `.trim();
+  // }, [assinaturaPadrao, form, currentFontSize]);
 
   const handleCriarAssinatura = async () => {
     try {
@@ -351,7 +351,7 @@ const ModalCreateAssinaturaEmail = ({
       formData.append("foto", file);
 
       await AssinaturaEmailService.create(formData);
-      await navigator.clipboard.writeText(htmlAssinatura);
+      // await navigator.clipboard.writeText(htmlAssinatura);
 
       showToast("Assinatura criada com sucesso!", "success");
       setFlushHook((prev: any) => !prev);

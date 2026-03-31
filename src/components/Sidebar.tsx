@@ -16,6 +16,8 @@ import {
   GradeOutlined,
   WorkOutline,
   LocalPoliceOutlined,
+  RequestQuoteOutlined,
+  PeopleOutlineOutlined,
 } from "@mui/icons-material";
 import {
   alpha,
@@ -76,10 +78,97 @@ function titleFromPath(pathname: string) {
     "/assinatura-email": "Assinatura de E-mail",
     "/plantao": "Plantão",
     "/politicas": "Politicas",
+    "/holerites": "Holerites",
   };
 
   return map[pathname] ?? "Sistema";
 }
+
+interface SidebarSubmenuSectionProps {
+  collapsed: boolean;
+  label: string;
+  icon: ReactNode;
+  items: {
+    label: string;
+    path: string;
+    icon?: ReactNode;
+  }[];
+  activePaths: string[];
+  pathname: string;
+  popoutTop: number;
+  openPopout: boolean;
+  openExpanded: boolean;
+  setOpenPopout: (value: boolean) => void;
+  setOpenExpanded: (value: boolean) => void;
+  wrapperRef: React.RefObject<HTMLDivElement | null>;
+  recalcTop: () => void;
+}
+
+const SidebarSubmenuSection = ({
+  collapsed,
+  label,
+  icon,
+  items,
+  activePaths,
+  pathname,
+  popoutTop,
+  openPopout,
+  openExpanded,
+  setOpenPopout,
+  setOpenExpanded,
+  wrapperRef,
+  recalcTop,
+}: SidebarSubmenuSectionProps) => {
+  const isActive = activePaths.includes(pathname);
+
+  return (
+    <Box
+      ref={wrapperRef}
+      onMouseEnter={() => {
+        if (!collapsed) return;
+        recalcTop();
+        setOpenPopout(true);
+      }}
+      onMouseLeave={() => {
+        if (!collapsed) return;
+        setOpenPopout(false);
+      }}
+      sx={{ position: "relative" }}
+    >
+      <StyledSubMenu
+        collapsed={collapsed}
+        label={!collapsed && label}
+        icon={icon}
+        open={collapsed ? openPopout : openExpanded}
+        onOpenChange={(open) => {
+          if (!collapsed) setOpenExpanded(open);
+        }}
+        className={isActive ? "ps-active" : undefined}
+        rootStyles={
+          collapsed
+            ? {
+                ["& .ps-submenu-content"]: {
+                  top: `${popoutTop}px`,
+                },
+              }
+            : undefined
+        }
+      >
+        {items.map((item) => (
+          <StyledMenuItem
+            key={item.path}
+            collapsed={collapsed}
+            icon={item.icon}
+            component={<Link to={item.path} />}
+            active={pathname === item.path}
+          >
+            {item.label}
+          </StyledMenuItem>
+        ))}
+      </StyledSubMenu>
+    </Box>
+  );
+};
 
 const StyledMenuItem = styled(MenuItem, {
   shouldForwardProp: (prop) => prop !== "collapsed",
@@ -202,21 +291,28 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
   const adminWrapperRef = useRef<HTMLDivElement | null>(null);
   const contratosWrapperRef = useRef<HTMLDivElement | null>(null);
   const endoMarketingWrapperRef = useRef<HTMLDivElement | null>(null);
+  const areaColaboradorWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const [openAdminPopout, setOpenAdminPopout] = useState(false);
   const [adminPopoutTop, setAdminPopoutTop] = useState<number>(0);
+  const [openAdminExpanded, setOpenAdminExpanded] = useState(false);
+  const [openInfraExpanded, setOpenInfraExpanded] = useState(false);
 
   const [openContratosPopout, setOpenContratosPopout] = useState(false);
   const [contratosPopoutTop, setContratosPopoutTop] = useState<number>(0);
-
-  const [openAdminExpanded, setOpenAdminExpanded] = useState(false);
-  const [openInfraExpanded, setOpenInfraExpanded] = useState(false);
   const [openContratosExpanded, setOpenContratosExpanded] = useState(false);
 
   const [openEndoMarketingPopout, setOpenEndoMarketingPopout] = useState(false);
   const [endoMarketingPopoutTop, setEndoMarketingPopoutTop] =
     useState<number>(0);
   const [openEndoMarketingExpanded, setOpenEndoMarketingExpanded] =
+    useState(false);
+
+  const [openAreaColaboradorPopout, setOpenAreaColaboradorPopout] =
+    useState(false);
+  const [areaColaboradorPopoutTop, setAreaColaboradorPopoutTop] =
+    useState<number>(0);
+  const [openAreaColaboradorExpanded, setOpenAreaColaboradorExpanded] =
     useState(false);
 
   const calcTopFromElement = (el: HTMLElement | null) => {
@@ -241,6 +337,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
       setOpenInfraExpanded(false);
       setOpenContratosExpanded(false);
       setOpenEndoMarketingExpanded(false);
+      setOpenAreaColaboradorExpanded(false);
     }
   }, [isCollapsed]);
 
@@ -329,6 +426,17 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
     [],
   );
 
+  const areaColaboradorItems = useMemo(
+    () => [
+      {
+        label: "Holerite",
+        path: "/holerites",
+        icon: <RequestQuoteOutlined />,
+      },
+    ],
+    [],
+  );
+
   const adminRoutes = useMemo(
     () => [
       "/users-ad",
@@ -353,6 +461,8 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
 
   const endoMarketingRoutes = useMemo(() => ["/assinatura-email"], []);
 
+  const areaColaboradorRoutes = useMemo(() => ["/holerites"], []);
+
   const adminIsActive = useMemo(
     () => adminRoutes.includes(location.pathname),
     [adminRoutes, location.pathname],
@@ -363,15 +473,15 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
     [infraRoutes, location.pathname],
   );
 
-  const contratosIsActive = useMemo(
-    () => contratosRoutes.includes(location.pathname),
-    [contratosRoutes, location.pathname],
-  );
+  // const contratosIsActive = useMemo(
+  //   () => contratosRoutes.includes(location.pathname),
+  //   [contratosRoutes, location.pathname],
+  // );
 
-  const endoMarketingIsActive = useMemo(
-    () => endoMarketingRoutes.includes(location.pathname),
-    [endoMarketingRoutes, location.pathname],
-  );
+  // const endoMarketingIsActive = useMemo(
+  //   () => endoMarketingRoutes.includes(location.pathname),
+  //   [endoMarketingRoutes, location.pathname],
+  // );
 
   const recalcAdminTop = () => {
     const root = adminWrapperRef.current;
@@ -389,6 +499,12 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
     const root = endoMarketingWrapperRef.current;
     const btn = root?.querySelector(".ps-menu-button") as HTMLElement | null;
     setEndoMarketingPopoutTop(calcTopFromElement(btn));
+  };
+
+  const recalcAreaColaboradorTop = () => {
+    const root = areaColaboradorWrapperRef.current;
+    const btn = root?.querySelector(".ps-menu-button") as HTMLElement | null;
+    setAreaColaboradorPopoutTop(calcTopFromElement(btn));
   };
 
   useEffect(() => {
@@ -711,7 +827,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               </Box>
             )}
 
-            <Box
+            {/* <Box
               ref={contratosWrapperRef}
               onMouseEnter={() => {
                 if (!isCollapsed) return;
@@ -754,9 +870,25 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                   </StyledMenuItem>
                 ))}
               </StyledSubMenu>
-            </Box>
+            </Box> */}
 
-            {user.roles?.includes("ADMIN", "ENDOMARKETING") && (
+            <SidebarSubmenuSection
+              collapsed={isCollapsed}
+              label="Contratos"
+              icon={<GavelOutlined />}
+              items={contratosItems}
+              activePaths={contratosRoutes}
+              pathname={location.pathname}
+              popoutTop={contratosPopoutTop}
+              openPopout={openContratosPopout}
+              openExpanded={openContratosExpanded}
+              setOpenPopout={setOpenContratosPopout}
+              setOpenExpanded={setOpenContratosExpanded}
+              wrapperRef={contratosWrapperRef}
+              recalcTop={recalcContratosTop}
+            />
+
+            {/* {user.roles?.includes("ADMIN", "ENDOMARKETING") && (
               <Box
                 ref={endoMarketingWrapperRef}
                 onMouseEnter={() => {
@@ -806,7 +938,40 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                   ))}
                 </StyledSubMenu>
               </Box>
+            )} */}
+
+            {user.roles?.includes("ADMIN", "ENDOMARKETING") && (
+              <SidebarSubmenuSection
+                collapsed={isCollapsed}
+                label="EndoMarketing"
+                icon={<GradeOutlined />}
+                items={endoMarketingItems}
+                activePaths={endoMarketingRoutes}
+                pathname={location.pathname}
+                popoutTop={endoMarketingPopoutTop}
+                openPopout={openEndoMarketingPopout}
+                openExpanded={openEndoMarketingExpanded}
+                setOpenPopout={setOpenEndoMarketingPopout}
+                setOpenExpanded={setOpenEndoMarketingExpanded}
+                wrapperRef={endoMarketingWrapperRef}
+                recalcTop={recalcEndoMarketingTop}
+              />
             )}
+            <SidebarSubmenuSection
+              collapsed={isCollapsed}
+              label="Área do Colaborador"
+              icon={<PeopleOutlineOutlined />}
+              items={areaColaboradorItems}
+              activePaths={areaColaboradorRoutes}
+              pathname={location.pathname}
+              popoutTop={areaColaboradorPopoutTop}
+              openPopout={openAreaColaboradorPopout}
+              openExpanded={openAreaColaboradorExpanded}
+              setOpenPopout={setOpenAreaColaboradorPopout}
+              setOpenExpanded={setOpenAreaColaboradorExpanded}
+              wrapperRef={areaColaboradorWrapperRef}
+              recalcTop={recalcAreaColaboradorTop}
+            />
 
             <StyledMenuItem
               collapsed={isCollapsed}
@@ -817,7 +982,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               {!isCollapsed && "A Fazer"}
             </StyledMenuItem>
 
-            {user.roles?.includes("ADMIN") && (
+            {user.roles?.includes("ADMIN", "ENDOMARKETING") && (
               <StyledMenuItem
                 collapsed={isCollapsed}
                 icon={<CalendarMonth />}
@@ -827,7 +992,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                 {!isCollapsed && "Calendário Institucional"}
               </StyledMenuItem>
             )}
-            {user.roles?.includes("ADMIN") && (
+            {user.roles?.includes("ADMIN", "ENDOMARKETING") && (
               <StyledMenuItem
                 collapsed={isCollapsed}
                 icon={<LocalPoliceOutlined />}
