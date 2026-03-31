@@ -106,6 +106,19 @@ const PlantaoPrincipal = () => {
     : normalizar(escalas?.diaSemana) === normalizar(diaSemanaAtual) &&
       estaDentroDoHorario(escalas?.infra?.inicio, escalas?.infra?.fim, agora);
 
+  console.log("escalas prod:", JSON.stringify(escalas, null, 2));
+  console.log("diaSemana escala:", escalas?.diaSemana);
+  console.log("diaSemana atual:", diaSemanaAtual);
+  console.log("inicio sis:", escalas?.sistemas?.inicio);
+  console.log("fim sis:", escalas?.sistemas?.fim);
+  console.log("inicio infra:", escalas?.infra?.inicio);
+  console.log("fim infra:", escalas?.infra?.fim);
+  console.log("agora:", agora.toString());
+
+  console.log("agora ISO:", agora.toISOString());
+  console.log("agora local:", agora.toString());
+  console.log("diaSemanaIndex:", diaSemanaIndex);
+  console.log("timezone offset:", agora.getTimezoneOffset());
   return (
     <Box
       sx={{
