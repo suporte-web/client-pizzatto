@@ -23,15 +23,15 @@ import { useState } from "react";
 import { CalendarioService } from "../../../stores/calendario/service";
 import { useToast } from "../../../components/Toast";
 
-const ModalCreateCalendario = ({ setFlushHook, departamentos }: any) => {
+const ModalCreateCalendario = ({ setFlushHook, colaboradores }: any) => {
   const { showToast } = useToast();
   const [open, setOpen] = useState(false);
-
+  
   const [nome, setNome] = useState("");
   const [data, setData] = useState("");
   const [horario, setHorario] = useState("");
   const [local, setLocal] = useState("");
-  const [selectedDepartamentos, setSelectedDepartamentos] = useState<string[]>(
+  const [selectedColaboradores, setSelectedColaboradores] = useState<string[]>(
     [],
   );
   const [descricao, setDescricao] = useState("");
@@ -46,7 +46,7 @@ const ModalCreateCalendario = ({ setFlushHook, departamentos }: any) => {
     setData("");
     setHorario("");
     setLocal("");
-    setSelectedDepartamentos([]);
+    setSelectedColaboradores([]);
     setDescricao("");
   };
 
@@ -64,19 +64,19 @@ const ModalCreateCalendario = ({ setFlushHook, departamentos }: any) => {
     if (value.includes("todos")) {
       if (allSelected) {
         // desmarca tudo
-        setSelectedDepartamentos([]);
+        setSelectedColaboradores([]);
       } else {
         // seleciona todos
-        setSelectedDepartamentos(departamentos);
+        setSelectedColaboradores(colaboradores);
       }
     } else {
-      setSelectedDepartamentos(value);
+      setSelectedColaboradores(value);
     }
   };
 
   const allSelected =
-    departamentos.length > 0 &&
-    selectedDepartamentos.length === departamentos.length;
+    colaboradores.length > 0 &&
+    selectedColaboradores.length === colaboradores.length;
 
   const handleCreate = async () => {
     try {
@@ -85,7 +85,7 @@ const ModalCreateCalendario = ({ setFlushHook, departamentos }: any) => {
         data,
         horario,
         local,
-        departamento: selectedDepartamentos,
+        colaboradores: selectedColaboradores,
         descricao,
       });
       showToast("Sucesso ao criar Calendário", "success");
@@ -157,20 +157,20 @@ const ModalCreateCalendario = ({ setFlushHook, departamentos }: any) => {
             />
             <FormControl fullWidth size="small">
               <InputLabel id="filiais-label">
-                Departamento Participante do Evento
+                Participantes do Evento
               </InputLabel>
               <Select
                 labelId="filiais-label"
                 multiple
-                value={selectedDepartamentos}
+                value={selectedColaboradores}
                 onChange={handleChangeDepartamentos}
                 input={
-                  <OutlinedInput label="Departamento Participante do Evento" />
+                  <OutlinedInput label="Participantes do Evento" />
                 }
                 renderValue={() =>
                   allSelected
                     ? "Todos os Departamentos"
-                    : selectedDepartamentos.join(", ")
+                    : selectedColaboradores.join(", ")
                 }
                 sx={{ borderRadius: "10px" }}
               >
@@ -178,13 +178,13 @@ const ModalCreateCalendario = ({ setFlushHook, departamentos }: any) => {
                   <Checkbox checked={allSelected} size="small" />
                   <ListItemText primary="Todos" />
                 </MenuItem>
-                {departamentos.map((depart: any) => {
-                  const checked = selectedDepartamentos.includes(depart);
+                {colaboradores.map((colab: any) => {
+                  const checked = selectedColaboradores.includes(colab);
 
                   return (
-                    <MenuItem key={depart} value={depart}>
+                    <MenuItem key={colab.cn} value={colab.cn}>
                       <Checkbox checked={checked} size="small" />
-                      <ListItemText primary={depart} />
+                      <ListItemText primary={colab.cn} />
                     </MenuItem>
                   );
                 })}

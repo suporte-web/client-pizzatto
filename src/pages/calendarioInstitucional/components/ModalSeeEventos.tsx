@@ -78,14 +78,14 @@ const ModalSeeEventos = ({
                       </Typography>
                     )}
 
-                    {evento.criadoPor && (
+                    {/* {evento.criadoPor && (
                       <Typography variant="body2" sx={{ mt: 0.5 }}>
                         <strong>Criado por:</strong> {evento.criadoPor}
                       </Typography>
-                    )}
+                    )} */}
 
                     {evento.descricao && (
-                      <Typography variant="body2" sx={{ mt: 1 }}>
+                      <Typography variant="body2" sx={{ mt: 0.5 }}>
                         <strong>Descrição:</strong> {evento.descricao}
                       </Typography>
                     )}
@@ -97,7 +97,11 @@ const ModalSeeEventos = ({
         </DialogContent>
 
         <DialogActions>
-          <Button onClick={handleCloseDialog} variant="contained">
+          <Button
+            onClick={handleCloseDialog}
+            variant="contained"
+            sx={{ borderRadius: "10px" }}
+          >
             Fechar
           </Button>
         </DialogActions>

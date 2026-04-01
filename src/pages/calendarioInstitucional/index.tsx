@@ -5,12 +5,8 @@ import {
   CardHeader,
   Container,
   Divider,
-  FormControl,
   Grid,
   IconButton,
-  InputLabel,
-  MenuItem,
-  Select,
   TextField,
   Typography,
   type ContainerProps,
@@ -57,8 +53,8 @@ const CalendarioInstitucional = () => {
   };
   const { user } = useUser();
 
-  const [departamentos, setDepartamentos] = useState<string[]>([]);
-  const [departamento, setDepartamento] = useState("");
+  const [colaboradores, setColaboradores] = useState<string[]>([]);
+  // const [departamento, setDepartamento] = useState("");
   const [pesquisa, setPesquisa] = useState("");
 
   const [calendarios, setCalendarios] = useState<CalendarioItem[]>([]);
@@ -69,6 +65,12 @@ const CalendarioInstitucional = () => {
   const [selectedEvents, setSelectedEvents] = useState<CalendarioItem[]>([]);
 
   const [flushHook, setFlushHook] = useState(false);
+
+  // const privilegedRoles = ["ADMIN", "ENDOMARKETING", "PESSOAS_E_CULTURA"];
+
+  // const isPrivilegedUser = user?.roles?.some((role: any) =>
+  //   privilegedRoles.includes(role),
+  // );
 
   const today = new Date();
 
@@ -141,7 +143,7 @@ const CalendarioInstitucional = () => {
 
   const handleResetFilters = () => {
     setPesquisa("");
-    setDepartamento("");
+    // setDepartamento("");
     setFlushHook((prev: any) => !prev);
     setCurrentDate(new Date());
   };
@@ -156,13 +158,7 @@ const CalendarioInstitucional = () => {
     try {
       const find = await CalendarioService.findByFilter({
         data: currentDate,
-        departamento: user.roles?.includes(
-          "ADMIN",
-          "ENDOMARKETING",
-          "PESSOAS_E_CULTURA",
-        )
-          ? departamento
-          : user?.department,
+        departamento: user?.department,
         pesquisa,
       });
 
@@ -174,12 +170,12 @@ const CalendarioInstitucional = () => {
 
   useEffect(() => {
     fetchData();
-  }, [pesquisa, departamento, currentDate, flushHook]);
+  }, [pesquisa, currentDate, flushHook]);
 
   const fetchArea = async () => {
     try {
-      const get = await UserAdService.getAllSetoresUsersAd();
-      setDepartamentos(get ?? []);
+      const get = await UserAdService.getAllActiveUsers();
+      setColaboradores(get ?? []);
     } catch (error) {
       console.log(error);
     }
@@ -210,7 +206,7 @@ const CalendarioInstitucional = () => {
             "PESSOAS_E_CULTURA",
           ) && (
             <>
-              <FormControl fullWidth size="small">
+              {/* <FormControl fullWidth size="small">
                 <InputLabel>Departamento</InputLabel>
                 <Select
                   value={departamento}
@@ -224,7 +220,7 @@ const CalendarioInstitucional = () => {
                     </MenuItem>
                   ))}
                 </Select>
-              </FormControl>
+              </FormControl> */}
 
               <IconButton
                 sx={{ borderRadius: "10px", bgcolor: orange[200] }}
@@ -235,7 +231,7 @@ const CalendarioInstitucional = () => {
 
               <ModalCreateCalendario
                 setFlushHook={setFlushHook}
-                departamentos={departamentos}
+                colaboradores={colaboradores}
               />
             </>
           )}
