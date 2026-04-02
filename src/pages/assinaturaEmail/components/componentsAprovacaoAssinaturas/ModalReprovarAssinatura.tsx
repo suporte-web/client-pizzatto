@@ -15,8 +15,10 @@ import {
 import { red } from "@mui/material/colors";
 import { useState } from "react";
 import { AssinaturaEmailService } from "../../../../stores/assinaturaEmail/service";
+import { useToast } from "../../../../components/Toast";
 
 const ModalReprovarAssinatura = ({ item, setFlushHook }: any) => {
+  const { showToast } = useToast();
   const [open, setOpen] = useState(false);
   const [motivo, setMotivo] = useState("");
   const [loading, setLoading] = useState(false);
@@ -44,10 +46,12 @@ const ModalReprovarAssinatura = ({ item, setFlushHook }: any) => {
         motivo: motivo.trim(),
       });
 
-      setFlushHook((prev: any) => !prev)
+      setFlushHook((prev: any) => !prev);
+      showToast("Sucesso ao Reprovar Assinatura!", "success");
       handleClose();
     } catch (error) {
       console.log(error);
+      showToast("Erro ao Reprovar Assinatura!", "error");
     } finally {
       setLoading(false);
     }

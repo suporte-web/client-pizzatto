@@ -14,8 +14,10 @@ import {
 import { green } from "@mui/material/colors";
 import { useState } from "react";
 import { AssinaturaEmailService } from "../../../../stores/assinaturaEmail/service";
+import { useToast } from "../../../../components/Toast";
 
 const ModalAprovarAssinatura = ({ item, setFlushHook }: any) => {
+  const { showToast } = useToast();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -36,9 +38,11 @@ const ModalAprovarAssinatura = ({ item, setFlushHook }: any) => {
       });
 
       setFlushHook((prev: any) => !prev);
+      showToast("Sucesso ao Aprovar Assinatura!", "success");
       handleClose();
     } catch (error) {
       console.log(error);
+      showToast("Erro ao Aprovar Assinatura!", "error");
     } finally {
       setLoading(false);
     }
