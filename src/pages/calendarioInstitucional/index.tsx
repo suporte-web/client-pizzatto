@@ -158,7 +158,7 @@ const CalendarioInstitucional = () => {
     try {
       const find = await CalendarioService.findByFilter({
         data: currentDate,
-        departamento: user?.department,
+        colaborador: user?.name,
         pesquisa,
       });
 

@@ -1,22 +1,16 @@
 import { Add } from "@mui/icons-material";
 import {
+  Autocomplete,
   Box,
   Button,
-  Checkbox,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
   IconButton,
-  InputLabel,
-  ListItemText,
-  MenuItem,
-  OutlinedInput,
-  Select,
   TextField,
   Tooltip,
-  type SelectChangeEvent,
 } from "@mui/material";
 import { orange } from "@mui/material/colors";
 import { useState } from "react";
@@ -26,7 +20,7 @@ import { useToast } from "../../../components/Toast";
 const ModalCreateCalendario = ({ setFlushHook, colaboradores }: any) => {
   const { showToast } = useToast();
   const [open, setOpen] = useState(false);
-  
+
   const [nome, setNome] = useState("");
   const [data, setData] = useState("");
   const [horario, setHorario] = useState("");
@@ -50,34 +44,6 @@ const ModalCreateCalendario = ({ setFlushHook, colaboradores }: any) => {
     setDescricao("");
   };
 
-  // const filiaisReais = useMemo(
-  //   () =>
-  //     departamentos
-  //       .filter((filial: any) => filial.value !== "todos")
-  //       .map((filial: any) => filial.value),
-  //   [],
-  // );
-
-  const handleChangeDepartamentos = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value as string[];
-
-    if (value.includes("todos")) {
-      if (allSelected) {
-        // desmarca tudo
-        setSelectedColaboradores([]);
-      } else {
-        // seleciona todos
-        setSelectedColaboradores(colaboradores);
-      }
-    } else {
-      setSelectedColaboradores(value);
-    }
-  };
-
-  const allSelected =
-    colaboradores.length > 0 &&
-    selectedColaboradores.length === colaboradores.length;
-
   const handleCreate = async () => {
     try {
       await CalendarioService.create({
@@ -88,6 +54,7 @@ const ModalCreateCalendario = ({ setFlushHook, colaboradores }: any) => {
         colaboradores: selectedColaboradores,
         descricao,
       });
+
       showToast("Sucesso ao criar Calendário", "success");
       setFlushHook((prev: any) => !prev);
       handleClose();
@@ -104,8 +71,10 @@ const ModalCreateCalendario = ({ setFlushHook, colaboradores }: any) => {
           <Add />
         </IconButton>
       </Tooltip>
+
       <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>Adicionar ao Calendário</DialogTitle>
+
         <DialogContent>
           <Box
             sx={{
@@ -125,6 +94,7 @@ const ModalCreateCalendario = ({ setFlushHook, colaboradores }: any) => {
               onChange={(e) => setNome(e.target.value)}
               InputProps={{ style: { borderRadius: "10px" } }}
             />
+
             <TextField
               type="date"
               label="Data do Evento"
@@ -135,6 +105,7 @@ const ModalCreateCalendario = ({ setFlushHook, colaboradores }: any) => {
               InputProps={{ style: { borderRadius: "10px" } }}
               InputLabelProps={{ shrink: true }}
             />
+
             <TextField
               type="time"
               label="Horario do Evento"
@@ -145,6 +116,7 @@ const ModalCreateCalendario = ({ setFlushHook, colaboradores }: any) => {
               InputProps={{ style: { borderRadius: "10px" } }}
               InputLabelProps={{ shrink: true }}
             />
+
             <TextField
               type="text"
               label="Local do Evento"
@@ -155,41 +127,47 @@ const ModalCreateCalendario = ({ setFlushHook, colaboradores }: any) => {
               InputProps={{ style: { borderRadius: "10px" } }}
               InputLabelProps={{ shrink: true }}
             />
-            <FormControl fullWidth size="small">
-              <InputLabel id="filiais-label">
-                Participantes do Evento
-              </InputLabel>
-              <Select
-                labelId="filiais-label"
-                multiple
-                value={selectedColaboradores}
-                onChange={handleChangeDepartamentos}
-                input={
-                  <OutlinedInput label="Participantes do Evento" />
-                }
-                renderValue={() =>
-                  allSelected
-                    ? "Todos os Departamentos"
-                    : selectedColaboradores.join(", ")
-                }
-                sx={{ borderRadius: "10px" }}
-              >
-                <MenuItem value="todos">
-                  <Checkbox checked={allSelected} size="small" />
-                  <ListItemText primary="Todos" />
-                </MenuItem>
-                {colaboradores.map((colab: any) => {
-                  const checked = selectedColaboradores.includes(colab);
 
-                  return (
-                    <MenuItem key={colab.cn} value={colab.cn}>
-                      <Checkbox checked={checked} size="small" />
-                      <ListItemText primary={colab.cn} />
-                    </MenuItem>
-                  );
-                })}
-              </Select>
-            </FormControl>
+            <Autocomplete
+              multiple
+              fullWidth
+              size="small"
+              options={colaboradores ?? []}
+              value={(colaboradores ?? []).filter((colab: any) =>
+                selectedColaboradores.includes(colab.cn),
+              )}
+              onChange={(_, newValue) => {
+                setSelectedColaboradores(
+                  newValue.map((colab: any) => colab.cn),
+                );
+              }}
+              getOptionLabel={(option: any) => option.cn ?? ""}
+              isOptionEqualToValue={(option: any, value: any) =>
+                option.cn === value.cn
+              }
+              filterSelectedOptions
+              renderTags={(value, getTagProps) =>
+                value.map((option: any, index: number) => (
+                  <Chip
+                    {...getTagProps({ index })}
+                    key={option.cn}
+                    label={option.cn}
+                    size="small"
+                  />
+                ))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Participantes do Evento"
+                  placeholder="Digite para buscar participantes"
+                  InputProps={{
+                    ...params.InputProps,
+                    style: { borderRadius: "10px" },
+                  }}
+                />
+              )}
+            />
 
             <TextField
               type="text"
@@ -205,6 +183,7 @@ const ModalCreateCalendario = ({ setFlushHook, colaboradores }: any) => {
             />
           </Box>
         </DialogContent>
+
         <DialogActions sx={{ justifyContent: "space-between" }}>
           <Button
             variant="outlined"
