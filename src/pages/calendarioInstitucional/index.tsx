@@ -170,7 +170,7 @@ const CalendarioInstitucional = () => {
 
   useEffect(() => {
     fetchData();
-  }, [pesquisa, currentDate, flushHook]);
+  }, [flushHook, pesquisa, currentDate, user]);
 
   const fetchArea = async () => {
     try {
