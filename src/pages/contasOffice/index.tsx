@@ -191,7 +191,7 @@ const ContasOffice = () => {
                   }
                 </TableCell>
                 <TableCell>
-                  {user?.acessos?.administrador && (
+                  {user?.roles?.includes("ADMIN", "RH") && (
                     <ModalEditarContasOffice
                       item={item}
                       setFlushHook={setFlushHook}

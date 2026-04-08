@@ -21,7 +21,6 @@ import {
   Diversity3Outlined,
   InfoOutlined,
   BookOutlined,
-  FolderSpecialOutlined,
 } from "@mui/icons-material";
 import {
   alpha,
@@ -86,7 +85,7 @@ function titleFromPath(pathname: string) {
     "/pagina-institucional": "Página Institucional",
     // "/valores-comportamentos": "Valores e Comportamentos",
     "/biblioteca-marca": "Biblioteca de Marca",
-    "/templates-institucionais": "Templates Institucionais",
+    // "/templates-institucionais": "Templates Institucionais",
     // "/diretrizes-linguagens": "Diretrizes de Linguagens",
   };
 
@@ -469,11 +468,11 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
         path: "/biblioteca-marca",
         icon: <BookOutlined />,
       },
-      {
-        label: "Templates Institucionais",
-        path: "/templates-institucionais",
-        icon: <FolderSpecialOutlined />,
-      },
+      // {
+      //   label: "Templates Institucionais",
+      //   path: "/templates-institucionais",
+      //   icon: <FolderSpecialOutlined />,
+      // },
       // {
       //   label: "Diretrizes de Linguagens",
       //   path: "/diretrizes-linguagens",
@@ -514,7 +513,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
       "/pagina-institucional",
       // "/valores-comportamentos",
       "/biblioteca-marca",
-      "/templates-institucionais",
+      // "/templates-institucionais",
       // "/diretrizes-linguagens",
     ],
     [],

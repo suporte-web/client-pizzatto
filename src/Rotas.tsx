@@ -195,14 +195,14 @@ const Rotas = () => (
         </UserProvider>
       }
     />
-    <Route
+    {/* <Route
       path="/templates-institucionais"
       element={
         <UserProvider>
           <Holerites />
         </UserProvider>
       }
-    />
+    /> */}
     {/* <Route
       path="/diretrizes-linguagens"
       element={
