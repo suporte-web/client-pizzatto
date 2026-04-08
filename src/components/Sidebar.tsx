@@ -18,6 +18,10 @@ import {
   LocalPoliceOutlined,
   RequestQuoteOutlined,
   PeopleOutlineOutlined,
+  Diversity3Outlined,
+  InfoOutlined,
+  BookOutlined,
+  FolderSpecialOutlined,
 } from "@mui/icons-material";
 import {
   alpha,
@@ -79,6 +83,11 @@ function titleFromPath(pathname: string) {
     "/plantao": "Plantão",
     "/politicas": "Politicas",
     "/holerites": "Holerites",
+    "/pagina-institucional": "Página Institucional",
+    // "/valores-comportamentos": "Valores e Comportamentos",
+    "/biblioteca-marca": "Biblioteca de Marca",
+    "/templates-institucionais": "Templates Institucionais",
+    // "/diretrizes-linguagens": "Diretrizes de Linguagens",
   };
 
   return map[pathname] ?? "Sistema";
@@ -292,6 +301,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
   const contratosWrapperRef = useRef<HTMLDivElement | null>(null);
   const endoMarketingWrapperRef = useRef<HTMLDivElement | null>(null);
   const areaColaboradorWrapperRef = useRef<HTMLDivElement | null>(null);
+  const culturaWrapperRef = useRef<HTMLDivElement | null>(null);
 
   const [openAdminPopout, setOpenAdminPopout] = useState(false);
   const [adminPopoutTop, setAdminPopoutTop] = useState<number>(0);
@@ -314,6 +324,10 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
     useState<number>(0);
   const [openAreaColaboradorExpanded, setOpenAreaColaboradorExpanded] =
     useState(false);
+
+  const [openCulturaPopout, setOpenCulturaPopout] = useState(false);
+  const [culturaPopoutTop, setCulturaPopoutTop] = useState<number>(0);
+  const [openCulturaExpanded, setOpenCulturaExpanded] = useState(false);
 
   const calcTopFromElement = (el: HTMLElement | null) => {
     if (!el) return 0;
@@ -338,6 +352,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
       setOpenContratosExpanded(false);
       setOpenEndoMarketingExpanded(false);
       setOpenAreaColaboradorExpanded(false);
+      setOpenCulturaExpanded(false);
     }
   }, [isCollapsed]);
 
@@ -437,6 +452,37 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
     [],
   );
 
+  const culturaItems = useMemo(
+    () => [
+      {
+        label: "Página Institucional",
+        path: "/pagina-institucional",
+        icon: <InfoOutlined />,
+      },
+      // {
+      //   label: "Valores e Comportamentos",
+      //   path: "/valores-comportamentos",
+      //   icon: <DiamondOutlined />,
+      // },
+      {
+        label: "Biblioteca de Marca",
+        path: "/biblioteca-marca",
+        icon: <BookOutlined />,
+      },
+      {
+        label: "Templates Institucionais",
+        path: "/templates-institucionais",
+        icon: <FolderSpecialOutlined />,
+      },
+      // {
+      //   label: "Diretrizes de Linguagens",
+      //   path: "/diretrizes-linguagens",
+      //   icon: <TranslateOutlined />,
+      // },
+    ],
+    [],
+  );
+
   const adminRoutes = useMemo(
     () => [
       "/users-ad",
@@ -462,6 +508,17 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
   const endoMarketingRoutes = useMemo(() => ["/assinatura-email"], []);
 
   const areaColaboradorRoutes = useMemo(() => ["/holerites"], []);
+
+  const culturaRoutes = useMemo(
+    () => [
+      "/pagina-institucional",
+      // "/valores-comportamentos",
+      "/biblioteca-marca",
+      "/templates-institucionais",
+      // "/diretrizes-linguagens",
+    ],
+    [],
+  );
 
   const adminIsActive = useMemo(
     () => adminRoutes.includes(location.pathname),
@@ -505,6 +562,12 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
     const root = areaColaboradorWrapperRef.current;
     const btn = root?.querySelector(".ps-menu-button") as HTMLElement | null;
     setAreaColaboradorPopoutTop(calcTopFromElement(btn));
+  };
+
+  const recalcCulturaTop = () => {
+    const root = culturaWrapperRef.current;
+    const btn = root?.querySelector(".ps-menu-button") as HTMLElement | null;
+    setCulturaPopoutTop(calcTopFromElement(btn));
   };
 
   useEffect(() => {
@@ -957,21 +1020,41 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                 recalcTop={recalcEndoMarketingTop}
               />
             )}
-            <SidebarSubmenuSection
-              collapsed={isCollapsed}
-              label="Área do Colaborador"
-              icon={<PeopleOutlineOutlined />}
-              items={areaColaboradorItems}
-              activePaths={areaColaboradorRoutes}
-              pathname={location.pathname}
-              popoutTop={areaColaboradorPopoutTop}
-              openPopout={openAreaColaboradorPopout}
-              openExpanded={openAreaColaboradorExpanded}
-              setOpenPopout={setOpenAreaColaboradorPopout}
-              setOpenExpanded={setOpenAreaColaboradorExpanded}
-              wrapperRef={areaColaboradorWrapperRef}
-              recalcTop={recalcAreaColaboradorTop}
-            />
+            {user.roles?.includes("ADMIN") && (
+              <SidebarSubmenuSection
+                collapsed={isCollapsed}
+                label="Área do Colaborador"
+                icon={<PeopleOutlineOutlined />}
+                items={areaColaboradorItems}
+                activePaths={areaColaboradorRoutes}
+                pathname={location.pathname}
+                popoutTop={areaColaboradorPopoutTop}
+                openPopout={openAreaColaboradorPopout}
+                openExpanded={openAreaColaboradorExpanded}
+                setOpenPopout={setOpenAreaColaboradorPopout}
+                setOpenExpanded={setOpenAreaColaboradorExpanded}
+                wrapperRef={areaColaboradorWrapperRef}
+                recalcTop={recalcAreaColaboradorTop}
+              />
+            )}
+
+            {user.roles?.includes("ADMIN") && (
+              <SidebarSubmenuSection
+                collapsed={isCollapsed}
+                label="Cultura Pizzattolog"
+                icon={<Diversity3Outlined />}
+                items={culturaItems}
+                activePaths={culturaRoutes}
+                pathname={location.pathname}
+                popoutTop={culturaPopoutTop}
+                openPopout={openCulturaPopout}
+                openExpanded={openCulturaExpanded}
+                setOpenPopout={setOpenCulturaPopout}
+                setOpenExpanded={setOpenCulturaExpanded}
+                wrapperRef={culturaWrapperRef}
+                recalcTop={recalcCulturaTop}
+              />
+            )}
 
             <StyledMenuItem
               collapsed={isCollapsed}

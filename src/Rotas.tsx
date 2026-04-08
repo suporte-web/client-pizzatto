@@ -21,6 +21,8 @@ import AssinaturaEmail from "./pages/assinaturaEmail";
 import PlantaoAdmin from "./pages/plantaoAdmin";
 import Politicas from "./pages/politicas";
 import Holerites from "./pages/holerites";
+import PaginaInstitucional from "./pages/paginaInstitucional";
+import BibliotecaMarca from "./pages/bibliotecaMarca";
 
 const Rotas = () => (
   <Routes>
@@ -119,7 +121,7 @@ const Rotas = () => (
         </UserProvider>
       }
     />
-    
+
     <Route
       path="/organograma"
       element={
@@ -169,6 +171,46 @@ const Rotas = () => (
         </UserProvider>
       }
     />
+    <Route
+      path="/pagina-institucional"
+      element={
+        <UserProvider>
+          <PaginaInstitucional />
+        </UserProvider>
+      }
+    />
+    {/* <Route
+      path="/valores-comportamentos"
+      element={
+        <UserProvider>
+          <Holerites />
+        </UserProvider>
+      }
+    /> */}
+    <Route
+      path="/biblioteca-marca"
+      element={
+        <UserProvider>
+          <BibliotecaMarca />
+        </UserProvider>
+      }
+    />
+    <Route
+      path="/templates-institucionais"
+      element={
+        <UserProvider>
+          <Holerites />
+        </UserProvider>
+      }
+    />
+    {/* <Route
+      path="/diretrizes-linguagens"
+      element={
+        <UserProvider>
+          <Holerites />
+        </UserProvider>
+      }
+    /> */}
   </Routes>
 );
 

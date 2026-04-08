@@ -66,7 +66,7 @@ const ModalCreateCalendario = ({ setFlushHook, colaboradores }: any) => {
 
   return (
     <>
-      <Tooltip title="Criar ">
+      <Tooltip title="Criar Calendario Institucional">
         <IconButton onClick={handleOpen} sx={{ bgcolor: orange[200] }}>
           <Add />
         </IconButton>
