@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   CardContent,
-  CardMedia,
   Checkbox,
   Chip,
   Dialog,
@@ -101,7 +100,17 @@ const ModalCreateMural = ({ setFlushHook }: any) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setImageFile(file);
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+
+    img.onload = () => {
+      if (img.width !== img.height) {
+        showToast("A imagem deve ser quadrada (1080x1080)", "warning");
+        return;
+      }
+
+      setImageFile(file);
+    };
   };
 
   const handleChangeFiliais = (event: SelectChangeEvent<string[]>) => {
@@ -280,6 +289,8 @@ const ModalCreateMural = ({ setFlushHook }: any) => {
 
                 <Card
                   sx={{
+                    maxWidth: 500,
+                    mx: "auto",
                     borderRadius: 3,
                     border: "1px solid #e0e0e0",
                     boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
@@ -287,16 +298,26 @@ const ModalCreateMural = ({ setFlushHook }: any) => {
                   }}
                 >
                   {previewUrl && (
-                    <CardMedia
-                      component="img"
-                      image={previewUrl}
-                      alt="Imagem do mural"
+                    <Box
                       sx={{
                         width: "100%",
-                        maxHeight: 320,
-                        objectFit: "cover",
+                        aspectRatio: "1 / 1",
+                        overflow: "hidden",
+                        backgroundColor: "#f5f5f5",
                       }}
-                    />
+                    >
+                      <Box
+                        component="img"
+                        src={previewUrl}
+                        alt="Imagem do mural"
+                        sx={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          display: "block",
+                        }}
+                      />
+                    </Box>
                   )}
 
                   <CardContent>

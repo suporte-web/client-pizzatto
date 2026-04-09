@@ -140,7 +140,6 @@ const MuralRecados = () => {
             }}
           >
             {murais.map((item: any) => {
-
               const totalLikes = item.likes?.length || 0;
 
               const totalComentario = item.comentarios?.length || 0;
@@ -156,6 +155,9 @@ const MuralRecados = () => {
                   elevation={7}
                   sx={{
                     position: "relative",
+                    width: "100%",
+                    maxWidth: 420,
+                    mx: "auto",
                     borderRadius: "16px",
                     overflow: "hidden",
                     border:
@@ -206,16 +208,35 @@ const MuralRecados = () => {
 
                   {item.caminhoImagem && (
                     <Box
-                      component="img"
-                      src={`${import.meta.env.VITE_API_BACKEND_AD}/${item.caminhoImagem}`}
-                      alt={item.titulo}
                       sx={{
-                        width: "100%",
-                        maxHeight: 380,
-                        objectFit: "cover",
-                        display: "block",
+                        display: "flex",
+                        justifyContent: "center",
+                        mt: 2,
+                        px: 2,
                       }}
-                    />
+                    >
+                      <Box
+                        sx={{
+                          width: "100%", // 🔥 controla o tamanho (igual preview)
+                          borderRadius: "12px",
+                          overflow: "hidden",
+                          backgroundColor: "#f5f5f5",
+                          position: "relative",
+                        }}
+                      >
+                        <Box
+                          component="img"
+                          src={`${import.meta.env.VITE_API_BACKEND_AD}/${item.caminhoImagem}`}
+                          alt={item.titulo}
+                          sx={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            display: "block",
+                          }}
+                        />
+                      </Box>
+                    </Box>
                   )}
 
                   <Box sx={{ p: 3 }}>
@@ -280,7 +301,7 @@ const MuralRecados = () => {
                       </Box>
 
                       <Typography variant="caption" color="text.secondary">
-                        Criado por: {item.criadoPor}
+                        Criado por: {item.departamentoCriador}
                       </Typography>
                     </Box>
                   </Box>
