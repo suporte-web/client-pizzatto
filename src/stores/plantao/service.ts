@@ -20,7 +20,7 @@ export const PlantaoService = {
     const put = await Api.put(`/plantao/update-membros-equipe`, data);
     return put.data;
   },
-  
+
   updateEscalas: async (data: any) => {
     const put = await Api.put(`/plantao/update-escalas`, data);
     return put.data;
@@ -36,8 +36,23 @@ export const PlantaoService = {
     return get.data;
   },
 
-  getPlantonistaDiaSemana: async () => {
+  getPlantonistasSemanaAtual: async () => {
     const get = await Api.get(`/plantao/find-plantonista-dia-semana`);
     return get.data;
+  },
+
+  create: async (data: any) => {
+    const post = await Api.post(`/plantao/create`, data);
+    return post.data;
+  },
+
+  createBySpreadsheet: async (data: any) => {
+    const post = await Api.post(`/plantao/create-by-spreadsheet`, data);
+    return post.data;
+  },
+  
+  deleteContatos: async (data: any) => {
+    const del = await Api.delete(`/plantao/delete-contatos/${data.id}`);
+    return del.data;
   },
 };

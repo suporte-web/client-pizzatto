@@ -21,6 +21,7 @@ import {
   Diversity3Outlined,
   InfoOutlined,
   BookOutlined,
+  ChatBubbleOutline,
 } from "@mui/icons-material";
 import {
   alpha,
@@ -782,6 +783,16 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               {!isCollapsed && "Home"}
             </StyledMenuItem>
 
+            {user.roles?.includes("ADMIN") && (
+              <StyledMenuItem
+                collapsed={isCollapsed}
+                icon={<ChatBubbleOutline />}
+                component={<Link to="/chat-interno" />}
+                active={location.pathname === "/chat-interno"}
+              >
+                {!isCollapsed && "Chat Interno"}
+              </StyledMenuItem>
+            )}
             {user.roles?.includes("ADMIN") && (
               <Box
                 ref={adminWrapperRef}

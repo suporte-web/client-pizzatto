@@ -16,10 +16,27 @@ import LogoPizzatto from "../../imgs/image.png";
 import { PlantaoService } from "../../stores/plantao/service";
 import PlantaoCard from "./components/PlantaoCard";
 
+type EscalaItem = {
+  dataJanela: string;
+  diaSemana: string;
+  nome: string;
+  telefone: string;
+  area: string;
+  janelaInicio: string;
+  janelaFim: string;
+};
+
 const PlantaoPrincipal = () => {
   const theme = useTheme();
   const [agora, setAgora] = useState(new Date());
-  const [escalas, setEscalas] = useState<any>({});
+  const [escalas, setEscalas] = useState<EscalaItem[]>([]);
+
+  const normalizar = (valor?: string) =>
+    valor
+      ?.normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim();
 
   const estaDentroDoHorario = (
     horaInicio?: string,
@@ -37,7 +54,6 @@ const PlantaoPrincipal = () => {
     const fim = new Date(dataAtual);
     fim.setHours(fimHora, fimMin, 0, 0);
 
-    // cobre virada de dia, ex: 18:00 até 06:00
     if (fim <= inicio) {
       fim.setDate(fim.getDate() + 1);
 
@@ -58,9 +74,9 @@ const PlantaoPrincipal = () => {
 
   const fetchData = async () => {
     try {
-      const get = await PlantaoService.getPlantonistaDiaSemana();
-
-      setEscalas(get);
+      const get = await PlantaoService.getPlantonistasSemanaAtual();
+      console.log(get);
+      setEscalas(get ?? []);
     } catch (error) {
       console.log(error);
     }
@@ -70,41 +86,58 @@ const PlantaoPrincipal = () => {
     fetchData();
   }, []);
 
-  const diaSemanaIndex = agora.getDay();
-  const isFimDeSemana = diaSemanaIndex === 0 || diaSemanaIndex === 6;
+  const dataHoje = agora.toISOString().slice(0, 10);
 
-  const diasSemana = [
-    "domingo",
-    "segunda",
-    "terca",
-    "quarta",
-    "quinta",
-    "sexta",
-    "sabado",
-  ];
+  const plantoesDeHoje = escalas.filter(
+    (item) => item.dataJanela === dataHoje,
+  );
 
-  const diaSemanaAtual = diasSemana[diaSemanaIndex];
+  const plantaoSistemas = plantoesDeHoje.find(
+    (item) =>
+      normalizar(item.area) === "sistemas" &&
+      estaDentroDoHorario(item.janelaInicio, item.janelaFim, agora),
+  );
 
-  const normalizar = (valor?: string) =>
-    valor
-      ?.normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .trim();
+  const plantaoInfra = plantoesDeHoje.find(
+    (item) =>
+      normalizar(item.area) === "infra" &&
+      estaDentroDoHorario(item.janelaInicio, item.janelaFim, agora),
+  );
 
-  const isPlantaoAtivoSis = isFimDeSemana
-    ? !!escalas?.sistemas
-    : normalizar(escalas?.diaSemana) === normalizar(diaSemanaAtual) &&
-      estaDentroDoHorario(
-        escalas?.sistemas?.inicio,
-        escalas?.sistemas?.fim,
-        agora,
-      );
+  const sistemasCard = plantaoSistemas
+    ? {
+        nome: plantaoSistemas.nome,
+        telefone: plantaoSistemas.telefone,
+        inicio: plantaoSistemas.janelaInicio,
+        fim: plantaoSistemas.janelaFim,
+        area: plantaoSistemas.area,
+      }
+    : {
+        nome: "",
+        telefone: "",
+        inicio: "",
+        fim: "",
+        area: "Sistemas",
+      };
 
-  const isPlantaoAtivoInfra = isFimDeSemana
-    ? !!escalas?.infra
-    : normalizar(escalas?.diaSemana) === normalizar(diaSemanaAtual) &&
-      estaDentroDoHorario(escalas?.infra?.inicio, escalas?.infra?.fim, agora);
+  const infraCard = plantaoInfra
+    ? {
+        nome: plantaoInfra.nome,
+        telefone: plantaoInfra.telefone,
+        inicio: plantaoInfra.janelaInicio,
+        fim: plantaoInfra.janelaFim,
+        area: plantaoInfra.area,
+      }
+    : {
+        nome: "",
+        telefone: "",
+        inicio: "",
+        fim: "",
+        area: "Infra",
+      };
+
+  const isPlantaoAtivoSis = !!plantaoSistemas;
+  const isPlantaoAtivoInfra = !!plantaoInfra;
 
   return (
     <Box
@@ -120,7 +153,6 @@ const PlantaoPrincipal = () => {
         p: { xs: 2, md: 4 },
       }}
     >
-      {/* Overlay para escurecer o fundo */}
       <Box
         sx={{
           position: "absolute",
@@ -134,7 +166,6 @@ const PlantaoPrincipal = () => {
       />
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
-        {/* Header */}
         <Box
           sx={{
             display: "flex",
@@ -220,23 +251,23 @@ const PlantaoPrincipal = () => {
           </Box>
         </Box>
 
-        {/* Main Content */}
         <Grid container spacing={3} sx={{ flex: 1 }}>
           <Grid size={{ xs: 12, md: 6 }}>
             <PlantaoCard
               titulo="Sistemas"
               icon={Computer}
-              plantonista={escalas.sistemas}
+              plantonista={sistemasCard}
               ativo={isPlantaoAtivoSis}
               corBorda={theme.palette.warning.main}
               corIcone={theme.palette.warning.main}
             />
           </Grid>
+
           <Grid size={{ xs: 12, md: 6 }}>
             <PlantaoCard
               titulo="Infraestrutura / Redes"
               icon={Storage}
-              plantonista={escalas.infra}
+              plantonista={infraCard}
               ativo={isPlantaoAtivoInfra}
               corBorda={theme.palette.info.main}
               corIcone={theme.palette.info.main}
@@ -244,7 +275,6 @@ const PlantaoPrincipal = () => {
           </Grid>
         </Grid>
 
-        {/* Footer */}
         <Box sx={{ mt: "auto", py: 4, textAlign: "center" }}>
           <Typography
             variant="caption"
