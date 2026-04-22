@@ -6,9 +6,13 @@ import Escalas from "./components/Escalas";
 import { grey } from "@mui/material/colors";
 import ModalCreatePlantonista from "./components/ModalCreatePlantonista";
 import ModalCreateMembrosEquipe from "./components/ModalCreateMembrosEquipe";
+import { useState } from "react";
 
 const PlantaoAdmin = () => {
   const { user } = useUser();
+
+  const [flushHook, setFlushHook] = useState(false);
+
   return (
     <SidebarNew>
       <Container maxWidth="lg" sx={{ bgcolor: grey[50], p: 2 }}>
@@ -34,7 +38,9 @@ const PlantaoAdmin = () => {
           </Box>
           <Box sx={{ display: "flex", gap: 1 }}>
             <ModalCreateMembrosEquipe />
-            <ModalCreatePlantonista />
+            <ModalCreatePlantonista
+              setFlushHook={setFlushHook}
+            />
           </Box>
           {/* </Stack> */}
         </Stack>
@@ -46,7 +52,7 @@ const PlantaoAdmin = () => {
         {/* <MembrosDaEquipe /> */}
 
         {/* SEÇÃO: ESCALAS SEMANAIS */}
-        <Escalas />
+        <Escalas flushHook={flushHook} />
       </Container>
     </SidebarNew>
   );

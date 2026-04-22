@@ -783,7 +783,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               {!isCollapsed && "Home"}
             </StyledMenuItem>
 
-            {user.roles?.includes("ADMIN") && (
+            {/* {user.roles?.includes("ADMIN") && ( */}
               <StyledMenuItem
                 collapsed={isCollapsed}
                 icon={<ChatBubbleOutline />}
@@ -792,7 +792,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               >
                 {!isCollapsed && "Chat Interno"}
               </StyledMenuItem>
-            )}
+            {/* )} */}
             {user.roles?.includes("ADMIN") && (
               <Box
                 ref={adminWrapperRef}

@@ -30,7 +30,7 @@ type ManualFormData = {
   janelaFim: string;
 };
 
-const ModalCreatePlantonista = () => {
+const ModalCreatePlantonista = ({ setFlushHook }: any) => {
   const { showToast } = useToast();
 
   const [open, setOpen] = useState(false);
@@ -81,7 +81,7 @@ const ModalCreatePlantonista = () => {
     };
 
   const handleSelectSpreadsheet = (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0] ?? null;
     setSpreadsheetFile(file);
@@ -105,6 +105,7 @@ const ModalCreatePlantonista = () => {
       await PlantaoService.create(payload);
 
       showToast("Sucesso ao cadastrar plantonista manualmente", "success");
+      setFlushHook((prev: any) => !prev);
       handleClose();
     } catch (error) {
       console.error("Erro ao cadastrar plantonista manualmente:", error);
@@ -146,8 +147,8 @@ const ModalCreatePlantonista = () => {
           Object.entries(row).map(([key, value]) => [
             key,
             typeof value === "string" ? value.trim() : value,
-          ])
-        )
+          ]),
+        ),
       );
 
       setProgress(70);

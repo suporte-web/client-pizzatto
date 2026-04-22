@@ -23,6 +23,7 @@ import Politicas from "./pages/politicas";
 import Holerites from "./pages/holerites";
 import PaginaInstitucional from "./pages/paginaInstitucional";
 import BibliotecaMarca from "./pages/bibliotecaMarca";
+import ChatInterno from "./pages/chatInterno";
 
 const Rotas = () => (
   <Routes>
@@ -179,14 +180,6 @@ const Rotas = () => (
         </UserProvider>
       }
     />
-    {/* <Route
-      path="/valores-comportamentos"
-      element={
-        <UserProvider>
-          <Holerites />
-        </UserProvider>
-      }
-    /> */}
     <Route
       path="/biblioteca-marca"
       element={
@@ -195,6 +188,22 @@ const Rotas = () => (
         </UserProvider>
       }
     />
+    <Route
+      path="/chat-interno"
+      element={
+        <UserProvider>
+          <ChatInterno />
+        </UserProvider>
+      }
+    />
+    {/* <Route
+      path="/valores-comportamentos"
+      element={
+        <UserProvider>
+          <Holerites />
+        </UserProvider>
+      }
+    /> */}
     {/* <Route
       path="/templates-institucionais"
       element={

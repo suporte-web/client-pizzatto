@@ -14,7 +14,7 @@ type EscalaSemanaItem = {
   janelaFim: string;
 };
 
-const Escalas = () => {
+const Escalas = ({flushHook}: any) => {
   const [escalasSemana, setEscalasSemana] = useState<EscalaSemanaItem[]>([]);
 
   const fetchDataEscalas = async () => {
@@ -30,7 +30,7 @@ const Escalas = () => {
 
   useEffect(() => {
     fetchDataEscalas();
-  }, []);
+  }, [flushHook]);
 
   return (
     <Paper
