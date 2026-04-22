@@ -42,8 +42,6 @@ const PoliticasAceites = () => {
 
       const get = await PoliticasService.findAllAceitesByUser();
 
-      console.log(get);
-
       setPoliticas(get || []);
 
       if (get?.length > 0) {
