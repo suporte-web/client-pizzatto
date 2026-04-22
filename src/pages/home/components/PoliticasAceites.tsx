@@ -41,12 +41,20 @@ const PoliticasAceites = () => {
       setLoading(true);
 
       const get = await PoliticasService.findAllAceitesByUser();
-      setPoliticas(get || []);
+      console.log(get);
 
-      if (get?.length > 0) {
+      const pendentes = (get || []).filter(
+        (p: any) => !p.aceito && !p.dataAceite,
+      );
+
+      setPoliticas(pendentes);
+
+      if (pendentes.length > 0) {
         setIndexAtual(0);
         setAceite(false);
         setOpen(true);
+      } else {
+        setOpen(false);
       }
     } catch (error) {
       console.log(error);
