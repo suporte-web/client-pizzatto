@@ -51,7 +51,6 @@ const PoliticasAceites = () => {
       }
     } catch (error) {
       console.log(error);
-      showToast("Erro ao buscar políticas liberadas", "error");
     } finally {
       setLoading(false);
     }

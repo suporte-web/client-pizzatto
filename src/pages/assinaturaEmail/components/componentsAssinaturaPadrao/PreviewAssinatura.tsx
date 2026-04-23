@@ -1,6 +1,6 @@
 import { Box, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
-import pizzattoImage from "../../../../imgs/PizzattoLog_logo.png";
+// import pizzattoImage from "../../../../imgs/PizzattoLog_logo.png";
 
 type PositionValue = number | string | null | undefined;
 
@@ -131,15 +131,15 @@ const PreviewAssinatura = ({ item }: { item: AssinaturaPadrao }) => {
     return `${num * scaleX}px`;
   };
 
-  const sizeByY = (value: PositionValue) => {
-    if (value === null || value === undefined || value === "") return undefined;
-    if (hasPercentUnit(value)) return value as string;
+  // const sizeByY = (value: PositionValue) => {
+  //   if (value === null || value === undefined || value === "") return undefined;
+  //   if (hasPercentUnit(value)) return value as string;
 
-    const num = toNumber(value);
-    if (num === null) return undefined;
+  //   const num = toNumber(value);
+  //   if (num === null) return undefined;
 
-    return `${num * scaleY}px`;
-  };
+  //   return `${num * scaleY}px`;
+  // };
 
   const fontSizeBase = `${fontSizeBaseRaw * scaleX}px`;
   const fontSizeSecundaria = `${fontSizeSecundariaRaw * scaleX}px`;
@@ -258,7 +258,7 @@ const PreviewAssinatura = ({ item }: { item: AssinaturaPadrao }) => {
         </Typography>
       )}
 
-      {renderIfPositioned(item.logoX, item.logoY, item.logoHeight) && (
+      {/* {renderIfPositioned(item.logoX, item.logoY, item.logoHeight) && (
         <Box
           component="img"
           src={pizzattoImage}
@@ -273,7 +273,7 @@ const PreviewAssinatura = ({ item }: { item: AssinaturaPadrao }) => {
             objectFit: "contain",
           }}
         />
-      )}
+      )} */}
     </Box>
   );
 };

@@ -14,13 +14,13 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type {
   ChangeEvent,
   MouseEvent as ReactMouseEvent,
   TouchEvent as ReactTouchEvent,
 } from "react";
-import pizzattoImage from "../../../../imgs/PizzattoLog_logo.png";
+// import pizzattoImage from "../../../../imgs/PizzattoLog_logo.png";
 import { orange } from "@mui/material/colors";
 import { useMask } from "@react-input/mask";
 import { removeBackground } from "@imgly/background-removal";
@@ -402,98 +402,98 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
     }
   };
 
-  const htmlAssinatura = useMemo(() => {
-    return `
-      <div style="
-        position: relative;
-        width: ${SIGNATURE_WIDTH}px;
-        height: ${SIGNATURE_HEIGHT}px;
-        font-family: Arial, sans-serif;
-        color: ${template.textColor};
-        overflow: hidden;
-        border: 1px solid #e0e0e0;
-        border-radius: 12px;
-        ${
-          template.backgroundUrl
-            ? `background-image: url('${template.backgroundUrl}');
-               background-size: cover;
-               background-position: center top;
-               background-repeat: no-repeat;
-               background-color: #ffffff;`
-            : "background-color: #ffffff;"
-        }
-      ">
-        <img
-          src="${form.fotoUrl || "https://via.placeholder.com/90x90.png?text=Foto"}"
-          alt="Foto"
-          width="${template.photoSize}"
-          height="${template.photoSize}"
-          style="
-            position: absolute;
-            left: ${template.positions.foto.x}px;
-            top: ${template.positions.foto.y}px;
-            width: ${template.photoSize}px;
-            height: ${template.photoSize}px;
-            border-radius: 50%;
-            object-fit: cover;
-            object-position: center top;
-            border: 2px solid #fff;
-            z-index: 2;
-          "
-        />
+  // const htmlAssinatura = useMemo(() => {
+  //   return `
+  //     <div style="
+  //       position: relative;
+  //       width: ${SIGNATURE_WIDTH}px;
+  //       height: ${SIGNATURE_HEIGHT}px;
+  //       font-family: Arial, sans-serif;
+  //       color: ${template.textColor};
+  //       overflow: hidden;
+  //       border: 1px solid #e0e0e0;
+  //       border-radius: 12px;
+  //       ${
+  //         template.backgroundUrl
+  //           ? `background-image: url('${template.backgroundUrl}');
+  //              background-size: cover;
+  //              background-position: center top;
+  //              background-repeat: no-repeat;
+  //              background-color: #ffffff;`
+  //           : "background-color: #ffffff;"
+  //       }
+  //     ">
+  //       <img
+  //         src="${form.fotoUrl || "https://via.placeholder.com/90x90.png?text=Foto"}"
+  //         alt="Foto"
+  //         width="${template.photoSize}"
+  //         height="${template.photoSize}"
+  //         style="
+  //           position: absolute;
+  //           left: ${template.positions.foto.x}px;
+  //           top: ${template.positions.foto.y}px;
+  //           width: ${template.photoSize}px;
+  //           height: ${template.photoSize}px;
+  //           border-radius: 50%;
+  //           object-fit: cover;
+  //           object-position: center top;
+  //           border: 2px solid #fff;
+  //           z-index: 2;
+  //         "
+  //       />
 
-        <div style="
-          position: absolute;
-          left: ${template.positions.nome.x}px;
-          top: ${template.positions.nome.y}px;
-          font-size: ${currentFontSize.nome}px;
-          font-weight: 800;
-          color: ${template.textColor};
-          z-index: 2;
-          white-space: nowrap;
-        ">
-          ${form.nome || "Nome do Colaborador"}
-        </div>
+  //       <div style="
+  //         position: absolute;
+  //         left: ${template.positions.nome.x}px;
+  //         top: ${template.positions.nome.y}px;
+  //         font-size: ${currentFontSize.nome}px;
+  //         font-weight: 800;
+  //         color: ${template.textColor};
+  //         z-index: 2;
+  //         white-space: nowrap;
+  //       ">
+  //         ${form.nome || "Nome do Colaborador"}
+  //       </div>
 
-        <div style="
-          position: absolute;
-          left: ${template.positions.departamento.x}px;
-          top: ${template.positions.departamento.y}px;
-          font-size: ${currentFontSize.departamento}px;
-          color: ${template.textColor};
-          z-index: 2;
-          white-space: nowrap;
-        ">
-          ${form.departamento || "Departamento"}
-        </div>
+  //       <div style="
+  //         position: absolute;
+  //         left: ${template.positions.departamento.x}px;
+  //         top: ${template.positions.departamento.y}px;
+  //         font-size: ${currentFontSize.departamento}px;
+  //         color: ${template.textColor};
+  //         z-index: 2;
+  //         white-space: nowrap;
+  //       ">
+  //         ${form.departamento || "Departamento"}
+  //       </div>
 
-        <div style="
-          position: absolute;
-          left: ${template.positions.telefone.x}px;
-          top: ${template.positions.telefone.y}px;
-          font-size: ${currentFontSize.contato}px;
-          color: ${template.textColor};
-          z-index: 2;
-          white-space: nowrap;
-        ">
-          <strong>Telefone:</strong> ${form.telefone || "(00) 00000-0000"}
-        </div>
+  //       <div style="
+  //         position: absolute;
+  //         left: ${template.positions.telefone.x}px;
+  //         top: ${template.positions.telefone.y}px;
+  //         font-size: ${currentFontSize.contato}px;
+  //         color: ${template.textColor};
+  //         z-index: 2;
+  //         white-space: nowrap;
+  //       ">
+  //         <strong>Telefone:</strong> ${form.telefone || "(00) 00000-0000"}
+  //       </div>
 
-        <img
-          src="${pizzattoImage}"
-          alt="Logo"
-          height="${template.logoHeight}"
-          style="
-            position: absolute;
-            left: ${template.positions.logo.x}px;
-            top: ${template.positions.logo.y}px;
-            height: ${template.logoHeight}px;
-            z-index: 2;
-          "
-        />
-      </div>
-    `.trim();
-  }, [form, template, currentFontSize]);
+  //       <img
+  //         src="${pizzattoImage}"
+  //         alt="Logo"
+  //         height="${template.logoHeight}"
+  //         style="
+  //           position: absolute;
+  //           left: ${template.positions.logo.x}px;
+  //           top: ${template.positions.logo.y}px;
+  //           height: ${template.logoHeight}px;
+  //           z-index: 2;
+  //         "
+  //       />
+  //     </div>
+  //   `.trim();
+  // }, [form, template, currentFontSize]);
 
   const handleCriarAssinatura = async () => {
     try {
@@ -543,7 +543,7 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
       formData.append("background", backgroundFile);
 
       await AssinaturaPadraoService.create(formData);
-      await navigator.clipboard.writeText(htmlAssinatura);
+      // await navigator.clipboard.writeText(htmlAssinatura);
 
       showToast("Template de assinatura salvo com sucesso!", "success");
       setFlushHook((prev: any) => !prev);
@@ -996,7 +996,7 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
                       {form.telefone || "(00) 00000-0000"}
                     </Typography>
 
-                    <Box
+                    {/* <Box
                       component="img"
                       src={pizzattoImage}
                       alt="Logo"
@@ -1022,7 +1022,7 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
                           filter: "drop-shadow(0 0 6px rgba(255,255,255,0.8))",
                         },
                       }}
-                    />
+                    /> */}
                   </Box>
                 </Box>
               </Paper>

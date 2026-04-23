@@ -16,7 +16,7 @@ import {
 import { useRef, useState } from "react";
 import { toBlob } from "html-to-image";
 import type { ChangeEvent } from "react";
-import pizzattoImage from "../../../../imgs/PizzattoLog_logo.png";
+// import pizzattoImage from "../../../../imgs/PizzattoLog_logo.png";
 import { orange } from "@mui/material/colors";
 import { useMask } from "@react-input/mask";
 import { removeBackground } from "@imgly/background-removal";
@@ -63,7 +63,7 @@ type PhoneFieldProps = {
 const SIGNATURE_WIDTH = 520;
 const SIGNATURE_HEIGHT = 220;
 const DEFAULT_PHOTO_SIZE = 110;
-const DEFAULT_LOGO_HEIGHT = 32;
+// const DEFAULT_LOGO_HEIGHT = 32;
 
 const fontSizePresets: Record<
   FontSizeKey,
@@ -373,9 +373,9 @@ const ModalCreateAssinaturaEmail = ({
   const departamentoY = assinaturaPadrao?.departamentoY ?? 65;
   const telefoneX = assinaturaPadrao?.telefoneX ?? 160;
   const telefoneY = assinaturaPadrao?.telefoneY ?? 110;
-  const logoX = assinaturaPadrao?.logoX ?? 160;
-  const logoY = assinaturaPadrao?.logoY ?? 155;
-  const logoHeight = assinaturaPadrao?.logoHeight ?? DEFAULT_LOGO_HEIGHT;
+  // const logoX = assinaturaPadrao?.logoX ?? 160;
+  // const logoY = assinaturaPadrao?.logoY ?? 155;
+  // const logoHeight = assinaturaPadrao?.logoHeight ?? DEFAULT_LOGO_HEIGHT;
 
   return (
     <>
@@ -625,7 +625,7 @@ const ModalCreateAssinaturaEmail = ({
                       {form.telefone || "(00) 00000-0000"}
                     </Typography>
 
-                    <Box
+                    {/* <Box
                       component="img"
                       src={pizzattoImage}
                       alt="Logo"
@@ -636,7 +636,7 @@ const ModalCreateAssinaturaEmail = ({
                         height: logoHeight,
                         zIndex: 3,
                       }}
-                    />
+                    /> */}
                   </Box>
                 </Box>
               </Paper>

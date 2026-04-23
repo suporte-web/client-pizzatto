@@ -784,14 +784,14 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
             </StyledMenuItem>
 
             {/* {user.roles?.includes("ADMIN") && ( */}
-              <StyledMenuItem
-                collapsed={isCollapsed}
-                icon={<ChatBubbleOutline />}
-                component={<Link to="/chat-interno" />}
-                active={location.pathname === "/chat-interno"}
-              >
-                {!isCollapsed && "Chat Interno"}
-              </StyledMenuItem>
+            <StyledMenuItem
+              collapsed={isCollapsed}
+              icon={<ChatBubbleOutline />}
+              component={<Link to="/chat-interno" />}
+              active={location.pathname === "/chat-interno"}
+            >
+              {!isCollapsed && "Chat Interno"}
+            </StyledMenuItem>
             {/* )} */}
             {user.roles?.includes("ADMIN") && (
               <Box
@@ -945,21 +945,23 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               </StyledSubMenu>
             </Box> */}
 
-            <SidebarSubmenuSection
-              collapsed={isCollapsed}
-              label="Contratos"
-              icon={<GavelOutlined />}
-              items={contratosItems}
-              activePaths={contratosRoutes}
-              pathname={location.pathname}
-              popoutTop={contratosPopoutTop}
-              openPopout={openContratosPopout}
-              openExpanded={openContratosExpanded}
-              setOpenPopout={setOpenContratosPopout}
-              setOpenExpanded={setOpenContratosExpanded}
-              wrapperRef={contratosWrapperRef}
-              recalcTop={recalcContratosTop}
-            />
+            {user.roles?.includes("ADMIN") && (
+              <SidebarSubmenuSection
+                collapsed={isCollapsed}
+                label="Contratos"
+                icon={<GavelOutlined />}
+                items={contratosItems}
+                activePaths={contratosRoutes}
+                pathname={location.pathname}
+                popoutTop={contratosPopoutTop}
+                openPopout={openContratosPopout}
+                openExpanded={openContratosExpanded}
+                setOpenPopout={setOpenContratosPopout}
+                setOpenExpanded={setOpenContratosExpanded}
+                wrapperRef={contratosWrapperRef}
+                recalcTop={recalcContratosTop}
+              />
+            )}
 
             {/* {user.roles?.includes("ADMIN", "ENDOMARKETING") && (
               <Box
