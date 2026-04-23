@@ -149,6 +149,7 @@ const PreviewAssinatura = ({ item }: { item: AssinaturaPadrao }) => {
       sx={{
         position: "relative",
         width: "100%",
+        aspectRatio: `${SIGNATURE_WIDTH} / ${SIGNATURE_HEIGHT}`,
         borderRadius: "16px",
         overflow: "hidden",
         border: "1px solid",
@@ -172,9 +173,9 @@ const PreviewAssinatura = ({ item }: { item: AssinaturaPadrao }) => {
         }}
         sx={{
           width: "100%",
-          height: "auto",
+          height: "100%",
           display: "block",
-          objectFit: "contain",
+          objectFit: "fill",
           backgroundColor: "#fff",
           userSelect: "none",
           pointerEvents: "none",
