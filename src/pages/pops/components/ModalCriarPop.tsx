@@ -94,16 +94,8 @@ const ModalCriarPop = ({ setFluskHook }: any) => {
         const formData = new FormData();
 
         // O campo deve ser 'file' para match com @FileInterceptor('file')
-        formData.append("file", uploadedFile.file);
+        formData.append("arquivo", uploadedFile.file);
 
-        // Adiciona as informações adicionais como campos textuais
-        formData.append("originalName", uploadedFile.file.name);
-        formData.append("mimetype", uploadedFile.file.type);
-        formData.append("size", uploadedFile.file.size.toString());
-        formData.append(
-          "filePath",
-          `uploads/${Date.now()}_${uploadedFile.file.name}`,
-        );
         await PopsService.create(formData);
       }
 

@@ -20,8 +20,10 @@ import { useEffect, useState } from "react";
 import { useToast } from "../../components/Toast";
 import { PopsService } from "../../stores/pops/service";
 import { Visibility, Download } from "@mui/icons-material";
+import { useUser } from "../../UserContext";
 
 const POPs = () => {
+  const { user } = useUser();
   const { showToast } = useToast();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -41,6 +43,7 @@ const POPs = () => {
         nome,
         page,
         limit: rowsPerPage,
+        departamento: user?.department || undefined,
       });
 
       setPops(get.result || []);
@@ -91,165 +94,258 @@ const POPs = () => {
   return (
     <SidebarNew title="Controle de POPs">
       <Container maxWidth="xl">
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
-          <TextField
-            size="small"
-            fullWidth
-            type="text"
-            label="Buscar por Nome da POP"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-            InputProps={{ style: { borderRadius: "10px" } }}
-          />
-          <ModalCriarPop setFluskHook={setFluskHook} />
-        </Box>
-
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          flexDirection={isMobile ? "column" : "row"}
-          gap={isMobile ? 2 : 0}
-          sx={{ mb: 3 }}
-        >
-          <FormControl
-            size="small"
-            disabled={loading}
-            sx={{
-              minWidth: 120,
-              width: isMobile ? "100%" : "auto",
-            }}
-          >
-            <InputLabel>Linhas por página</InputLabel>
-            <Select
-              label="Linhas por página"
-              value={rowsPerPage}
-              onChange={(e) => setRowsPerPage(Number(e.target.value))}
-              sx={{
-                borderRadius: "12px",
-                backgroundColor: "background.paper",
-              }}
-            >
-              {[12, 24, 36, 48].map((option) => (
-                <MenuItem key={option} value={option}>
-                  {option}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Pagination
-            count={totalPaginas}
-            page={page}
-            onChange={(_e, value) => setPage(value)}
-            disabled={loading}
-            color="primary"
-            shape="rounded"
-            showFirstButton
-            showLastButton
-            size={isMobile ? "small" : "medium"}
-          />
-        </Box>
-        <Grid container spacing={2}>
-          {pops.map((pop: any) => (
-            <Grid size={{ xs: 6, md: 3 }} key={pop._id}>
-              <Paper
-                elevation={5}
-                sx={{
-                  borderRadius: "10px",
-                  p: 2,
-                  height: "85%",
-                  display: "flex",
-                  flexDirection: "column",
-                  // justifyContent: "space-between", // Isso garante que o conteúdo ocupe toda a altura
-                }}
-              >
-                <Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      mb: 1,
-                      fontSize: "1rem",
-                      fontWeight: "bold",
-                      color: "primary.main",
-                    }}
-                  >
-                    {pop.originalName || "Sem nome"}
-                  </Typography>
-
-                  <Box>
-                    <Box sx={{ mb: 1 }}>
-                      <strong>Tamanho:</strong>{" "}
-                      {pop.size
-                        ? `${(pop.size / 1024 / 1024).toFixed(2)} MB`
-                        : "N/A"}
-                    </Box>
-                    <Box sx={{ mb: 1 }}>
-                      <strong>Data:</strong>{" "}
-                      {pop.createdAt
-                        ? new Date(pop.createdAt).toLocaleDateString()
-                        : "N/A"}
-                    </Box>
-                  </Box>
-                </Box>
-
-                {/* Box dos botões agora fica no bottom */}
-                <Box
-                  sx={{
-                    display: "flex",
-                    gap: 1,
-                    mt: "auto", // Isso empurra os botões para o bottom
-                    pt: 2, // Padding top para separar do conteúdo acima
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<Visibility />}
-                    onClick={() => handleViewFile(pop)}
-                    sx={{
-                      borderRadius: "8px",
-                      flex: 1,
-                    }}
-                  >
-                    Visualizar
-                  </Button>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    startIcon={<Download />}
-                    onClick={() => handleDownloadFile(pop)}
-                    sx={{
-                      borderRadius: "8px",
-                      flex: 1,
-                    }}
-                  >
-                    Baixar
-                  </Button>
-                </Box>
-              </Paper>
-            </Grid>
-          ))}
-        </Grid>
-
-        {pops.length === 0 && !loading && (
+        <Box sx={{ py: 3 }}>
           <Paper
+            elevation={0}
             sx={{
-              p: 4,
-              textAlign: "center",
-              borderRadius: "12px",
-              backgroundColor: "grey.50",
-              mt: 2,
+              p: 3,
+              mb: 3,
+              borderRadius: 4,
+              border: "1px solid",
+              borderColor: "divider",
+              background:
+                "linear-gradient(135deg, rgba(25,118,210,0.08), rgba(255,255,255,1))",
             }}
           >
-            <Box sx={{ color: "text.secondary" }}>
-              {nome
-                ? "Nenhum POP encontrado para esta busca"
-                : "Nenhum POP cadastrado"}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems={isMobile ? "stretch" : "center"}
+              flexDirection={isMobile ? "column" : "row"}
+              gap={2}
+            >
+              <Box>
+                <Typography variant="h5" fontWeight={800}>
+                  POPs
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Consulte, visualize e baixe os procedimentos operacionais.
+                </Typography>
+              </Box>
+
+              <ModalCriarPop setFluskHook={setFluskHook} />
             </Box>
           </Paper>
-        )}
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+              mb: 3,
+              borderRadius: 3,
+              border: "1px solid",
+              borderColor: "divider",
+            }}
+          >
+            <Box
+              display="flex"
+              alignItems="center"
+              flexDirection={isMobile ? "column" : "row"}
+              gap={2}
+            >
+              <TextField
+                size="small"
+                fullWidth
+                label="Buscar por nome da POP"
+                value={nome}
+                onChange={(e) => {
+                  setNome(e.target.value);
+                  setPage(1);
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 3,
+                  },
+                }}
+              />
+
+              <FormControl
+                size="small"
+                disabled={loading}
+                sx={{ minWidth: isMobile ? "100%" : 190 }}
+              >
+                <InputLabel>Itens por página</InputLabel>
+                <Select
+                  label="Itens por página"
+                  value={rowsPerPage}
+                  onChange={(e) => {
+                    setRowsPerPage(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  sx={{ borderRadius: 3 }}
+                >
+                  {[12, 24, 36, 48].map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+          </Paper>
+
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems={isMobile ? "stretch" : "center"}
+            flexDirection={isMobile ? "column" : "row"}
+            gap={2}
+            sx={{ mb: 2 }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              {loading
+                ? "Carregando POPs..."
+                : `${totalPages} POP${totalPages === 1 ? "" : "s"} encontrado${
+                    totalPages === 1 ? "" : "s"
+                  }`}
+            </Typography>
+
+            <Pagination
+              count={totalPaginas}
+              page={page}
+              onChange={(_e, value) => setPage(value)}
+              disabled={loading}
+              color="primary"
+              shape="rounded"
+              showFirstButton
+              showLastButton
+              size={isMobile ? "small" : "medium"}
+            />
+          </Box>
+
+          <Grid container spacing={2}>
+            {pops.map((pop: any) => (
+              <Grid size={{ xs: 12, md: 4 }} key={pop.id}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    // height: "100%",
+                    // minHeight: 210,
+                    borderRadius: 4,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    display: "flex",
+                    flexDirection: "column",
+                    transition: "all 0.2s ease",
+                    "&:hover": {
+                      transform: "translateY(-3px)",
+                      boxShadow: "0 10px 30px rgba(15, 23, 42, 0.12)",
+                      borderColor: "primary.light",
+                    },
+                  }}
+                >
+                  <Box sx={{ mb: 2 }}>
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight={800}
+                      color="primary.main"
+                      sx={{
+                        mb: 1,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {pop.originalName || "Sem nome"}
+                    </Typography>
+
+                    <Typography variant="caption" color="text.secondary">
+                      Documento POP
+                    </Typography>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      p: 1.5,
+                      mb: 2,
+                      borderRadius: 3,
+                      bgcolor: "grey.50",
+                      border: "1px solid",
+                      borderColor: "divider",
+                    }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Tamanho:</strong>{" "}
+                      {pop.size
+                        ? `${(Number(pop.size) / 1024 / 1024).toFixed(2)} MB`
+                        : "N/A"}
+                    </Typography>
+
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Criado em:</strong>{" "}
+                      {pop.createdAt
+                        ? new Date(pop.createdAt).toLocaleDateString("pt-BR")
+                        : "N/A"}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      <strong>Departamento:</strong>{" "}
+                      {pop.departamento ? pop.departamento : "N/A"}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ display: "flex", gap: 1, mt: "auto" }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<Visibility />}
+                      onClick={() => handleViewFile(pop)}
+                      sx={{
+                        borderRadius: 3,
+                        flex: 1,
+                        textTransform: "none",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Visualizar
+                    </Button>
+
+                    <Button
+                      variant="contained"
+                      size="small"
+                      startIcon={<Download />}
+                      onClick={() => handleDownloadFile(pop)}
+                      sx={{
+                        borderRadius: 3,
+                        flex: 1,
+                        textTransform: "none",
+                        fontWeight: 700,
+                      }}
+                    >
+                      Baixar
+                    </Button>
+                  </Box>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+
+          {pops.length === 0 && !loading && (
+            <Paper
+              elevation={0}
+              sx={{
+                p: 5,
+                mt: 3,
+                textAlign: "center",
+                borderRadius: 4,
+                border: "1px dashed",
+                borderColor: "divider",
+                bgcolor: "grey.50",
+              }}
+            >
+              <Typography variant="h6" fontWeight={700} gutterBottom>
+                Nenhuma POP encontrada
+              </Typography>
+
+              <Typography variant="body2" color="text.secondary">
+                {nome
+                  ? "Tente buscar por outro nome ou limpe o filtro."
+                  : "Ainda não há POPs cadastradas."}
+              </Typography>
+            </Paper>
+          )}
+        </Box>
       </Container>
     </SidebarNew>
   );

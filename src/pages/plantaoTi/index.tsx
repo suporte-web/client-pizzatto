@@ -17,8 +17,11 @@ import { PlantaoService } from "../../stores/plantao/service";
 import PlantaoCard from "./components/PlantaoCard";
 
 type EscalaItem = {
+  id: string;
+  status: "DATA FIXA" | "RECORRENTE";
   dataJanela: string;
   diaSemana: string;
+  diaSemanaNumero: number;
   nome: string;
   telefone: string;
   area: string;
@@ -38,30 +41,24 @@ const PlantaoPrincipal = () => {
       .toLowerCase()
       .trim();
 
-  const estaDentroDoHorario = (
+  const estaDentroDoHorarioPlantao = (
+    dataJanela: string,
     horaInicio?: string,
     horaFim?: string,
     dataAtual: Date = new Date(),
   ) => {
-    if (!horaInicio || !horaFim) return false;
+    if (!dataJanela || !horaInicio || !horaFim) return false;
 
     const [inicioHora, inicioMin] = horaInicio.split(":").map(Number);
     const [fimHora, fimMin] = horaFim.split(":").map(Number);
 
-    const inicio = new Date(dataAtual);
-    inicio.setHours(inicioHora, inicioMin, 0, 0);
+    const [ano, mes, dia] = dataJanela.split("-").map(Number);
 
-    const fim = new Date(dataAtual);
-    fim.setHours(fimHora, fimMin, 0, 0);
+    const inicio = new Date(ano, mes - 1, dia, inicioHora, inicioMin, 0, 0);
+    const fim = new Date(ano, mes - 1, dia, fimHora, fimMin, 0, 0);
 
     if (fim <= inicio) {
       fim.setDate(fim.getDate() + 1);
-
-      if (dataAtual < inicio) {
-        const atualAjustado = new Date(dataAtual);
-        atualAjustado.setDate(atualAjustado.getDate() + 1);
-        return atualAjustado >= inicio && atualAjustado <= fim;
-      }
     }
 
     return dataAtual >= inicio && dataAtual <= fim;
@@ -75,7 +72,6 @@ const PlantaoPrincipal = () => {
   const fetchData = async () => {
     try {
       const get = await PlantaoService.getPlantonistasSemanaAtual();
-      console.log(get);
       setEscalas(get ?? []);
     } catch (error) {
       console.log(error);
@@ -86,22 +82,26 @@ const PlantaoPrincipal = () => {
     fetchData();
   }, []);
 
-  const dataHoje = agora.toISOString().slice(0, 10);
-
-  const plantoesDeHoje = escalas.filter(
-    (item) => item.dataJanela === dataHoje,
-  );
-
-  const plantaoSistemas = plantoesDeHoje.find(
+  const plantaoSistemas = escalas.find(
     (item) =>
       normalizar(item.area) === "sistemas" &&
-      estaDentroDoHorario(item.janelaInicio, item.janelaFim, agora),
+      estaDentroDoHorarioPlantao(
+        item.dataJanela,
+        item.janelaInicio,
+        item.janelaFim,
+        agora,
+      ),
   );
 
-  const plantaoInfra = plantoesDeHoje.find(
+  const plantaoInfra = escalas.find(
     (item) =>
       normalizar(item.area) === "infra" &&
-      estaDentroDoHorario(item.janelaInicio, item.janelaFim, agora),
+      estaDentroDoHorarioPlantao(
+        item.dataJanela,
+        item.janelaInicio,
+        item.janelaFim,
+        agora,
+      ),
   );
 
   const sistemasCard = plantaoSistemas
@@ -206,6 +206,7 @@ const PlantaoPrincipal = () => {
                 style={{ width: "80%", height: "100%", objectFit: "contain" }}
               />
             </Avatar>
+
             <Box>
               <Typography
                 variant="h5"
@@ -213,6 +214,7 @@ const PlantaoPrincipal = () => {
               >
                 Plantão TI
               </Typography>
+
               <Typography
                 variant="body2"
                 sx={{

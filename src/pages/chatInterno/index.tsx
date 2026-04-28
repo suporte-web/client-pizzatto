@@ -458,6 +458,16 @@ const ChatInterno = () => {
     );
   };
 
+  const fimMensagensRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollParaFim = () => {
+    fimMensagensRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollParaFim();
+  }, [mensagens, conversaIdSelecionada]);
+
   return (
     <SidebarNew>
       <Container maxWidth={false}>
@@ -756,6 +766,7 @@ const ChatInterno = () => {
                       </Stack>
                     );
                   })}
+                  <div ref={fimMensagensRef} />
                 </Stack>
               )}
             </Box>

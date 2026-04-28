@@ -16,7 +16,7 @@ import {
   GradeOutlined,
   WorkOutline,
   LocalPoliceOutlined,
-  RequestQuoteOutlined,
+  // RequestQuoteOutlined,
   PeopleOutlineOutlined,
   Diversity3Outlined,
   InfoOutlined,
@@ -403,11 +403,6 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
         icon: <Inventory2Outlined />,
       },
       {
-        label: "POPs",
-        path: "/pops",
-        icon: <FileOpen />,
-      },
-      {
         label: "Contas Office",
         path: "/contas-office",
         icon: <Microsoft />,
@@ -443,10 +438,15 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
 
   const areaColaboradorItems = useMemo(
     () => [
+      // {
+      //   label: "Holerite",
+      //   path: "/holerites",
+      //   icon: <RequestQuoteOutlined />,
+      // },
       {
-        label: "Holerite",
-        path: "/holerites",
-        icon: <RequestQuoteOutlined />,
+        label: "POPs",
+        path: "/pops",
+        icon: <FileOpen />,
       },
     ],
     [],
@@ -1032,23 +1032,23 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                 recalcTop={recalcEndoMarketingTop}
               />
             )}
-            {user.roles?.includes("ADMIN") && (
-              <SidebarSubmenuSection
-                collapsed={isCollapsed}
-                label="Área do Colaborador"
-                icon={<PeopleOutlineOutlined />}
-                items={areaColaboradorItems}
-                activePaths={areaColaboradorRoutes}
-                pathname={location.pathname}
-                popoutTop={areaColaboradorPopoutTop}
-                openPopout={openAreaColaboradorPopout}
-                openExpanded={openAreaColaboradorExpanded}
-                setOpenPopout={setOpenAreaColaboradorPopout}
-                setOpenExpanded={setOpenAreaColaboradorExpanded}
-                wrapperRef={areaColaboradorWrapperRef}
-                recalcTop={recalcAreaColaboradorTop}
-              />
-            )}
+            {/* {user.roles?.includes("ADMIN") && ( */}
+            <SidebarSubmenuSection
+              collapsed={isCollapsed}
+              label="Área do Colaborador"
+              icon={<PeopleOutlineOutlined />}
+              items={areaColaboradorItems}
+              activePaths={areaColaboradorRoutes}
+              pathname={location.pathname}
+              popoutTop={areaColaboradorPopoutTop}
+              openPopout={openAreaColaboradorPopout}
+              openExpanded={openAreaColaboradorExpanded}
+              setOpenPopout={setOpenAreaColaboradorPopout}
+              setOpenExpanded={setOpenAreaColaboradorExpanded}
+              wrapperRef={areaColaboradorWrapperRef}
+              recalcTop={recalcAreaColaboradorTop}
+            />
+            {/* )} */}
 
             {user.roles?.includes("ADMIN") && (
               <SidebarSubmenuSection

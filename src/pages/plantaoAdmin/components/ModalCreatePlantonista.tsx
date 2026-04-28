@@ -14,6 +14,11 @@ import {
   Typography,
   LinearProgress,
   Tooltip,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  type SelectChangeEvent,
 } from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
 import { Add } from "@mui/icons-material";
@@ -28,6 +33,8 @@ type ManualFormData = {
   dataJanela: string;
   janelaInicio: string;
   janelaFim: string;
+  status: string;
+  diaSemana: string;
 };
 
 const ModalCreatePlantonista = ({ setFlushHook }: any) => {
@@ -42,6 +49,8 @@ const ModalCreatePlantonista = ({ setFlushHook }: any) => {
     dataJanela: "",
     janelaInicio: "",
     janelaFim: "",
+    status: "DATA FIXA",
+    diaSemana: "",
   });
 
   const [contatos, setContatos] = useState<any[]>([]);
@@ -62,6 +71,8 @@ const ModalCreatePlantonista = ({ setFlushHook }: any) => {
       dataJanela: "",
       janelaInicio: "",
       janelaFim: "",
+      status: "DATA FIXA",
+      diaSemana: "",
     });
     setSpreadsheetFile(null);
     setProgress(0);
@@ -73,7 +84,11 @@ const ModalCreatePlantonista = ({ setFlushHook }: any) => {
 
   const handleChangeManualField =
     (field: keyof ManualFormData) =>
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    (
+      event:
+        | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+        | SelectChangeEvent<string>,
+    ) => {
       setManualForm((prev) => ({
         ...prev,
         [field]: event.target.value,
@@ -100,6 +115,8 @@ const ModalCreatePlantonista = ({ setFlushHook }: any) => {
         dataJanela: manualForm.dataJanela.trim(),
         janelaInicio: manualForm.janelaInicio.trim(),
         janelaFim: manualForm.janelaFim.trim(),
+        status: manualForm.status.trim(),
+        diaSemana: manualForm.diaSemana.trim(),
       };
 
       await PlantaoService.create(payload);
@@ -239,18 +256,37 @@ const ModalCreatePlantonista = ({ setFlushHook }: any) => {
                   />
                 )}
               />
-
-              <TextField
-                type="date"
-                size="small"
-                label="Data Janela"
-                value={manualForm.dataJanela}
-                onChange={handleChangeManualField("dataJanela")}
-                fullWidth
-                disabled={loading}
-                InputLabelProps={{ shrink: true }}
-                InputProps={{ style: { borderRadius: "10px" } }}
-              />
+              {manualForm.status === "DATA FIXA" ? (
+                <TextField
+                  type="date"
+                  size="small"
+                  label="Data Janela"
+                  value={manualForm.dataJanela}
+                  onChange={handleChangeManualField("dataJanela")}
+                  fullWidth
+                  disabled={loading}
+                  InputLabelProps={{ shrink: true }}
+                  InputProps={{ style: { borderRadius: "10px" } }}
+                />
+              ) : (
+                <FormControl fullWidth size="small">
+                  <InputLabel>Dia da Semana</InputLabel>
+                  <Select
+                    label="Dia da Semana"
+                    value={manualForm.diaSemana}
+                    onChange={handleChangeManualField("diaSemana")}
+                    fullWidth
+                    disabled={loading}
+                    sx={{ borderRadius: "10px" }}
+                  >
+                    <MenuItem value={"1"}>SEGUNDA-FEIRA</MenuItem>
+                    <MenuItem value={"2"}>TERÇA-FEIRA</MenuItem>
+                    <MenuItem value={"3"}>QUARTA-FEIRA</MenuItem>
+                    <MenuItem value={"4"}>QUINTA-FEIRA</MenuItem>
+                    <MenuItem value={"5"}>SEXTA-FEIRA</MenuItem>
+                  </Select>
+                </FormControl>
+              )}
 
               <TextField
                 type="time"
@@ -275,6 +311,21 @@ const ModalCreatePlantonista = ({ setFlushHook }: any) => {
                 InputLabelProps={{ shrink: true }}
                 InputProps={{ style: { borderRadius: "10px" } }}
               />
+
+              <FormControl fullWidth size="small">
+                <InputLabel>Tipo de Status</InputLabel>
+                <Select
+                  label="Tipo de Status"
+                  value={manualForm.status}
+                  onChange={handleChangeManualField("status")}
+                  fullWidth
+                  disabled={loading}
+                  sx={{ borderRadius: "10px" }}
+                >
+                  <MenuItem value={"DATA FIXA"}>DATA FIXA</MenuItem>
+                  <MenuItem value={"RECORRENTE"}>RECORRENTE</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
           )}
 
@@ -331,7 +382,6 @@ const ModalCreatePlantonista = ({ setFlushHook }: any) => {
               loading ||
               (tab === 0
                 ? !manualForm.plantonistaId ||
-                  !manualForm.dataJanela ||
                   !manualForm.janelaInicio ||
                   !manualForm.janelaFim
                 : !spreadsheetFile)
