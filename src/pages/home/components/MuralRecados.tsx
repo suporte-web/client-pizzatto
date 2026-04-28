@@ -25,6 +25,9 @@ const MuralRecados = () => {
   const [comentarios, setComentarios] = useState<any[]>([]);
   const [loadingComentarios, setLoadingComentarios] = useState(false);
 
+  const hasRole = (roles: string[]) =>
+    roles.some((role) => user?.roles?.includes(role));
+
   const fetchGetMural = async () => {
     try {
       const getMurais = await MuralService.getAllByFilial();
@@ -110,9 +113,9 @@ const MuralRecados = () => {
 
   return (
     <>
-      {user?.roles?.some((role: string) =>
-        ["ADMIN", "ENDOMARKETING"].includes(role),
-      ) && <ModalCreateMural setFlushHook={setFlushHook} />}
+      {hasRole(["ADMIN", "ENDOMARKETING"]) && (
+        <ModalCreateMural setFlushHook={setFlushHook} />
+      )}
 
       {murais.length >= 1 && (
         <>

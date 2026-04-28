@@ -46,6 +46,9 @@ const ContasOffice = () => {
 
   const [contasOffice, setContasOffice] = useState([]);
 
+  const hasRole = (roles: string[]) =>
+    roles.some((role) => user?.roles?.includes(role));
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -191,7 +194,7 @@ const ContasOffice = () => {
                   }
                 </TableCell>
                 <TableCell>
-                  {user?.roles?.includes("ADMIN", "RH") && (
+                  {hasRole(["ADMIN", "RH"]) && (
                     <ModalEditarContasOffice
                       item={item}
                       setFlushHook={setFlushHook}

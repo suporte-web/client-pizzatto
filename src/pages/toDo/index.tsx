@@ -23,16 +23,16 @@ import {
   Typography,
 } from "@mui/material";
 import SidebarNew from "../../components/Sidebar";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ModalAdicionarToDo from "./components/ModalAdicionarToDo";
 import { ToDoService } from "../../stores/toDo/service";
 import { useToast } from "../../components/Toast";
 import moment from "moment";
 import ModalEditarToDo from "./components/ModalEditarToD";
-import { UserContext } from "../../UserContext";
+import { useUser } from "../../UserContext";
 
 const ToDo = () => {
-  const { user } = useContext(UserContext);
+  const { user } = useUser();
   const { showToast } = useToast();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -135,7 +135,8 @@ const ToDo = () => {
             mt: 1,
             borderRadius: "16px",
             p: 1,
-            background: theme.palette.mode === "light" ? "#fafafa" : "background.paper",
+            background:
+              theme.palette.mode === "light" ? "#fafafa" : "background.paper",
           }}
         >
           <Tabs
@@ -316,7 +317,6 @@ const ToDo = () => {
                   }}
                 >
                   <TableCell align="center">
-                    {user?.acessos?.administrador || user?.nome === item.responsavel}
                     <FormGroup
                       sx={{
                         display: "flex",
@@ -342,7 +342,7 @@ const ToDo = () => {
 
                               showToast(
                                 "Item a Fazer alterado com sucesso",
-                                "success"
+                                "success",
                               );
 
                               setFlushHook((prev) => !prev);
@@ -377,9 +377,7 @@ const ToDo = () => {
                   <TableCell>{item.responsavel}</TableCell>
                   <TableCell>
                     {item.dataFinalizado
-                      ? moment(item.dataFinalizado).format(
-                          "DD/MM/YYYY HH:mm"
-                        )
+                      ? moment(item.dataFinalizado).format("DD/MM/YYYY HH:mm")
                       : "-"}
                   </TableCell>
                   <TableCell align="center">

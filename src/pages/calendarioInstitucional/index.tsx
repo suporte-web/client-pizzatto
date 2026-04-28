@@ -66,11 +66,8 @@ const CalendarioInstitucional = () => {
 
   const [flushHook, setFlushHook] = useState(false);
 
-  // const privilegedRoles = ["ADMIN", "ENDOMARKETING", "PESSOAS_E_CULTURA"];
-
-  // const isPrivilegedUser = user?.roles?.some((role: any) =>
-  //   privilegedRoles.includes(role),
-  // );
+  const hasRole = (roles: string[]) =>
+    roles.some((role) => user?.roles?.includes(role));
 
   const today = new Date();
 
@@ -200,11 +197,7 @@ const CalendarioInstitucional = () => {
             InputProps={{ style: { borderRadius: "10px" } }}
           />
 
-          {user?.roles?.includes(
-            "ADMIN",
-            "ENDOMARKETING",
-            "PESSOAS_E_CULTURA",
-          ) && (
+          {hasRole(["ADMIN", "ENDOMARKETING", "PESSOAS_E_CULTURA"]) && (
             <>
               {/* <FormControl fullWidth size="small">
                 <InputLabel>Departamento</InputLabel>

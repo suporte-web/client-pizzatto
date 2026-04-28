@@ -198,13 +198,6 @@ const BibliotecaMarca = () => {
                       spacing={1}
                       mt={2}
                     >
-                      {/* <ModalVisualizarInfo pagina={pagina} />
-                      {user.roles?.includes("ADMIN", "RH") && (
-                        <ModalEditarPaginaInstitucional
-                          pagina={pagina}
-                          setFlushHook={setFlushHook}
-                        />
-                      )} */}
                     </Stack>
                   </Paper>
                 </Grid>

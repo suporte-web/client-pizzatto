@@ -17,7 +17,7 @@ import {
 import { useContext, useEffect, useState } from "react";
 import { ToDoService } from "../../../stores/toDo/service";
 import { UserContext } from "../../../UserContext";
-import { UserService } from "../../../stores/users/service";
+import { UserAdService } from "../../../stores/adLdap/serviceUsersAd";
 
 const ModalEditarToDo = ({ item }: any) => {
   const { user } = useContext(UserContext);
@@ -28,6 +28,9 @@ const ModalEditarToDo = ({ item }: any) => {
   const [prazoLimite, setPrazoLimite] = useState(item.prazoLimite || "");
   const [responsavel, setResponsavel] = useState(item.responsavel || "");
   const [users, setUsers] = useState([]);
+
+  const hasRole = (roles: string[]) =>
+    roles.some((role) => user?.roles?.includes(role));
 
   const handleOpen = () => {
     setOpen(true);
@@ -53,8 +56,8 @@ const ModalEditarToDo = ({ item }: any) => {
 
   const fetchUsersAtivos = async () => {
     try {
-      const get = await UserService.getUsersAtivos();
-      
+      const get = await UserAdService.getAllActiveUsers();
+
       setUsers(get);
     } catch (error) {
       console.log(error);
@@ -125,20 +128,8 @@ const ModalEditarToDo = ({ item }: any) => {
               />
             </Grid>
 
-            {user?.acessos?.administrador && (
-              <Grid size={{ xs: 12, sm: 6 }}>
-                {/* <TextField
-                  label="Colaborador"
-                  size="small"
-                  value={responsavel}
-                  onChange={(e) => {
-                    setResponsavel(e.target.value);
-                  }}
-                  fullWidth
-                  InputProps={{
-                    sx: { borderRadius: "10px" },
-                  }}
-                /> */}
+            {hasRole(["ADMIN", "DESENVOLVIMENTO"]) && (
+              <Grid size={{ xs: 12, sm: 12 }}>
                 <FormControl size="small" fullWidth>
                   <InputLabel>Colaborador</InputLabel>
                   <Select
@@ -149,7 +140,7 @@ const ModalEditarToDo = ({ item }: any) => {
                     sx={{ borderRadius: "10px" }}
                   >
                     {users.map((user: any) => (
-                      <MenuItem value={user.nome}>{user.nome}</MenuItem>
+                      <MenuItem value={user.name}>{user.name}</MenuItem>
                     ))}
                   </Select>
                 </FormControl>

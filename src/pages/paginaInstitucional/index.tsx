@@ -37,7 +37,10 @@ const PaginaInstitucional = () => {
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(9);
+
+  const hasRole = (roles: string[]) =>
+    roles.some((role) => user?.roles?.includes(role));
 
   const fetchData = async () => {
     setLoading(true);
@@ -95,7 +98,7 @@ const PaginaInstitucional = () => {
               size="small"
               InputProps={{ style: { borderRadius: "10px" } }}
             />
-            {user.roles?.includes("ADMIN", "RH") && (
+            {hasRole(["ADMIN", "RH", "DESENVOLVIMENTO"]) && (
               <ModalCreatePaginaInstitucional setFlushHook={setFlushHook} />
             )}
           </Box>
@@ -208,7 +211,7 @@ const PaginaInstitucional = () => {
                       mt={2}
                     >
                       <ModalVisualizarInfo pagina={pagina} />
-                      {user.roles?.includes("ADMIN", "RH") && (
+                      {hasRole(["ADMIN", "RH", "DESENVOLVIMENTO"]) && (
                         <ModalEditarPaginaInstitucional
                           pagina={pagina}
                           setFlushHook={setFlushHook}

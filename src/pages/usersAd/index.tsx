@@ -40,6 +40,9 @@ const UsersAd = () => {
   const [pesquisa, setPesquisa] = useState("");
   const [usersAd, setUsersAd] = useState([]);
 
+  const hasRole = (roles: string[]) =>
+    roles.some((role) => user?.roles?.includes(role));
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -86,9 +89,7 @@ const UsersAd = () => {
               }}
               InputProps={{ style: { borderRadius: "10px" } }}
             />
-            {user?.roles.includes("ADMIN") && (
-              <ModalCriarUserAD showToast={showToast} />
-            )}
+            {hasRole(["ADMIN"]) && <ModalCriarUserAD showToast={showToast} />}
           </Box>
         </Paper>
 
@@ -149,9 +150,9 @@ const UsersAd = () => {
                 <TableCell>Departamento</TableCell>
                 <TableCell>Filial</TableCell>
                 <TableCell>Ativo</TableCell>
-                {/* {user?.acessos?.administrador &&  */}
-                <TableCell>Ações</TableCell>
-                {/* } */}
+                {hasRole(["DESENVOLVIMENTO", "TI"]) && (
+                  <TableCell>Ações</TableCell>
+                )}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -170,15 +171,15 @@ const UsersAd = () => {
                       color={item.isDisabled === true ? "error" : "success"}
                     />
                   </TableCell>
-                  {/* {user?.acessos?.administrador && ( */}
-                  <TableCell>
-                    <ModalEditarUserAD
-                      item={item}
-                      showToast={showToast}
-                      setFlushHook={setFlushHook}
-                    />
-                  </TableCell>
-                  {/* )} */}
+                  {hasRole(["DESENVOLVIMENTO", "TI"]) && (
+                    <TableCell>
+                      <ModalEditarUserAD
+                        item={item}
+                        showToast={showToast}
+                        setFlushHook={setFlushHook}
+                      />
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

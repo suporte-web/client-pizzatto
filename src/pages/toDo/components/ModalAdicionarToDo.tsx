@@ -32,6 +32,9 @@ const ModalAdicionarToDo = ({ setFlushHook, showToast }: any) => {
   const [responsavel, setResponsavel] = useState("");
   const [users, setUsers] = useState([]);
 
+  const hasRole = (roles: string[]) =>
+    roles.some((role) => user?.roles?.includes(role));
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
     setOpen(false);
@@ -163,7 +166,7 @@ const ModalAdicionarToDo = ({ setFlushHook, showToast }: any) => {
               />
             </Grid>
 
-            {user?.acessos?.administrador && (
+            {hasRole(["ADMIN", "DESENVOLVIMENTO"]) && (
               <Grid size={{ xs: 12, sm: 6 }}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Colaborador</InputLabel>

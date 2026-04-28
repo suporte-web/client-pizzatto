@@ -16,7 +16,6 @@ import {
   GradeOutlined,
   WorkOutline,
   LocalPoliceOutlined,
-  // RequestQuoteOutlined,
   PeopleOutlineOutlined,
   Diversity3Outlined,
   InfoOutlined,
@@ -54,7 +53,6 @@ import {
 } from "react-pro-sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { UserContext } from "../UserContext";
-import SidebarMobile from "./SidebarMobile";
 import pizzattoImage from "../imgs/PizzattoLog_logo.png";
 
 interface SidebarNewProps {
@@ -328,6 +326,9 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
   const [openCulturaPopout, setOpenCulturaPopout] = useState(false);
   const [culturaPopoutTop, setCulturaPopoutTop] = useState<number>(0);
   const [openCulturaExpanded, setOpenCulturaExpanded] = useState(false);
+
+  const hasRole = (roles: string[]) =>
+    roles.some((role) => user?.roles?.includes(role));
 
   const calcTopFromElement = (el: HTMLElement | null) => {
     if (!el) return 0;
@@ -631,10 +632,6 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
     );
   }
 
-  if (isMobile) {
-    return <SidebarMobile children={children} logout={logout} title={title} />;
-  }
-
   return (
     <Box
       sx={{
@@ -742,7 +739,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                 {user.mail}
               </Typography>
 
-              {user.roles?.includes("ADMIN") && (
+              {hasRole(["ADMIN"]) && (
                 <Chip
                   label="ADMIN"
                   size="small"
@@ -783,7 +780,6 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               {!isCollapsed && "Home"}
             </StyledMenuItem>
 
-            {/* {user.roles?.includes("ADMIN") && ( */}
             <StyledMenuItem
               collapsed={isCollapsed}
               icon={<ChatBubbleOutline />}
@@ -792,8 +788,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
             >
               {!isCollapsed && "Chat Interno"}
             </StyledMenuItem>
-            {/* )} */}
-            {user.roles?.includes("ADMIN") && (
+            {hasRole(["ADMIN", "DESENVOLVIMENTO"]) && (
               <Box
                 ref={adminWrapperRef}
                 onMouseEnter={() => {
@@ -900,52 +895,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               </Box>
             )}
 
-            {/* <Box
-              ref={contratosWrapperRef}
-              onMouseEnter={() => {
-                if (!isCollapsed) return;
-                recalcContratosTop();
-                setOpenContratosPopout(true);
-              }}
-              onMouseLeave={() => {
-                if (!isCollapsed) return;
-                setOpenContratosPopout(false);
-              }}
-              sx={{ position: "relative" }}
-            >
-              <StyledSubMenu
-                collapsed={isCollapsed}
-                label={!isCollapsed && "Contratos"}
-                icon={<GavelOutlined />}
-                open={isCollapsed ? openContratosPopout : openContratosExpanded}
-                onOpenChange={(open) => {
-                  if (!isCollapsed) setOpenContratosExpanded(open);
-                }}
-                className={contratosIsActive ? "ps-active" : undefined}
-                rootStyles={
-                  isCollapsed
-                    ? {
-                        ["& .ps-submenu-content"]: {
-                          top: `${contratosPopoutTop}px`,
-                        },
-                      }
-                    : undefined
-                }
-              >
-                {contratosItems.map((item) => (
-                  <StyledMenuItem
-                    key={item.path}
-                    collapsed={isCollapsed}
-                    component={<Link to={item.path} />}
-                    active={location.pathname === item.path}
-                  >
-                    {item.label}
-                  </StyledMenuItem>
-                ))}
-              </StyledSubMenu>
-            </Box> */}
-
-            {user.roles?.includes("ADMIN") && (
+            {hasRole(["DESENVOLVIMENTO"]) && (
               <SidebarSubmenuSection
                 collapsed={isCollapsed}
                 label="Contratos"
@@ -963,59 +913,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               />
             )}
 
-            {/* {user.roles?.includes("ADMIN", "ENDOMARKETING") && (
-              <Box
-                ref={endoMarketingWrapperRef}
-                onMouseEnter={() => {
-                  if (!isCollapsed) return;
-                  recalcEndoMarketingTop();
-                  setOpenEndoMarketingPopout(true);
-                }}
-                onMouseLeave={() => {
-                  if (!isCollapsed) return;
-                  setOpenEndoMarketingPopout(false);
-                }}
-                sx={{ position: "relative" }}
-              >
-                <StyledSubMenu
-                  collapsed={isCollapsed}
-                  label={!isCollapsed && "EndoMarketing"}
-                  icon={<GradeOutlined />}
-                  open={
-                    isCollapsed
-                      ? openEndoMarketingPopout
-                      : openEndoMarketingExpanded
-                  }
-                  onOpenChange={(open) => {
-                    if (!isCollapsed) setOpenEndoMarketingExpanded(open);
-                  }}
-                  className={endoMarketingIsActive ? "ps-active" : undefined}
-                  rootStyles={
-                    isCollapsed
-                      ? {
-                          ["& .ps-submenu-content"]: {
-                            top: `${endoMarketingPopoutTop}px`,
-                          },
-                        }
-                      : undefined
-                  }
-                >
-                  {endoMarketingItems.map((item) => (
-                    <StyledMenuItem
-                      key={item.path}
-                      collapsed={isCollapsed}
-                      icon={item.icon}
-                      component={<Link to={item.path} />}
-                      active={location.pathname === item.path}
-                    >
-                      {item.label}
-                    </StyledMenuItem>
-                  ))}
-                </StyledSubMenu>
-              </Box>
-            )} */}
-
-            {user.roles?.includes("ADMIN", "ENDOMARKETING") && (
+            {hasRole(["ADMIN", "ENDOMARKETING", "DESENVOLVIMENTO"]) && (
               <SidebarSubmenuSection
                 collapsed={isCollapsed}
                 label="EndoMarketing"
@@ -1032,7 +930,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                 recalcTop={recalcEndoMarketingTop}
               />
             )}
-            {/* {user.roles?.includes("ADMIN") && ( */}
+
             <SidebarSubmenuSection
               collapsed={isCollapsed}
               label="Área do Colaborador"
@@ -1048,9 +946,8 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               wrapperRef={areaColaboradorWrapperRef}
               recalcTop={recalcAreaColaboradorTop}
             />
-            {/* )} */}
 
-            {user.roles?.includes("ADMIN") && (
+            {hasRole(["DESENVOLVIMENTO"]) && (
               <SidebarSubmenuSection
                 collapsed={isCollapsed}
                 label="Cultura Pizzattolog"
@@ -1077,26 +974,23 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               {!isCollapsed && "A Fazer"}
             </StyledMenuItem>
 
-            {/* {user.roles?.includes("ADMIN", "ENDOMARKETING") && ( */}
-              <StyledMenuItem
-                collapsed={isCollapsed}
-                icon={<CalendarMonth />}
-                component={<Link to="/calendario-institucional" />}
-                active={location.pathname === "/calendario-institucional"}
-              >
-                {!isCollapsed && "Calendário Institucional"}
-              </StyledMenuItem>
-            {/* )} */}
-            {/* {user.roles?.includes("ADMIN", "ENDOMARKETING") && ( */}
-              <StyledMenuItem
-                collapsed={isCollapsed}
-                icon={<LocalPoliceOutlined />}
-                component={<Link to="/politicas" />}
-                active={location.pathname === "/politicas"}
-              >
-                {!isCollapsed && "Politicas"}
-              </StyledMenuItem>
-            {/* )} */}
+            <StyledMenuItem
+              collapsed={isCollapsed}
+              icon={<CalendarMonth />}
+              component={<Link to="/calendario-institucional" />}
+              active={location.pathname === "/calendario-institucional"}
+            >
+              {!isCollapsed && "Calendário Institucional"}
+            </StyledMenuItem>
+
+            <StyledMenuItem
+              collapsed={isCollapsed}
+              icon={<LocalPoliceOutlined />}
+              component={<Link to="/politicas" />}
+              active={location.pathname === "/politicas"}
+            >
+              {!isCollapsed && "Politicas"}
+            </StyledMenuItem>
           </Menu>
         </Box>
 
