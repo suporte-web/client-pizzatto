@@ -1077,7 +1077,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               {!isCollapsed && "A Fazer"}
             </StyledMenuItem>
 
-            {user.roles?.includes("ADMIN", "ENDOMARKETING") && (
+            {/* {user.roles?.includes("ADMIN", "ENDOMARKETING") && ( */}
               <StyledMenuItem
                 collapsed={isCollapsed}
                 icon={<CalendarMonth />}
@@ -1086,8 +1086,8 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               >
                 {!isCollapsed && "Calendário Institucional"}
               </StyledMenuItem>
-            )}
-            {user.roles?.includes("ADMIN", "ENDOMARKETING") && (
+            {/* )} */}
+            {/* {user.roles?.includes("ADMIN", "ENDOMARKETING") && ( */}
               <StyledMenuItem
                 collapsed={isCollapsed}
                 icon={<LocalPoliceOutlined />}
@@ -1096,7 +1096,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
               >
                 {!isCollapsed && "Politicas"}
               </StyledMenuItem>
-            )}
+            {/* )} */}
           </Menu>
         </Box>
 
