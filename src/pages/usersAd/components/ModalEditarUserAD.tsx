@@ -152,6 +152,34 @@ const ModalEditarUserAD = ({ item, showToast, setFlushHook }: any) => {
     }
   };
 
+  const handleEnableUserAd = async () => {
+    try {
+      await UserAdService.enableUserAd({
+        sAMAccountName: item.sAMAccountName,
+      });
+      showToast("Sucesso ao Ativar o Usuario pelo AD!", "success");
+      setFlushHook((prev: any) => !prev);
+    } catch (error) {
+      showToast("Erro ao Ativar o Usuario pelo AD!", "error");
+    } finally {
+      handleClose();
+    }
+  };
+
+  const handleDisableUserAd = async () => {
+    try {
+      await UserAdService.disableUserAd({
+        sAMAccountName: item.sAMAccountName,
+      });
+      showToast("Sucesso ao Inativar o Usuario pelo AD!", "success");
+      setFlushHook((prev: any) => !prev);
+    } catch (error) {
+      showToast("Erro ao Inativar o Usuario pelo AD!", "error");
+    } finally {
+      handleClose();
+    }
+  };
+
   const fetchGroups = async () => {
     try {
       const data = await UserAdService.getGroupsUsersAd();
@@ -212,6 +240,22 @@ const ModalEditarUserAD = ({ item, showToast, setFlushHook }: any) => {
                 sx={{ borderRadius: "10px" }}
               >
                 Redefinir Senha
+              </Button>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 12 }}>
+              <Button
+                variant="contained"
+                color={item.isDisabled === true ? "success" : "error"}
+                fullWidth
+                onClick={
+                  item.isDisabled === true
+                    ? handleEnableUserAd
+                    : handleDisableUserAd
+                }
+                sx={{ borderRadius: "10px" }}
+              >
+                {item.isDisabled === true ? "Ativar Conta" : "Inativar Conta"}
               </Button>
             </Grid>
 

@@ -40,6 +40,16 @@ export const UserAdService = {
     return reset.data;
   },
 
+  enableUserAd: async (data: any) => {
+    const des = await usersAdApi.patch(`/ad-users/enable`, data);
+    return des.data;
+  },
+
+  disableUserAd: async (data: any) => {
+    const des = await usersAdApi.patch(`/ad-users/disable`, data);
+    return des.data;
+  },
+
   getAllSetoresUsersAd: async () => {
     const get = await usersAdApi.get(`/ad-users/get-all-setores-users-ad`);
     return get.data;
