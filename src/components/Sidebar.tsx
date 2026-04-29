@@ -3,23 +3,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Logout,
-  PersonOutlineOutlined,
-  FileOpen,
-  Inventory2Outlined,
-  GavelOutlined,
-  AdminPanelSettingsOutlined,
-  Microsoft,
   Checklist,
-  AccountTreeOutlined,
   CalendarMonth,
-  AlternateEmail,
-  GradeOutlined,
-  WorkOutline,
   LocalPoliceOutlined,
-  PeopleOutlineOutlined,
-  Diversity3Outlined,
-  InfoOutlined,
-  BookOutlined,
   ChatBubbleOutline,
 } from "@mui/icons-material";
 import {
@@ -32,28 +18,18 @@ import {
   IconButton,
   Tooltip,
   Typography,
-  styled,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import {
-  type ReactNode,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  Menu,
-  MenuItem,
-  Sidebar,
-  sidebarClasses,
-  SubMenu,
-} from "react-pro-sidebar";
+import { type ReactNode, useContext, useEffect, useRef, useState } from "react";
+import { Menu, Sidebar, sidebarClasses } from "react-pro-sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { UserContext } from "../UserContext";
 import pizzattoImage from "../imgs/PizzattoLog_logo.png";
+import { StyledMenuItem } from "./componentsSidebar/styled";
+import { sidebarSections } from "./componentsSidebar/menuConfig";
+import { SidebarSectionRenderer } from "./componentsSidebar/SidebarSectionRenderer";
+import SidebarMobile from "./componentsSidebar/SidebarMobile";
 
 interface SidebarNewProps {
   children: ReactNode;
@@ -62,7 +38,6 @@ interface SidebarNewProps {
 
 const COLLAPSED_WIDTH = 100;
 const EXPANDED_WIDTH = 260;
-const POPOUT_GAP = 8;
 
 function titleFromPath(pathname: string) {
   const map: Record<string, string> = {
@@ -82,206 +57,11 @@ function titleFromPath(pathname: string) {
     "/politicas": "Politicas",
     "/holerites": "Holerites",
     "/pagina-institucional": "Página Institucional",
-    // "/valores-comportamentos": "Valores e Comportamentos",
     "/biblioteca-marca": "Biblioteca de Marca",
-    // "/templates-institucionais": "Templates Institucionais",
-    // "/diretrizes-linguagens": "Diretrizes de Linguagens",
   };
 
   return map[pathname] ?? "Sistema";
 }
-
-interface SidebarSubmenuSectionProps {
-  collapsed: boolean;
-  label: string;
-  icon: ReactNode;
-  items: {
-    label: string;
-    path: string;
-    icon?: ReactNode;
-  }[];
-  activePaths: string[];
-  pathname: string;
-  popoutTop: number;
-  openPopout: boolean;
-  openExpanded: boolean;
-  setOpenPopout: (value: boolean) => void;
-  setOpenExpanded: (value: boolean) => void;
-  wrapperRef: React.RefObject<HTMLDivElement | null>;
-  recalcTop: () => void;
-}
-
-const SidebarSubmenuSection = ({
-  collapsed,
-  label,
-  icon,
-  items,
-  activePaths,
-  pathname,
-  popoutTop,
-  openPopout,
-  openExpanded,
-  setOpenPopout,
-  setOpenExpanded,
-  wrapperRef,
-  recalcTop,
-}: SidebarSubmenuSectionProps) => {
-  const isActive = activePaths.includes(pathname);
-
-  return (
-    <Box
-      ref={wrapperRef}
-      onMouseEnter={() => {
-        if (!collapsed) return;
-        recalcTop();
-        setOpenPopout(true);
-      }}
-      onMouseLeave={() => {
-        if (!collapsed) return;
-        setOpenPopout(false);
-      }}
-      sx={{ position: "relative" }}
-    >
-      <StyledSubMenu
-        collapsed={collapsed}
-        label={!collapsed && label}
-        icon={icon}
-        open={collapsed ? openPopout : openExpanded}
-        onOpenChange={(open) => {
-          if (!collapsed) setOpenExpanded(open);
-        }}
-        className={isActive ? "ps-active" : undefined}
-        rootStyles={
-          collapsed
-            ? {
-                ["& .ps-submenu-content"]: {
-                  top: `${popoutTop}px`,
-                },
-              }
-            : undefined
-        }
-      >
-        {items.map((item) => (
-          <StyledMenuItem
-            key={item.path}
-            collapsed={collapsed}
-            icon={item.icon}
-            component={<Link to={item.path} />}
-            active={pathname === item.path}
-          >
-            {item.label}
-          </StyledMenuItem>
-        ))}
-      </StyledSubMenu>
-    </Box>
-  );
-};
-
-const StyledMenuItem = styled(MenuItem, {
-  shouldForwardProp: (prop) => prop !== "collapsed",
-})<{ collapsed: boolean }>(({ theme, collapsed }) => ({
-  color: theme.palette.text.secondary,
-  margin: "6px 12px",
-  borderRadius: "12px",
-  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-  position: "relative",
-  overflow: "hidden",
-
-  "&.ps-active": {
-    color: theme.palette.primary.contrastText,
-    backgroundColor: theme.palette.primary.main,
-    fontWeight: 700,
-    boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
-    "&::before": {
-      content: '""',
-      position: "absolute",
-      inset: 0,
-      background: `linear-gradient(135deg, ${alpha(
-        theme.palette.common.white,
-        0.2,
-      )} 0%, transparent 100%)`,
-      pointerEvents: "none",
-    },
-  },
-
-  "&:hover": {
-    backgroundColor: alpha(theme.palette.primary.main, 0.08),
-    transform: "translateX(4px)",
-    boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.15)}`,
-  },
-
-  "& .ps-menu-button": {
-    padding: "12px 16px",
-    minHeight: "48px",
-  },
-
-  "& .ps-menu-icon": {
-    marginRight: collapsed ? "0" : "12px",
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-    fontSize: "20px",
-  },
-}));
-
-const StyledSubMenu = styled(SubMenu, {
-  shouldForwardProp: (prop) => prop !== "collapsed",
-})<{ collapsed: boolean }>(({ theme, collapsed }) => ({
-  color: theme.palette.text.secondary,
-  margin: "6px 12px",
-  borderRadius: "12px",
-  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-  overflow: "visible",
-
-  "& .ps-menu-button": {
-    padding: "12px 16px",
-    minHeight: "48px",
-    borderRadius: "12px",
-    "&:hover": {
-      backgroundColor: alpha(theme.palette.primary.main, 0.08),
-      transform: "translateX(4px)",
-      boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.15)}`,
-    },
-  },
-
-  "&.ps-active": {
-    "& > .ps-menu-button": {
-      color: theme.palette.primary.contrastText,
-      backgroundColor: theme.palette.primary.main,
-      fontWeight: 700,
-      boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.3)}`,
-    },
-  },
-
-  "& .ps-menu-icon": {
-    marginRight: collapsed ? "0" : "12px",
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-    fontSize: "20px",
-  },
-
-  "& .ps-submenu-expand-icon": {
-    display: collapsed ? "none" : "block",
-  },
-
-  "& .ps-submenu-content": {
-    backgroundColor: alpha(theme.palette.background.paper, 0.95),
-    backdropFilter: "blur(20px)",
-    borderRadius: "12px",
-    margin: 0,
-    boxShadow: `0 8px 32px ${alpha(theme.palette.common.black, 0.15)}`,
-    zIndex: 3000,
-    width: "max-content",
-    minWidth: "220px",
-    whiteSpace: "nowrap",
-    paddingRight: "12px",
-    overflow: "visible",
-
-    position: collapsed ? "fixed" : "static",
-    left: collapsed ? `calc(${COLLAPSED_WIDTH}px + ${POPOUT_GAP}px)` : "auto",
-
-    "& .ps-menu-button": {
-      paddingLeft: collapsed ? "16px" : "48px",
-    },
-  },
-}));
 
 const SidebarNew = ({ children, title }: SidebarNewProps) => {
   const { user } = useContext(UserContext);
@@ -295,46 +75,9 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
   );
 
   const menuScrollRef = useRef<HTMLDivElement | null>(null);
-  const adminWrapperRef = useRef<HTMLDivElement | null>(null);
-  const contratosWrapperRef = useRef<HTMLDivElement | null>(null);
-  const endoMarketingWrapperRef = useRef<HTMLDivElement | null>(null);
-  const areaColaboradorWrapperRef = useRef<HTMLDivElement | null>(null);
-  const culturaWrapperRef = useRef<HTMLDivElement | null>(null);
-
-  const [openAdminPopout, setOpenAdminPopout] = useState(false);
-  const [adminPopoutTop, setAdminPopoutTop] = useState<number>(0);
-  const [openAdminExpanded, setOpenAdminExpanded] = useState(false);
-  const [openInfraExpanded, setOpenInfraExpanded] = useState(false);
-
-  const [openContratosPopout, setOpenContratosPopout] = useState(false);
-  const [contratosPopoutTop, setContratosPopoutTop] = useState<number>(0);
-  const [openContratosExpanded, setOpenContratosExpanded] = useState(false);
-
-  const [openEndoMarketingPopout, setOpenEndoMarketingPopout] = useState(false);
-  const [endoMarketingPopoutTop, setEndoMarketingPopoutTop] =
-    useState<number>(0);
-  const [openEndoMarketingExpanded, setOpenEndoMarketingExpanded] =
-    useState(false);
-
-  const [openAreaColaboradorPopout, setOpenAreaColaboradorPopout] =
-    useState(false);
-  const [areaColaboradorPopoutTop, setAreaColaboradorPopoutTop] =
-    useState<number>(0);
-  const [openAreaColaboradorExpanded, setOpenAreaColaboradorExpanded] =
-    useState(false);
-
-  const [openCulturaPopout, setOpenCulturaPopout] = useState(false);
-  const [culturaPopoutTop, setCulturaPopoutTop] = useState<number>(0);
-  const [openCulturaExpanded, setOpenCulturaExpanded] = useState(false);
 
   const hasRole = (roles: string[]) =>
     roles.some((role) => user?.roles?.includes(role));
-
-  const calcTopFromElement = (el: HTMLElement | null) => {
-    if (!el) return 0;
-    const rect = el.getBoundingClientRect();
-    return rect.top;
-  };
 
   const toggleMenu = () => {
     if (!isMobile) setIsCollapsed((v) => !v);
@@ -348,12 +91,6 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
 
   useEffect(() => {
     if (!isCollapsed) {
-      setOpenAdminExpanded(false);
-      setOpenInfraExpanded(false);
-      setOpenContratosExpanded(false);
-      setOpenEndoMarketingExpanded(false);
-      setOpenAreaColaboradorExpanded(false);
-      setOpenCulturaExpanded(false);
     }
   }, [isCollapsed]);
 
@@ -369,246 +106,6 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
       console.error("Erro durante o logout:", error);
     }
   };
-
-  const adminItems = useMemo(
-    () => [
-      {
-        label: "Usuários AD",
-        path: "/users-ad",
-        icon: <PersonOutlineOutlined />,
-      },
-      {
-        label: "Organograma",
-        path: "/organograma",
-        icon: <AccountTreeOutlined />,
-      },
-    ],
-    [],
-  );
-
-  const tiItems = useMemo(
-    () => [
-      {
-        label: "Plantão",
-        path: "/plantao",
-        icon: <WorkOutline />,
-      },
-      {
-        label: "Inventário",
-        path: "/inventario",
-        icon: <Inventory2Outlined />,
-      },
-      {
-        label: "Inventário Impressoras",
-        path: "/inventario-impressoras",
-        icon: <Inventory2Outlined />,
-      },
-      {
-        label: "Contas Office",
-        path: "/contas-office",
-        icon: <Microsoft />,
-      },
-    ],
-    [],
-  );
-
-  const contratosItems = useMemo(
-    () => [
-      {
-        label: "Página Principal",
-        path: "/pagina-principal-contratos",
-      },
-      {
-        label: "Cadastros",
-        path: "/cadastros-contratos",
-      },
-    ],
-    [],
-  );
-
-  const endoMarketingItems = useMemo(
-    () => [
-      {
-        label: "Assinatura de E-mail",
-        path: "/assinatura-email",
-        icon: <AlternateEmail />,
-      },
-    ],
-    [],
-  );
-
-  const areaColaboradorItems = useMemo(
-    () => [
-      // {
-      //   label: "Holerite",
-      //   path: "/holerites",
-      //   icon: <RequestQuoteOutlined />,
-      // },
-      {
-        label: "POPs",
-        path: "/pops",
-        icon: <FileOpen />,
-      },
-    ],
-    [],
-  );
-
-  const culturaItems = useMemo(
-    () => [
-      {
-        label: "Página Institucional",
-        path: "/pagina-institucional",
-        icon: <InfoOutlined />,
-      },
-      // {
-      //   label: "Valores e Comportamentos",
-      //   path: "/valores-comportamentos",
-      //   icon: <DiamondOutlined />,
-      // },
-      {
-        label: "Biblioteca de Marca",
-        path: "/biblioteca-marca",
-        icon: <BookOutlined />,
-      },
-      // {
-      //   label: "Templates Institucionais",
-      //   path: "/templates-institucionais",
-      //   icon: <FolderSpecialOutlined />,
-      // },
-      // {
-      //   label: "Diretrizes de Linguagens",
-      //   path: "/diretrizes-linguagens",
-      //   icon: <TranslateOutlined />,
-      // },
-    ],
-    [],
-  );
-
-  const adminRoutes = useMemo(
-    () => [
-      "/users-ad",
-      "/inventario",
-      "/inventario-impressoras",
-      "/pops",
-      "/contas-office",
-      "/organograma",
-    ],
-    [],
-  );
-
-  const infraRoutes = useMemo(
-    () => ["/inventario", "/inventario-impressoras", "/pops", "/contas-office"],
-    [],
-  );
-
-  const contratosRoutes = useMemo(
-    () => ["/pagina-principal-contratos", "/cadastros-contratos"],
-    [],
-  );
-
-  const endoMarketingRoutes = useMemo(() => ["/assinatura-email"], []);
-
-  const areaColaboradorRoutes = useMemo(() => ["/holerites"], []);
-
-  const culturaRoutes = useMemo(
-    () => [
-      "/pagina-institucional",
-      // "/valores-comportamentos",
-      "/biblioteca-marca",
-      // "/templates-institucionais",
-      // "/diretrizes-linguagens",
-    ],
-    [],
-  );
-
-  const adminIsActive = useMemo(
-    () => adminRoutes.includes(location.pathname),
-    [adminRoutes, location.pathname],
-  );
-
-  const infraIsActive = useMemo(
-    () => infraRoutes.includes(location.pathname),
-    [infraRoutes, location.pathname],
-  );
-
-  // const contratosIsActive = useMemo(
-  //   () => contratosRoutes.includes(location.pathname),
-  //   [contratosRoutes, location.pathname],
-  // );
-
-  // const endoMarketingIsActive = useMemo(
-  //   () => endoMarketingRoutes.includes(location.pathname),
-  //   [endoMarketingRoutes, location.pathname],
-  // );
-
-  const recalcAdminTop = () => {
-    const root = adminWrapperRef.current;
-    const btn = root?.querySelector(".ps-menu-button") as HTMLElement | null;
-    setAdminPopoutTop(calcTopFromElement(btn));
-  };
-
-  const recalcContratosTop = () => {
-    const root = contratosWrapperRef.current;
-    const btn = root?.querySelector(".ps-menu-button") as HTMLElement | null;
-    setContratosPopoutTop(calcTopFromElement(btn));
-  };
-
-  const recalcEndoMarketingTop = () => {
-    const root = endoMarketingWrapperRef.current;
-    const btn = root?.querySelector(".ps-menu-button") as HTMLElement | null;
-    setEndoMarketingPopoutTop(calcTopFromElement(btn));
-  };
-
-  const recalcAreaColaboradorTop = () => {
-    const root = areaColaboradorWrapperRef.current;
-    const btn = root?.querySelector(".ps-menu-button") as HTMLElement | null;
-    setAreaColaboradorPopoutTop(calcTopFromElement(btn));
-  };
-
-  const recalcCulturaTop = () => {
-    const root = culturaWrapperRef.current;
-    const btn = root?.querySelector(".ps-menu-button") as HTMLElement | null;
-    setCulturaPopoutTop(calcTopFromElement(btn));
-  };
-
-  useEffect(() => {
-    if (!openAdminPopout || !isCollapsed) return;
-    const el = menuScrollRef.current;
-    if (!el) return;
-
-    const onScroll = () => recalcAdminTop();
-    el.addEventListener("scroll", onScroll, { passive: true });
-
-    recalcAdminTop();
-
-    return () => el.removeEventListener("scroll", onScroll);
-  }, [openAdminPopout, isCollapsed]);
-
-  useEffect(() => {
-    if (!openContratosPopout || !isCollapsed) return;
-    const el = menuScrollRef.current;
-    if (!el) return;
-
-    const onScroll = () => recalcContratosTop();
-    el.addEventListener("scroll", onScroll, { passive: true });
-
-    recalcContratosTop();
-
-    return () => el.removeEventListener("scroll", onScroll);
-  }, [openContratosPopout, isCollapsed]);
-
-  useEffect(() => {
-    if (!openEndoMarketingPopout || !isCollapsed) return;
-    const el = menuScrollRef.current;
-    if (!el) return;
-
-    const onScroll = () => recalcEndoMarketingTop();
-    el.addEventListener("scroll", onScroll, { passive: true });
-
-    recalcEndoMarketingTop();
-
-    return () => el.removeEventListener("scroll", onScroll);
-  }, [openEndoMarketingPopout, isCollapsed]);
 
   if (!user) {
     return (
@@ -629,6 +126,17 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
           Carregando usuário...
         </Typography>
       </Box>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <SidebarMobile
+        logout={logout}
+        title={title || titleFromPath(location.pathname)}
+      >
+        {children}
+      </SidebarMobile>
     );
   }
 
@@ -767,10 +275,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
             WebkitOverflowScrolling: "touch",
           }}
         >
-          <Menu
-            rootStyles={{ ["& > ul"]: { padding: "16px 0" } }}
-            menuItemStyles={{ button: { transition: "all 0.2s ease" } }}
-          >
+          <Menu rootStyles={{ ["& > ul"]: { padding: "16px 0" } }}>
             <StyledMenuItem
               collapsed={isCollapsed}
               icon={<HomeOutlined />}
@@ -788,182 +293,20 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
             >
               {!isCollapsed && "Chat Interno"}
             </StyledMenuItem>
-            {hasRole(["ADMIN", "DESENVOLVIMENTO"]) && (
-              <Box
-                ref={adminWrapperRef}
-                onMouseEnter={() => {
-                  if (!isCollapsed) return;
-                  recalcAdminTop();
-                  setOpenAdminPopout(true);
-                }}
-                onMouseLeave={() => {
-                  if (!isCollapsed) return;
-                  setOpenAdminPopout(false);
-                }}
-                sx={{ position: "relative" }}
-              >
-                <StyledSubMenu
+
+            {sidebarSections.map((section) => {
+              if (section.roles && !hasRole(section.roles)) return null;
+
+              return (
+                <SidebarSectionRenderer
+                  key={section.key}
+                  section={section}
                   collapsed={isCollapsed}
-                  label={!isCollapsed && "Admin"}
-                  icon={<AdminPanelSettingsOutlined />}
-                  open={isCollapsed ? openAdminPopout : openAdminExpanded}
-                  onOpenChange={(open) => {
-                    if (!isCollapsed) setOpenAdminExpanded(open);
-                  }}
-                  className={adminIsActive ? "ps-active" : undefined}
-                  rootStyles={
-                    isCollapsed
-                      ? {
-                          ["& .ps-submenu-content"]: {
-                            top: `${adminPopoutTop}px`,
-                          },
-                        }
-                      : undefined
-                  }
-                >
-                  {adminItems.map((item) => (
-                    <StyledMenuItem
-                      key={item.path}
-                      collapsed={isCollapsed}
-                      icon={item.icon}
-                      component={<Link to={item.path} />}
-                      active={location.pathname === item.path}
-                    >
-                      {item.label}
-                    </StyledMenuItem>
-                  ))}
-
-                  {isCollapsed ? (
-                    <>
-                      <Box
-                        sx={{
-                          px: 2,
-                          pt: 1.5,
-                          pb: 0.5,
-                        }}
-                      >
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            fontWeight: 800,
-                            color: theme.palette.text.secondary,
-                            textTransform: "uppercase",
-                            letterSpacing: "0.08em",
-                          }}
-                        >
-                          Infraestrutura
-                        </Typography>
-                      </Box>
-
-                      {tiItems.map((item) => (
-                        <StyledMenuItem
-                          key={item.path}
-                          collapsed={isCollapsed}
-                          icon={item.icon}
-                          component={<Link to={item.path} />}
-                          active={location.pathname === item.path}
-                        >
-                          {item.label}
-                        </StyledMenuItem>
-                      ))}
-                    </>
-                  ) : (
-                    <StyledSubMenu
-                      collapsed={isCollapsed}
-                      label="TI"
-                      icon={<Inventory2Outlined />}
-                      open={openInfraExpanded}
-                      onOpenChange={(open) => {
-                        setOpenInfraExpanded(open);
-                      }}
-                      className={infraIsActive ? "ps-active" : undefined}
-                    >
-                      {tiItems.map((item) => (
-                        <StyledMenuItem
-                          key={item.path}
-                          collapsed={isCollapsed}
-                          icon={item.icon}
-                          component={<Link to={item.path} />}
-                          active={location.pathname === item.path}
-                        >
-                          {item.label}
-                        </StyledMenuItem>
-                      ))}
-                    </StyledSubMenu>
-                  )}
-                </StyledSubMenu>
-              </Box>
-            )}
-
-            {hasRole(["DESENVOLVIMENTO"]) && (
-              <SidebarSubmenuSection
-                collapsed={isCollapsed}
-                label="Contratos"
-                icon={<GavelOutlined />}
-                items={contratosItems}
-                activePaths={contratosRoutes}
-                pathname={location.pathname}
-                popoutTop={contratosPopoutTop}
-                openPopout={openContratosPopout}
-                openExpanded={openContratosExpanded}
-                setOpenPopout={setOpenContratosPopout}
-                setOpenExpanded={setOpenContratosExpanded}
-                wrapperRef={contratosWrapperRef}
-                recalcTop={recalcContratosTop}
-              />
-            )}
-
-            {hasRole(["ADMIN", "ENDOMARKETING", "DESENVOLVIMENTO"]) && (
-              <SidebarSubmenuSection
-                collapsed={isCollapsed}
-                label="EndoMarketing"
-                icon={<GradeOutlined />}
-                items={endoMarketingItems}
-                activePaths={endoMarketingRoutes}
-                pathname={location.pathname}
-                popoutTop={endoMarketingPopoutTop}
-                openPopout={openEndoMarketingPopout}
-                openExpanded={openEndoMarketingExpanded}
-                setOpenPopout={setOpenEndoMarketingPopout}
-                setOpenExpanded={setOpenEndoMarketingExpanded}
-                wrapperRef={endoMarketingWrapperRef}
-                recalcTop={recalcEndoMarketingTop}
-              />
-            )}
-
-            <SidebarSubmenuSection
-              collapsed={isCollapsed}
-              label="Área do Colaborador"
-              icon={<PeopleOutlineOutlined />}
-              items={areaColaboradorItems}
-              activePaths={areaColaboradorRoutes}
-              pathname={location.pathname}
-              popoutTop={areaColaboradorPopoutTop}
-              openPopout={openAreaColaboradorPopout}
-              openExpanded={openAreaColaboradorExpanded}
-              setOpenPopout={setOpenAreaColaboradorPopout}
-              setOpenExpanded={setOpenAreaColaboradorExpanded}
-              wrapperRef={areaColaboradorWrapperRef}
-              recalcTop={recalcAreaColaboradorTop}
-            />
-
-            {hasRole(["DESENVOLVIMENTO"]) && (
-              <SidebarSubmenuSection
-                collapsed={isCollapsed}
-                label="Cultura Pizzattolog"
-                icon={<Diversity3Outlined />}
-                items={culturaItems}
-                activePaths={culturaRoutes}
-                pathname={location.pathname}
-                popoutTop={culturaPopoutTop}
-                openPopout={openCulturaPopout}
-                openExpanded={openCulturaExpanded}
-                setOpenPopout={setOpenCulturaPopout}
-                setOpenExpanded={setOpenCulturaExpanded}
-                wrapperRef={culturaWrapperRef}
-                recalcTop={recalcCulturaTop}
-              />
-            )}
+                  pathname={location.pathname}
+                  menuScrollRef={menuScrollRef}
+                />
+              );
+            })}
 
             <StyledMenuItem
               collapsed={isCollapsed}
@@ -994,18 +337,7 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
           </Menu>
         </Box>
 
-        <Box
-          p={2}
-          sx={{
-            mt: "auto",
-            width: "100%",
-            boxSizing: "border-box",
-            background: `linear-gradient(180deg, transparent 0%, ${alpha(
-              theme.palette.background.paper,
-              0.8,
-            )} 100%)`,
-          }}
-        >
+        <Box p={2} sx={{ mt: "auto", width: "100%", boxSizing: "border-box" }}>
           <Divider sx={{ my: 2, opacity: 0.3 }} />
           <Tooltip title="Sair do sistema" placement="right" arrow>
             <IconButton
@@ -1021,10 +353,6 @@ const SidebarNew = ({ children, title }: SidebarNewProps) => {
                 minHeight: "48px",
                 border: `1px solid ${alpha(theme.palette.error.main, 0.2)}`,
                 backgroundColor: alpha(theme.palette.error.main, 0.05),
-                "&:hover": {
-                  backgroundColor: alpha(theme.palette.error.main, 0.1),
-                  borderColor: alpha(theme.palette.error.main, 0.4),
-                },
               }}
             >
               <Logout fontSize="small" />
