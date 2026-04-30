@@ -140,7 +140,7 @@ const ModalCreateBibliotecaMarca = ({ setFlushHook }: Props) => {
       const formData = new FormData();
       formData.append("nome", form.nome);
       formData.append("descricao", form.descricao);
-      imagens.forEach((img) => formData.append("imagens", img.file));
+      imagens.forEach((img) => formData.append("arquivo", img.file));
 
       await BibliotecaMarcaService.create(formData);
 

@@ -131,7 +131,9 @@ const ModalCreateMural = ({ setFlushHook }: any) => {
 
       formData.append("titulo", title);
       formData.append("mensagem", message);
-      formData.append("validoAte", valideUntil);
+      if (valideUntil) {
+        formData.append("validoAte", valideUntil);
+      }
       formData.append("importante", String(important));
 
       selectedFiliais.forEach((filial) => {

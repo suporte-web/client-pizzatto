@@ -2,7 +2,7 @@
 import {
   CalendarMonth,
   ChatBubbleOutline,
-  Checklist,
+//   Checklist,
   HomeOutlined,
   LocalPoliceOutlined,
 } from "@mui/icons-material";
@@ -27,11 +27,11 @@ export const fixedMobileItems: MobileMenuItem[] = [
     path: "/chat-interno",
     icon: <ChatBubbleOutline />,
   },
-  {
-    label: "A Fazer",
-    path: "/to-do",
-    icon: <Checklist />,
-  },
+//   {
+//     label: "A Fazer",
+//     path: "/to-do",
+//     icon: <Checklist />,
+//   },
   {
     label: "Calendário",
     path: "/calendario-institucional",

@@ -34,12 +34,13 @@ const Home = () => {
       <Container
         {...containerProps}
         sx={{
-          p: 3,
+          p: 2,
           background: `linear-gradient(135deg, ${alpha(
             teal[50],
             0.5,
           )} 0%, ${alpha(blue[50], 0.5)} 100%)`,
-          minHeight: "100vh",
+          // minHeight: "92vh",
+          borderRadius: "10px",
         }}
       >
         <ModalCreateAssinaturaEmail

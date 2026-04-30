@@ -7,9 +7,14 @@ export const MuralService = {
     const post = await adLdapApi.post(`/mural/create`, data);
     return post.data;
   },
-  
+
   getAllByFilial: async () => {
     const get = await adLdapApi.get(`/mural/get-all-by-filial`);
     return get.data;
+  },
+
+  delete: async (muralId: string) => {
+    const del = await adLdapApi.delete(`/mural/delete/${muralId}`);
+    return del.data;
   },
 };

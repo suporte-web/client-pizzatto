@@ -23,42 +23,27 @@ const emojisRapidos = ["👍", "👏", "🎉", "❤️", "🔥", "😊", "🚀",
 
 const ModalCreateComentarioMural = ({
   muralId,
+  mural,
   fetchComentarios,
   comentarios,
   loadingComentarios,
+  setModalAberto,
 }: any) => {
   const [open, setOpen] = useState(false);
   const [comentario, setComentario] = useState("");
-  // const [comentarios, setComentarios] = useState<any[]>([]);
-  // const [loadingComentarios, setLoadingComentarios] = useState(false);
   const [sending, setSending] = useState(false);
 
   const handleOpen = async () => {
     setOpen(true);
+    setModalAberto(true); // 🔥 avisa o pai
     await fetchComentarios(muralId);
   };
 
   const handleClose = () => {
     setOpen(false);
+    setModalAberto(false); // 🔥 libera o refresh
     setComentario("");
   };
-
-  // const fetchComentarios = async () => {
-  //   try {
-  //     setLoadingComentarios(true);
-
-  //     const response = await MuralComentarioService.findByMural({
-  //       muralId,
-  //     });
-
-  //     setComentarios(Array.isArray(response) ? response : []);
-  //   } catch (error) {
-  //     console.log(error);
-  //     setComentarios([]);
-  //   } finally {
-  //     setLoadingComentarios(false);
-  //   }
-  // };
 
   const handleAddEmoji = (emoji: string) => {
     setComentario((prev) => `${prev}${emoji}`);
@@ -76,7 +61,7 @@ const ModalCreateComentarioMural = ({
       });
 
       setComentario("");
-      await fetchComentarios();
+      await fetchComentarios(muralId);
     } catch (error) {
       console.log(error);
     } finally {
@@ -95,13 +80,13 @@ const ModalCreateComentarioMural = ({
 
   return (
     <>
-      <Tooltip title="Comentários">
+      <Tooltip title="Abrir mural e comentários">
         <IconButton onClick={handleOpen}>
           <ChatBubbleOutlineIcon />
         </IconButton>
       </Tooltip>
 
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle
           sx={{
             display: "flex",
@@ -110,11 +95,9 @@ const ModalCreateComentarioMural = ({
             pr: 1,
           }}
         >
-          <Box>
-            <Typography variant="h6" fontWeight={700}>
-              Comentários do mural
-            </Typography>
-          </Box>
+          <Typography variant="h6" fontWeight={700}>
+            Mural de Recados
+          </Typography>
 
           <IconButton onClick={handleClose}>
             <CloseIcon />
@@ -126,20 +109,74 @@ const ModalCreateComentarioMural = ({
           sx={{
             display: "flex",
             flexDirection: "column",
-            height: "60vh",
+            maxHeight: "80vh",
             p: 0,
           }}
         >
-          {/* LISTA DE COMENTÁRIOS */}
+          <Box sx={{ p: 2 }}>
+            {mural?.caminhoImagem && (
+              <Box
+                sx={{
+                  width: "100%",
+                  maxHeight: 420,
+                  borderRadius: "14px",
+                  overflow: "hidden",
+                  backgroundColor: "#f5f5f5",
+                  mb: 2,
+                }}
+              >
+                <Box
+                  component="img"
+                  src={`${import.meta.env.VITE_API_BACKEND_AD}/${mural.caminhoImagem}`}
+                  alt={mural?.titulo || "Imagem do mural"}
+                  sx={{
+                    width: "100%",
+                    maxHeight: 420,
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                />
+              </Box>
+            )}
+
+            <Typography variant="h5" fontWeight={800} sx={{ mb: 1 }}>
+              {mural?.titulo}
+            </Typography>
+
+            <Typography
+              variant="body1"
+              sx={{
+                whiteSpace: "pre-wrap",
+                color: "#444",
+                lineHeight: 1.7,
+              }}
+            >
+              {mural?.mensagem}
+            </Typography>
+
+            {mural?.departamentoCriador && (
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: "block", mt: 1.5 }}
+              >
+                Criado por: {mural.departamentoCriador}
+              </Typography>
+            )}
+          </Box>
+
+          <Divider />
+
           <Box
             sx={{
               flex: 1,
               overflowY: "auto",
               p: 2,
+              minHeight: 220,
             }}
           >
             <Typography variant="body2" fontWeight={700} sx={{ mb: 2 }}>
-              Pessoas que comentaram ({comentarios.length})
+              Comentários ({comentarios.length})
             </Typography>
 
             {loadingComentarios ? (
@@ -198,9 +235,7 @@ const ModalCreateComentarioMural = ({
 
           <Divider />
 
-          {/* ÁREA DE INPUT */}
           <Box sx={{ p: 1.5 }}>
-            {/* EMOJIS */}
             <Box
               sx={{
                 display: "flex",
@@ -226,7 +261,6 @@ const ModalCreateComentarioMural = ({
               ))}
             </Box>
 
-            {/* INPUT + BOTÃO */}
             <TextField
               fullWidth
               multiline
