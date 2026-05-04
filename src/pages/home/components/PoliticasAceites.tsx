@@ -60,10 +60,10 @@ const PoliticasAceites = () => {
     fetchData();
   }, []);
 
-  const handleClose = () => {
-    setOpen(false);
-    setAceite(false);
-  };
+  // const handleClose = () => {
+  //   setOpen(false);
+  //   setAceite(false);
+  // };
 
   const handleAceitarPolitica = async () => {
     if (!politicaAtual) return;
@@ -98,7 +98,7 @@ const PoliticasAceites = () => {
     <>
       <Dialog
         open={open}
-        onClose={handleClose}
+        // onClose={handleClose}
         fullWidth
         maxWidth="md"
         PaperProps={{
@@ -196,10 +196,10 @@ const PoliticasAceites = () => {
             px: 3,
             pb: 2.5,
             pt: 1,
-            justifyContent: "space-between",
+            // justifyContent: "space-between",
           }}
         >
-          <Button
+          {/* <Button
             variant="outlined"
             onClick={handleClose}
             sx={{
@@ -210,7 +210,7 @@ const PoliticasAceites = () => {
             disabled={loadingAceite}
           >
             Fechar
-          </Button>
+          </Button> */}
 
           <Button
             variant="contained"
