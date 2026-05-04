@@ -151,8 +151,15 @@ const ModalCreateAssinaturaEmail = ({
     fotoUrl: "",
   });
 
-  const currentFontSize =
-    fontSizePresets[getFontSizeKey(assinaturaPadrao?.fontSize)];
+  const nomeFontSize =
+    fontSizePresets[getFontSizeKey(assinaturaPadrao?.nomeFontSize)].nome;
+
+  const departamentoFontSize =
+    fontSizePresets[getFontSizeKey(assinaturaPadrao?.departamentoFontSize)]
+      .departamento;
+
+  const telefoneFontSize =
+    fontSizePresets[getFontSizeKey(assinaturaPadrao?.telefoneFontSize)].contato;
 
   const telefoneCompleto = /^\(\d{2}\) \d{5}-\d{4}$/.test(form.telefone);
 
@@ -362,7 +369,16 @@ const ModalCreateAssinaturaEmail = ({
     }
   };
 
-  const textColor = assinaturaPadrao?.corFont || "#1f1f1f";
+  const nomeColor =
+    assinaturaPadrao?.nomeCorFont || assinaturaPadrao?.corFont || "#1f1f1f";
+
+  const departamentoColor =
+    assinaturaPadrao?.departamentoCorFont ||
+    assinaturaPadrao?.corFont ||
+    "#1f1f1f";
+
+  const telefoneColor =
+    assinaturaPadrao?.telefoneCorFont || assinaturaPadrao?.corFont || "#1f1f1f";
   const backgroundUrl = assinaturaPadrao?.caminhoBackground || "";
   const photoX = assinaturaPadrao?.photoX ?? 24;
   const photoY = assinaturaPadrao?.photoY ?? 42;
@@ -585,9 +601,9 @@ const ModalCreateAssinaturaEmail = ({
                         position: "absolute",
                         left: nomeX,
                         top: nomeY,
-                        color: textColor,
                         zIndex: 3,
-                        fontSize: `${currentFontSize.nome}px`,
+                        color: nomeColor,
+                        fontSize: `${nomeFontSize}px`,
                         lineHeight: 1.2,
                       }}
                     >
@@ -600,9 +616,9 @@ const ModalCreateAssinaturaEmail = ({
                         position: "absolute",
                         left: departamentoX,
                         top: departamentoY,
-                        color: textColor,
                         zIndex: 3,
-                        fontSize: `${currentFontSize.departamento}px`,
+                        color: departamentoColor,
+                        fontSize: `${departamentoFontSize}px`,
                         lineHeight: 1.2,
                       }}
                     >
@@ -615,9 +631,9 @@ const ModalCreateAssinaturaEmail = ({
                         position: "absolute",
                         left: telefoneX,
                         top: telefoneY,
-                        color: textColor,
                         zIndex: 3,
-                        fontSize: `${currentFontSize.contato}px`,
+                        color: telefoneColor,
+                        fontSize: `${telefoneFontSize}px`,
                         lineHeight: 1.2,
                       }}
                     >

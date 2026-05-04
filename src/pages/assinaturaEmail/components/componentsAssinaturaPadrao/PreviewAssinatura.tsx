@@ -17,12 +17,18 @@ type AssinaturaPadrao = {
 
   nomeX?: PositionValue;
   nomeY?: PositionValue;
+  nomeCorFont?: string | null;
+  nomeFontSize?: string | number | null;
 
   departamentoX?: PositionValue;
   departamentoY?: PositionValue;
+  departamentoCorFont?: string | null;
+  departamentoFontSize?: string | number | null;
 
   telefoneX?: PositionValue;
   telefoneY?: PositionValue;
+  telefoneCorFont?: string | null;
+  telefoneFontSize?: string | number | null;
 
   logoX?: PositionValue;
   logoY?: PositionValue;
@@ -53,13 +59,46 @@ const renderIfPositioned = (...values: PositionValue[]) =>
   );
 
 const PreviewAssinatura = ({ item }: { item: AssinaturaPadrao }) => {
-  const corFonte = item.corFont || "#000000";
   const imgRef = useRef<HTMLImageElement | null>(null);
-
   const [renderSize, setRenderSize] = useState({ width: 1, height: 1 });
 
-  const fontSizeBaseRaw = toNumber(item.fontSize) ?? 16;
-  const fontSizeSecundariaRaw = Math.max(fontSizeBaseRaw - 2, 10);
+  const nomeCorFonte = item.nomeCorFont || item.corFont || "#000000";
+  const departamentoCorFonte =
+    item.departamentoCorFont || item.corFont || "#000000";
+  const telefoneCorFonte = item.telefoneCorFont || item.corFont || "#000000";
+
+  const fontSizeMap: Record<string, number> = {
+    pequeno: 12,
+    medio: 14,
+    grande: 16,
+  };
+
+  const resolveFontSize = (
+    value: string | number | null | undefined,
+    fallback = 14,
+  ) => {
+    if (typeof value === "number") return value;
+
+    const normalized = String(value || "").trim();
+
+    if (fontSizeMap[normalized]) return fontSizeMap[normalized];
+
+    const parsed = toNumber(normalized);
+    return parsed ?? fallback;
+  };
+
+  const nomeFontSizeRaw = resolveFontSize(
+    item.nomeFontSize || item.fontSize,
+    24,
+  );
+  const departamentoFontSizeRaw = resolveFontSize(
+    item.departamentoFontSize || item.fontSize,
+    14,
+  );
+  const telefoneFontSizeRaw = resolveFontSize(
+    item.telefoneFontSize || item.fontSize,
+    14,
+  );
 
   useEffect(() => {
     const updateSize = () => {
@@ -101,6 +140,10 @@ const PreviewAssinatura = ({ item }: { item: AssinaturaPadrao }) => {
     [renderSize.height],
   );
 
+  const nomeFontSize = `${nomeFontSizeRaw * scaleX}px`;
+  const departamentoFontSize = `${departamentoFontSizeRaw * scaleX}px`;
+  const telefoneFontSize = `${telefoneFontSizeRaw * scaleX}px`;
+
   const posX = (value: PositionValue) => {
     if (value === null || value === undefined || value === "") return undefined;
     if (hasPercentUnit(value)) return value as string;
@@ -140,9 +183,6 @@ const PreviewAssinatura = ({ item }: { item: AssinaturaPadrao }) => {
 
   //   return `${num * scaleY}px`;
   // };
-
-  const fontSizeBase = `${fontSizeBaseRaw * scaleX}px`;
-  const fontSizeSecundaria = `${fontSizeSecundariaRaw * scaleX}px`;
 
   return (
     <Box
@@ -208,8 +248,8 @@ const PreviewAssinatura = ({ item }: { item: AssinaturaPadrao }) => {
             position: "absolute",
             left: posX(item.nomeX),
             top: posY(item.nomeY),
-            color: corFonte,
-            fontSize: fontSizeBase,
+            color: nomeCorFonte,
+            fontSize: nomeFontSize,
             fontWeight: 800,
             lineHeight: 1.15,
             textAlign: "left",
@@ -227,8 +267,8 @@ const PreviewAssinatura = ({ item }: { item: AssinaturaPadrao }) => {
             position: "absolute",
             left: posX(item.departamentoX),
             top: posY(item.departamentoY),
-            color: corFonte,
-            fontSize: fontSizeSecundaria,
+            color: departamentoCorFonte,
+            fontSize: departamentoFontSize,
             fontWeight: 500,
             lineHeight: 1.15,
             textAlign: "left",
@@ -246,8 +286,8 @@ const PreviewAssinatura = ({ item }: { item: AssinaturaPadrao }) => {
             position: "absolute",
             left: posX(item.telefoneX),
             top: posY(item.telefoneY),
-            color: corFonte,
-            fontSize: fontSizeSecundaria,
+            color: telefoneCorFonte,
+            fontSize: telefoneFontSize,
             fontWeight: 500,
             lineHeight: 1.15,
             textAlign: "left",

@@ -84,7 +84,7 @@ const AssinaturaEmail = () => {
             }}
           >
             <Tab label="Ajustar Assinatura" />
-            <Tab label={`Aprovar/Reprovar Assinaturas (${totalPages || 0})`} />
+            <Tab label={`Aprovar/Reprovar Assinaturas`} />
           </Tabs>
         </Box>
 

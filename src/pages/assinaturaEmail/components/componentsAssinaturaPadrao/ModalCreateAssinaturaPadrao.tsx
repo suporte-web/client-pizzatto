@@ -30,15 +30,22 @@ import { AssinaturaPadraoService } from "../../../../stores/assinaturaPadrao/ser
 
 type FontSizeKey = "pequeno" | "medio" | "grande";
 type PositionKey = "foto" | "nome" | "departamento" | "telefone" | "logo";
+type TextPositionKey = Extract<PositionKey, "nome" | "departamento" | "telefone">;
 type LayoutPresetKey = "padrao" | "compacto" | "centralizado";
 
 type Positions = Record<PositionKey, { x: number; y: number }>;
 
+type TextStyle = {
+  color: string;
+  fontSize: FontSizeKey;
+};
+
+type TextStyles = Record<TextPositionKey, TextStyle>;
+
 type SignatureTemplate = {
   backgroundUrl: string;
   positions: Positions;
-  textColor: string;
-  fontSize: FontSizeKey;
+  textStyles: TextStyles;
   photoSize: number;
   logoHeight: number;
 };
@@ -157,11 +164,17 @@ const clonePositions = (positions: Positions): Positions => ({
   logo: { ...positions.logo },
 });
 
+const createDefaultTextStyles = (color = "#1f1f1f"): TextStyles => ({
+  nome: { color, fontSize: "medio" },
+  departamento: { color, fontSize: "medio" },
+  telefone: { color, fontSize: "medio" },
+});
+
+
 const defaultTemplate: SignatureTemplate = {
   backgroundUrl: "",
   positions: clonePositions(layoutPresets.padrao.positions),
-  textColor: layoutPresets.padrao.textColor,
-  fontSize: "medio",
+  textStyles: createDefaultTextStyles(layoutPresets.padrao.textColor),
   photoSize: PHOTO_SIZE,
   logoHeight: DEFAULT_LOGO_HEIGHT,
 };
@@ -219,7 +232,6 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
 
   const [template, setTemplate] = useState<SignatureTemplate>(defaultTemplate);
 
-  const currentFontSize = fontSizePresets[template.fontSize];
   const telefoneCompleto = /^\(\d{2}\) \d{5}-\d{4}$/.test(form.telefone);
 
   const normalizeHexColor = (value: string) => {
@@ -251,7 +263,7 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
     setTemplate((prev) => ({
       ...prev,
       positions: clonePositions(layoutPresets[layoutKey].positions),
-      textColor: layoutPresets[layoutKey].textColor,
+      textStyles: createDefaultTextStyles(layoutPresets[layoutKey].textColor),
     }));
   };
 
@@ -259,8 +271,7 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
     setTemplate((prev) => ({
       ...prev,
       positions: clonePositions(layoutPresets[selectedLayout].positions),
-      textColor: layoutPresets[selectedLayout].textColor,
-      fontSize: "medio",
+      textStyles: createDefaultTextStyles(layoutPresets[selectedLayout].textColor),
       photoSize: PHOTO_SIZE,
       logoHeight: DEFAULT_LOGO_HEIGHT,
     }));
@@ -495,6 +506,36 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
   //   `.trim();
   // }, [form, template, currentFontSize]);
 
+  const isTextElement = (key: PositionKey | null): key is TextPositionKey =>
+    key === "nome" || key === "departamento" || key === "telefone";
+
+  const getElementFontSize = (key: TextPositionKey) => {
+    const preset = fontSizePresets[template.textStyles[key].fontSize];
+
+    if (key === "nome") return preset.nome;
+    if (key === "departamento") return preset.departamento;
+
+    return preset.contato;
+  };
+
+  const updateSelectedTextStyle = <K extends keyof TextStyle>(
+    field: K,
+    value: TextStyle[K],
+  ) => {
+    if (!isTextElement(selectedElement)) return;
+
+    setTemplate((prev) => ({
+      ...prev,
+      textStyles: {
+        ...prev.textStyles,
+        [selectedElement]: {
+          ...prev.textStyles[selectedElement],
+          [field]: value,
+        },
+      },
+    }));
+  };
+
   const handleCriarAssinatura = async () => {
     try {
       if (!telefoneCompleto) {
@@ -508,8 +549,20 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
       }
 
       const formData = new FormData();
-      formData.append("corFont", template.textColor);
-      formData.append("fontSize", template.fontSize);
+      formData.append("nomeCorFont", template.textStyles.nome.color);
+      formData.append("nomeFontSize", template.textStyles.nome.fontSize);
+
+      formData.append(
+        "departamentoCorFont",
+        template.textStyles.departamento.color,
+      );
+      formData.append(
+        "departamentoFontSize",
+        template.textStyles.departamento.fontSize,
+      );
+
+      formData.append("telefoneCorFont", template.textStyles.telefone.color);
+      formData.append("telefoneFontSize", template.textStyles.telefone.fontSize);
 
       formData.append("photoX", String(Math.round(template.positions.foto.x)));
       formData.append("photoY", String(Math.round(template.positions.foto.y)));
@@ -558,7 +611,6 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
     position: "absolute" as const,
     left: template.positions[key].x,
     top: template.positions[key].y,
-    color: template.textColor,
     zIndex: 3,
     cursor: dragging?.key === key ? "grabbing" : "grab",
     userSelect: "none" as const,
@@ -654,84 +706,93 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
                       </TextField>
                     </Grid>
 
-                    <Grid size={{ xs: 12, md: 4 }}>
-                      <Stack spacing={1}>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1,
-                          }}
-                        >
-                          <Box
-                            component="input"
-                            type="color"
-                            value={normalizeHexColor(template.textColor)}
-                            onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                              setTemplate((prev) => ({
-                                ...prev,
-                                textColor: event.target.value,
-                              }))
-                            }
-                            sx={{
-                              width: 52,
-                              height: 40,
-                              p: 0,
-                              border: "1px solid",
-                              borderColor: "divider",
-                              borderRadius: 2,
-                              backgroundColor: "transparent",
-                              cursor: "pointer",
-                            }}
-                          />
-                          
+                    {isTextElement(selectedElement) && (
+                      <>
+                        <Grid size={{ xs: 12, md: 4 }}>
+                          <Stack spacing={1}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                              }}
+                            >
+                              <Box
+                                component="input"
+                                type="color"
+                                value={normalizeHexColor(
+                                  template.textStyles[selectedElement].color,
+                                )}
+                                onChange={(
+                                  event: ChangeEvent<HTMLInputElement>,
+                                ) =>
+                                  updateSelectedTextStyle(
+                                    "color",
+                                    event.target.value,
+                                  )
+                                }
+                                sx={{
+                                  width: 52,
+                                  height: 40,
+                                  p: 0,
+                                  border: "1px solid",
+                                  borderColor: "divider",
+                                  borderRadius: 2,
+                                  backgroundColor: "transparent",
+                                  cursor: "pointer",
+                                }}
+                              />
+
+                              <TextField
+                                label="Cor"
+                                value={template.textStyles[selectedElement].color}
+                                onChange={(event) =>
+                                  updateSelectedTextStyle(
+                                    "color",
+                                    event.target.value,
+                                  )
+                                }
+                                onBlur={(event) =>
+                                  updateSelectedTextStyle(
+                                    "color",
+                                    normalizeHexColor(event.target.value),
+                                  )
+                                }
+                                fullWidth
+                                size="small"
+                                placeholder="#1f1f1f"
+                                InputProps={{ style: { borderRadius: 12 } }}
+                              />
+                            </Box>
+                          </Stack>
+                        </Grid>
+
+                        <Grid size={{ xs: 12, md: 4 }}>
                           <TextField
-                            value={template.textColor}
-                            onChange={(event) =>
-                              setTemplate((prev) => ({
-                                ...prev,
-                                textColor: event.target.value,
-                              }))
+                            select
+                            label="Tamanho da fonte"
+                            value={
+                              template.textStyles[selectedElement].fontSize
                             }
-                            onBlur={(event) =>
-                              setTemplate((prev) => ({
-                                ...prev,
-                                textColor: normalizeHexColor(
-                                  event.target.value,
-                                ),
-                              }))
+                            onChange={(event) =>
+                              updateSelectedTextStyle(
+                                "fontSize",
+                                event.target.value as FontSizeKey,
+                              )
                             }
                             fullWidth
                             size="small"
-                            placeholder="#1f1f1f"
                             InputProps={{ style: { borderRadius: 12 } }}
-                          />
-                        </Box>
-                      </Stack>
-                    </Grid>
-
-                    <Grid size={{ xs: 12, md: 4 }}>
-                      <TextField
-                        select
-                        label="Tamanho da fonte"
-                        value={template.fontSize}
-                        onChange={(event) =>
-                          setTemplate((prev) => ({
-                            ...prev,
-                            fontSize: event.target.value as FontSizeKey,
-                          }))
-                        }
-                        fullWidth
-                        size="small"
-                        InputProps={{ style: { borderRadius: 12 } }}
-                      >
-                        {fontSizeOptions.map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    </Grid>
+                          >
+                            {fontSizeOptions.map((option) => (
+                              <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                              </MenuItem>
+                            ))}
+                          </TextField>
+                        </Grid>
+                      </>
+                    )}
                   </Grid>
 
                   <TextField
@@ -830,6 +891,18 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
                         X: {Math.round(template.positions[selectedElement].x)} |
                         Y: {Math.round(template.positions[selectedElement].y)}
                       </Typography>
+
+                      {!isTextElement(selectedElement) && (
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          display="block"
+                          mt={1}
+                        >
+                          Cor e tamanho de fonte ficam disponíveis apenas para
+                          nome, departamento e telefone.
+                        </Typography>
+                      )}
                     </Paper>
                   )}
 
@@ -960,7 +1033,8 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
                       onClick={() => handleSelectElement("nome")}
                       sx={{
                         ...draggableItemSx("nome"),
-                        fontSize: `${currentFontSize.nome}px`,
+                        color: template.textStyles.nome.color,
+                        fontSize: `${getElementFontSize("nome")}px`,
                         lineHeight: 1.2,
                       }}
                     >
@@ -974,7 +1048,8 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
                       onClick={() => handleSelectElement("departamento")}
                       sx={{
                         ...draggableItemSx("departamento"),
-                        fontSize: `${currentFontSize.departamento}px`,
+                        color: template.textStyles.departamento.color,
+                        fontSize: `${getElementFontSize("departamento")}px`,
                         lineHeight: 1.2,
                       }}
                     >
@@ -988,7 +1063,8 @@ const ModalCreateAssinaturaPadrao = ({ setFlushHook }: any) => {
                       onClick={() => handleSelectElement("telefone")}
                       sx={{
                         ...draggableItemSx("telefone"),
-                        fontSize: `${currentFontSize.contato}px`,
+                        color: template.textStyles.telefone.color,
+                        fontSize: `${getElementFontSize("telefone")}px`,
                         lineHeight: 1.2,
                       }}
                     >
